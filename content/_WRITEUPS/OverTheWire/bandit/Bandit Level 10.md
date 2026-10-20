@@ -1,7 +1,8 @@
 ---
+module: sistemas-y-redes
 title: "OTW Bandit: 10"
 cover:
-description:
+description: Cómo decodificar datos en base64 desde la terminal: extraer la contraseña del archivo data.txt decodificando su contenido con la herramienta adecuada.
 tags:
   - linux
   - bash
@@ -10,7 +11,7 @@ tags:
   - cifrado
 difficulty:
   - ★☆☆☆☆
-publishDate: 2025-10-30
+date: 2025-10-30
 ---
 ### Resumen
 Este nivel consiste en decodificar datos codificados en base64 contenidos en el archivo `data.txt` para obtener la contraseña del siguiente nivel.

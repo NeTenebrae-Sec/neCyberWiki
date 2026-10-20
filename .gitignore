@@ -18,3 +18,5 @@ private/
 # Env vars
 .env
 .env.*
+/specs
+/AGENTS.md

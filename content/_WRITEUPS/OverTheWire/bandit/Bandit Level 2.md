@@ -1,7 +1,8 @@
 ---
+module: sistemas-y-redes
 title: "OTW Bandit: 2"
 cover:
-description:
+description: Cómo manejar nombres de archivo con espacios desde la terminal: tres técnicas (comillas, escape de caracteres y autocompletado con TAB) para tratar el nombre como una sola entidad.
 tags:
   - linux
   - bash
@@ -11,7 +12,7 @@ tags:
   - escaping
   - spaces-in-filename
 difficulty: ★☆☆☆☆
-publishDate: 2025-10-26
+date: 2025-10-26
 ---
 ### Resumen
 Este write-up aborda cómo manejar nombres de archivo que contienen espacios, lo que normalmente haría que el shell interpretara cada palabra como un argumento separado. Se demuestran tres técnicas para tratar el nombre del archivo como una sola entidad: comillas, escape de caracteres y autocompletado con TAB.

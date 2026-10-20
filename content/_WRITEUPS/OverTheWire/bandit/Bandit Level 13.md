@@ -1,4 +1,5 @@
 ---
+module: sistemas-y-redes
 title: "OTW Bandit: 13"
 description: Aqui se presenta un reto donde el usuario recibe una clave privada SSH en lugar de una contraseña. El objetivo es aprender a usar claves privadas para autenticarse por SSH y comprender la importancia de los controles de acceso en sistemas GNU/Linux.
 tags:
@@ -7,7 +8,7 @@ tags:
   - bandit
   - ssh
   - chmod
-publishDate: 2025-11-12
+date: 2025-11-12
 Dificultad:
   - ★☆☆☆☆
 ---

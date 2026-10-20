@@ -1,4 +1,5 @@
 ---
+module: sistemas-y-redes
 title: "OTW Bandit: 16"
 description: El objetivo de este nivel es encontrar con nmap el puerto en el rango de 31000 a 32000 en localhost que escucha un servicio SSL/TLS, luego conectarse via openssl para obtener la siguiente contraseña.
 tags:
@@ -11,7 +12,7 @@ tags:
   - s_client
 Dificultad:
   - ★★☆☆☆
-publishDate: 2025-12-04
+date: 2025-12-04
 ---
 ## Introducción y Desafío
 

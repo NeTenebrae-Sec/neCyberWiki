@@ -1,6 +1,8 @@
 ---
+module: maquinas-y-ctfs
 title: "VulnHub: darkhole_2"
-publishDate: 2025-10-09
+description: Writeup de la máquina DarkHole 2 de VulnHub: auditoría completa desde una fuga de información de un repositorio .git expuesto, pasando por SQL Injection hasta la escalada de privilegios con command injection para capturar la flag root.
+date: 2025-10-09
 tags:
   - writeup
   - vulnhub

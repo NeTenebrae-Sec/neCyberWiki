@@ -1,7 +1,8 @@
 ---
+module: sistemas-y-redes
 title: "OTW Bandit: 7"
 cover:
-description:
+description: Cómo extraer la contraseña con grep: localizar la palabra millionth en data.txt y quedarse con el texto asociado a ella.
 tags:
   - linux
   - bash
@@ -12,7 +13,7 @@ tags:
   - strings
 difficulty:
   - ★☆☆☆☆
-publishDate: 2025-10-29
+date: 2025-10-29
 ---
 ### Resumen
 El reto consiste en buscar dentro del archivo `data.txt` la contraseña para el siguiente nivel. Esta contraseña se encuentra justo junto a la palabra \"millionth\", por lo que será necesario buscar esa palabra y extraer el texto relacionado.

@@ -1,7 +1,8 @@
 ---
+module: sistemas-y-redes
 title: "OTW Bandit: 1"
 cover:
-description:
+description: Cómo leer un archivo cuyo nombre es un guion (-), un carácter que el shell interpreta como opción o como entrada estándar: la solución pasa por desambiguar el nombre con una ruta relativa.
 tags:
   - linux
   - bash
@@ -11,7 +12,7 @@ tags:
   - stdin
   - argument-parsing
 difficulty: ★☆☆☆☆
-publishDate: 2025-10-26
+date: 2025-10-26
 ---
 ### Resumen
 Este write-up explica cómo acceder a un archivo cuyo nombre es un guion (`-`), un carácter que los comandos de shell suelen interpretar como una opción o como la entrada estándar (stdin). La solución se basa en desambiguar el nombre del archivo utilizando una ruta relativa.

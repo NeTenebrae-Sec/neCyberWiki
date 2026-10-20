@@ -1,11 +1,12 @@
 ---
+module: fundamentos-y-etica
 title: Ética de la Ciberseguridad
 cover:
 description: La ética en la ciberseguridad es sobre hacer las cosas bien cuando trabajamos con tecnología y datos. Significa proteger la información y los sistemas respetando la privacidad y las leyes, siempre actuando con responsabilidad. Recuerda nunca usar tus conocimientos para dañar a otros
 tags:
   - etica
   - legal
-publishDate: 2025-11-01
+date: 2025-11-01
 ---
 ## ¡Un Aviso Importante!
 ![[Disclaimer.webp]]
