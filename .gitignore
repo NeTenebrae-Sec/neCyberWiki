@@ -19,3 +19,4 @@ private/
 .env
 .env.*
 /specs
+/AGENTS.md
