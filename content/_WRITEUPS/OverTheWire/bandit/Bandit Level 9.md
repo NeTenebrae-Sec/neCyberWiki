@@ -1,7 +1,8 @@
 ---
+module: sistemas-y-redes
 title: "OTW Bandit: 9"
 cover:
-description:
+description: Ejercicio práctico de filtrado de líneas duplicadas en data.txt para extraer, con comandos de filtro, la única línea que no se repite.
 tags:
   - linux
   - bash
@@ -12,7 +13,7 @@ tags:
   - uniq
 difficulty:
   - ★☆☆☆☆
-publishDate: 2025-10-30
+date: 2025-10-30
 ---
 ### Resumen
 En este nivel se debe encontrar la única línea que aparece solo una vez en el archivo `data.txt`. Esto es un buen ejercicio para aprender a usar comandos que filtren líneas duplicadas.

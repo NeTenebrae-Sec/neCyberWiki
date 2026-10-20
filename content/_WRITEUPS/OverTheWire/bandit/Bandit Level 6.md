@@ -1,7 +1,8 @@
 ---
+module: sistemas-y-redes
 title: "OTW Bandit: 6"
 cover:
-description:
+description: Cómo buscar un archivo con find filtrando por propietario (usuario y grupo) y tamaño exacto para aislar el que contiene la contraseña del siguiente nivel.
 tags:
   - linux
   - bash
@@ -13,7 +14,7 @@ tags:
   - size
 difficulty:
   - ★☆☆☆☆
-publishDate: 2025-10-29
+date: 2025-10-29
 ---
 ### Resumen
 Este write-up explica cómo buscar un archivo basado en atributos específicos: propietario usuario y grupo, y tamaño exacto. Se utiliza el comando `find` combinando múltiples filtros para aislar el archivo deseado, que contiene la contraseña para avanzar al siguiente nivel.

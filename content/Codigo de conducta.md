@@ -1,11 +1,12 @@
 ---
+module: fundamentos-y-etica
 title: Código de Conducta
 cover:
 description: En esta página encontrarás el Código de Conducta, donde explicamos las normas de respeto, ética y legalidad que guían nuestra comunidad. Aquí establecemos cómo queremos que todos participen para crear un ambiente seguro, inclusivo y responsable en el mundo de la ciberseguridad.
 tags:
   - etica
   - legal
-publishDate: 2025-11-01
+date: 2025-11-01
 ---
 En la neCyberWiki estamos comprometidos con un entorno respetuoso, legal y ético en todas nuestras actividades relacionadas con la ciberseguridad. Nuestro propósito es fomentar el aprendizaje, la colaboración y la práctica responsable, siempre respetando el marco legal vigente. Consulta "[[Ética en la Ciberseguridad]]" para más información.
 

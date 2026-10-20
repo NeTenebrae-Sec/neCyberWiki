@@ -1,7 +1,8 @@
 ---
+module: sistemas-y-redes
 title: "OTW Bandit: 3"
 cover:
-description:
+description: Dos métodos para encontrar y leer un archivo oculto (dotfile) dentro de inhere: la enumeración manual con ls -a y la búsqueda automatizada con find + cat.
 tags:
   - linux
   - bash
@@ -11,7 +12,7 @@ tags:
   - escaping
   - spaces-in-filename
 difficulty: ★☆☆☆☆
-publishDate: 2025-10-26
+date: 2025-10-26
 ---
 ### Resumen
 Este write-up detalla dos métodos para encontrar una contraseña almacenada en un archivo oculto (dotfile). El primer método utiliza `ls -a` para la enumeración manual, mientras que el segundo, más didáctico, emplea el comando `find` para localizar la ruta del archivo y `cat` para leerlo.

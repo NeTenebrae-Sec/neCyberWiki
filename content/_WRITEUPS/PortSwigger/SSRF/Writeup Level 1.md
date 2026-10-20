@@ -1,3 +1,16 @@
+---
+title: "SSRF: Writeup Level 1"
+description: Resolución del laboratorio introductorio de SSRF de PortSwigger: se intercepta la llamada de stock, se sustituye por localhost/admin y se abusa del loopback para borrar al usuario y completar el nivel.
+date: 2026-02-11
+tags:
+  - portswigger
+  - ssrf
+  - web
+  - ctf
+  - burpsuite
+module: pentesting-web
+---
+
 ## 1. Identificar la aplicación.
 
 ![[Pasted image 20260211212904.webp]]
