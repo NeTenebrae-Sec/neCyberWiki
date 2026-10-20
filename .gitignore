@@ -1,0 +1,20 @@
+# OS junk
+.DS_Store
+
+# Node
+node_modules/
+
+# Astro build output and caches
+dist/
+.astro/
+
+# Obsidian vault internals
+.obsidian/
+
+# Private material, never committed
+private/
+/ignored/
+
+# Env vars
+.env
+.env.*
