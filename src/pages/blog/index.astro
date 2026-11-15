@@ -1,0 +1,315 @@
+---
+import { getCollection } from "astro:content"
+import BaseLayout from "../../layouts/BaseLayout.astro"
+import { site } from "../../data/site"
+
+const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+)
+const base = site.base
+const fmt = (d: Date) =>
+  new Intl.DateTimeFormat("es-MX", { year: "numeric", month: "long", day: "numeric" }).format(d)
+const [featured, ...rest] = posts
+const featuredSlug = featured?.id.split("/").pop()
+---
+
+<BaseLayout
+  titulo="Blog & Bitácora de Aprendizaje"
+  descripcion="Artículos, notas de investigación y reflexiones sobre informática, Linux, ciberseguridad y herramientas por NeTenebrae."
+>
+  <section class="blog-hero">
+    <div class="container-page">
+      <div class="blog-hero__docket">
+        <span class="docket">Bitácora pública</span>
+        <span class="chip chip--blog">Notas y artículos</span>
+      </div>
+
+      <div class="blog-hero__grid">
+        <div>
+          <h1 class="display blog-hero__title">Bitácora de campo.</h1>
+          <p class="lead blog-hero__lead">
+            Lo que sale del laboratorio antes de ser curso: pruebas, errores, decisiones y notas de
+            investigación. Sin pulir de más.
+          </p>
+        </div>
+        <div class="blog-hero__stamp">
+          <span class="stamp stamp--lg">Registro abierto</span>
+          <p class="meta">{posts.length.toString().padStart(2, "0")} entradas publicadas</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="blog-body">
+    <div class="container-page">
+      {featured && featuredSlug ? (
+        <>
+          <p class="label-rule">Última entrada</p>
+
+          <article class="featured-post sheet sheet--cut">
+            <span class="tape featured-post__tape" aria-hidden="true"></span>
+            <div class="featured-post__inner">
+              <div class="featured-post__meta">
+                <span class="docket">Entrada 01</span>
+                <time class="meta" datetime={featured.data.date.toISOString()}>
+                  {fmt(featured.data.date)}
+                </time>
+              </div>
+              <h2 class="featured-post__title">
+                <a href={`${base}blog/${featuredSlug}/`}>{featured.data.title}</a>
+              </h2>
+              <p class="featured-post__desc">{featured.data.description}</p>
+              <ul class="tags featured-post__tags" aria-label="Etiquetas del artículo">
+                {featured.data.tags.map((tag) => (
+                  <li class="tag">{tag}</li>
+                ))}
+              </ul>
+              <a class="arrow-link featured-post__link" href={`${base}blog/${featuredSlug}/`}>
+                Leer el artículo{" "}
+                <span class="arrow" aria-hidden="true">
+                  →
+                </span>
+              </a>
+            </div>
+          </article>
+
+          {rest.length > 0 && (
+            <div class="post-archive">
+              <p class="label-rule">Archivo</p>
+              <ul class="post-list">
+                {rest.map((post) => {
+                  const slug = post.id.split("/").pop()
+                  return (
+                    <li>
+                      <a class="post-row" href={`${base}blog/${slug}/`}>
+                        <time class="post-row__date" datetime={post.data.date.toISOString()}>
+                          {fmt(post.data.date)}
+                        </time>
+                        <span class="post-row__main">
+                          <span class="post-row__title">{post.data.title}</span>
+                          <span class="post-row__desc">{post.data.description}</span>
+                        </span>
+                        <span class="post-row__arrow" aria-hidden="true">
+                          →
+                        </span>
+                      </a>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          )}
+        </>
+      ) : (
+        <div class="empty">
+          <h2>La bitácora está en pausa.</h2>
+          <p>Los avances se publican primero en Threads. Vuelve pronto o empieza por un curso.</p>
+          <a class="btn btn-primary" href={`${base}cursos/`}>
+            Ver los cursos <span aria-hidden="true">→</span>
+          </a>
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .blog-hero {
+    position: relative;
+    padding-block: clamp(2.5rem, 5vw, 4.5rem);
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+  }
+
+  .blog-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(circle at 1px 1px, var(--line) 0.7px, transparent 0.8px),
+      linear-gradient(
+        90deg,
+        transparent 0 22%,
+        color-mix(in srgb, var(--blog) 16%, transparent) 22% 22.15%,
+        transparent 22.15% 100%
+      );
+    background-size:
+      22px 22px,
+      100% 100%;
+    mask-image: linear-gradient(180deg, #000, transparent 80%);
+    opacity: 0.55;
+  }
+
+  .blog-hero .container-page {
+    position: relative;
+    z-index: 1;
+  }
+
+  .blog-hero__docket {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .blog-hero__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) auto;
+    gap: 2rem;
+    align-items: end;
+  }
+
+  .blog-hero__title {
+    font-size: clamp(2.4rem, 5.5vw, 4.75rem);
+    line-height: 0.94;
+  }
+
+  .blog-hero__lead {
+    margin-top: 1.2rem;
+    max-width: 56ch;
+  }
+
+  .blog-hero__stamp {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding-bottom: 0.4rem;
+  }
+
+  .blog-body {
+    padding-block: clamp(2.5rem, 5vw, 4.5rem);
+  }
+
+  .featured-post {
+    --sheet-cut: 30px;
+    position: relative;
+    margin-top: 1rem;
+    background: var(--bg-raised);
+  }
+
+  .featured-post__tape {
+    top: -0.55rem;
+    left: 3rem;
+    width: 5rem;
+    transform: rotate(-4deg);
+  }
+
+  .featured-post__inner {
+    padding: clamp(1.35rem, 3.5vw, 2.5rem);
+  }
+
+  .featured-post__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .featured-post__title {
+    margin-top: 0.9rem;
+    max-width: 24ch;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+  }
+
+  .featured-post__title a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .featured-post__title a:hover {
+    color: var(--accent);
+  }
+
+  .featured-post__desc {
+    margin-top: 0.9rem;
+    max-width: 66ch;
+    color: var(--ink-dim);
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  .featured-post__tags {
+    margin-top: 1rem;
+  }
+
+  .featured-post__link {
+    margin-top: 1.1rem;
+  }
+
+  .post-archive {
+    margin-top: 2.5rem;
+  }
+
+  .post-list {
+    margin-top: 0.75rem;
+    border-top: 1px solid var(--line-strong);
+  }
+
+  .post-row {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr) 1rem;
+    gap: 1.25rem;
+    align-items: baseline;
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--line);
+    text-decoration: none;
+  }
+
+  .post-row__date {
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    color: var(--ink-muted);
+  }
+
+  .post-row__title {
+    display: block;
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .post-row__desc {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--ink-dim);
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
+
+  .post-row__arrow {
+    color: var(--accent);
+    transition: transform var(--dur-ui) var(--ease-out);
+  }
+
+  .post-row:hover .post-row__title {
+    color: var(--accent);
+  }
+
+  .post-row:hover .post-row__arrow {
+    transform: translateX(3px);
+  }
+
+  @media (max-width: 760px) {
+    .blog-hero__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .post-row {
+      grid-template-columns: minmax(0, 1fr) 1rem;
+      gap: 0.35rem 0.75rem;
+    }
+
+    .post-row__date {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

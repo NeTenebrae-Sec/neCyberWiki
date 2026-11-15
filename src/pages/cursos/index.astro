@@ -1,0 +1,459 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro"
+import { site } from "../../data/site"
+import { cursos } from "../../data/cursos"
+
+const base = site.base
+---
+
+<BaseLayout
+  titulo="Catálogo de Cursos Prácticos"
+  descripcion="Cursos técnicos gratuitos de informática y ciberseguridad en español. Sin registros, con videos concisos, guías paso a paso y laboratorios locales."
+>
+  <section class="catalog-hero">
+    <div class="container-page">
+      <div class="catalog-hero__docket">
+        <span class="docket">Archivo de cursos</span>
+        <span class="stamp">Acceso libre</span>
+      </div>
+
+      <div class="catalog-hero__grid">
+        <div>
+          <h1 class="display catalog-hero__title">Contratos abiertos.</h1>
+          <p class="lead catalog-hero__lead">
+            Formación libre sin ataduras: cada curso incluye video, documentación con comandos
+            exactos y ejercicios para practicar en tu máquina. Sin registro, sin costo, sin
+            ataduras.
+          </p>
+        </div>
+
+        <dl class="catalog-facts">
+          <div>
+            <dt>Cursos publicados</dt>
+            <dd>{cursos.length.toString().padStart(2, "0")}</dd>
+          </div>
+          <div>
+            <dt>Formato</dt>
+            <dd>Video + guía</dd>
+          </div>
+          <div>
+            <dt>Costo</dt>
+            <dd>$0</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="catalog-body">
+    <div class="container-page">
+      <p class="label-rule">Expedientes disponibles</p>
+
+      <div class="course-list">
+        {cursos.map((c) => (
+          <article class="course-dossier sheet sheet--cut">
+            <span class="course-dossier__spine" aria-hidden="true"></span>
+            <div class="course-dossier__inner">
+              <div class="course-dossier__head">
+                <span class="docket">
+                  Curso 01 · <strong>{c.nivel}</strong>
+                </span>
+                <span class="chip chip--signal">
+                  <span class="status-dot" aria-hidden="true"></span> Publicado
+                </span>
+              </div>
+
+              <h2 class="course-dossier__title">
+                <a href={`${base}cursos/${c.slug}/`}>{c.titulo}</a>
+              </h2>
+
+              <p class="course-dossier__desc">{c.descripcion}</p>
+
+              <div class="course-dossier__grid">
+                <div>
+                  <p class="course-dossier__label">Equipo requerido</p>
+                  <ul class="course-dossier__req">
+                    {c.requisitos.map((r) => (
+                      <li>
+                        <span aria-hidden="true">▹</span>
+                        {r}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <dl class="course-dossier__stats">
+                  <div>
+                    <dt>Lecciones</dt>
+                    <dd>{c.lecciones}</dd>
+                  </div>
+                  <div>
+                    <dt>Duración</dt>
+                    <dd>{c.duracion}</dd>
+                  </div>
+                  <div>
+                    <dt>Nivel</dt>
+                    <dd>{c.nivel}</dd>
+                  </div>
+                </dl>
+              </div>
+
+              <div class="course-dossier__foot">
+                <div
+                  class="course-dossier__progress"
+                  data-course-progress={c.slug}
+                  data-total={c.lecciones}
+                >
+                  <div class="progress-head">
+                    <span>Tu avance guardado</span>
+                    <strong data-course-progress-label>0 / {c.lecciones} lecciones</strong>
+                  </div>
+                  <div class="progress-track">
+                    <div class="progress-fill" data-course-progress-fill></div>
+                  </div>
+                </div>
+
+                <a href={`${base}cursos/${c.slug}/`} class="btn btn-primary">
+                  Ver temario y lecciones <span aria-hidden="true">→</span>
+                </a>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div class="catalog-upcoming">
+        <div class="catalog-upcoming__head">
+          <span class="status status--pending">
+            <span class="status-dot status-dot--amber" aria-hidden="true"></span>
+            En preparación
+          </span>
+          <span class="stamp stamp--faint">Sellado</span>
+        </div>
+        <h2>Fundamentos de Redes TCP/IP · Python Ofensivo · Pentesting Web con Burp Suite</h2>
+        <p>
+          Nuevos módulos prácticos en desarrollo. Cada dos semanas se publica contenido nuevo
+          derivado de laboratorios reales. Los avances se anuncian primero en la bitácora.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline>
+    try {
+      for (const root of document.querySelectorAll("[data-course-progress]")) {
+        const slug = root.getAttribute("data-course-progress")
+        const total = Number(root.getAttribute("data-total") || 8)
+        const done = JSON.parse(localStorage.getItem(`ncw:progress:${slug}`) || "[]")
+        const n = Array.isArray(done) ? done.length : 0
+        const pct = Math.round((n / total) * 100)
+
+        const label = root.querySelector("[data-course-progress-label]")
+        const fill = root.querySelector("[data-course-progress-fill]")
+        if (label) label.textContent = `${n} / ${total} lecciones (${pct}%)`
+        if (fill) fill.style.width = `${pct}%`
+      }
+    } catch {}
+  </script>
+</BaseLayout>
+
+<style>
+  .catalog-hero {
+    position: relative;
+    padding-block: clamp(2.5rem, 5vw, 4.5rem);
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+  }
+
+  .catalog-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle at 1px 1px, var(--line) 0.7px, transparent 0.8px);
+    background-size: 22px 22px;
+    mask-image: linear-gradient(180deg, #000, transparent 75%);
+    opacity: 0.5;
+  }
+
+  .catalog-hero .container-page {
+    position: relative;
+    z-index: 1;
+  }
+
+  .catalog-hero__docket {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.8rem 1rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .catalog-hero__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+    gap: clamp(1.75rem, 4vw, 3.5rem);
+    align-items: end;
+  }
+
+  .catalog-hero__title {
+    font-size: clamp(2.4rem, 5.5vw, 4.75rem);
+    line-height: 0.94;
+  }
+
+  .catalog-hero__lead {
+    margin-top: 1.2rem;
+    max-width: 58ch;
+  }
+
+  .catalog-facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-top: 1px solid var(--line-strong);
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .catalog-facts > div {
+    padding: 0.9rem 0.75rem;
+  }
+
+  .catalog-facts > div + div {
+    border-left: 1px solid var(--line);
+  }
+
+  .catalog-facts dt {
+    font-family: var(--font-mono);
+    font-size: 0.56rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .catalog-facts dd {
+    margin-top: 0.35rem;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+  }
+
+  .catalog-body {
+    padding-block: clamp(2.5rem, 5vw, 4.5rem);
+  }
+
+  .course-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-top: 1rem;
+  }
+
+  .course-dossier {
+    --sheet-cut: 34px;
+    position: relative;
+    padding-left: 0.55rem;
+    overflow: hidden;
+  }
+
+  .course-dossier__spine {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0.55rem;
+    background: repeating-linear-gradient(0deg, var(--accent) 0 18px, transparent 18px 24px);
+    opacity: 0.55;
+  }
+
+  .course-dossier__inner {
+    padding: clamp(1.25rem, 3vw, 2.25rem);
+  }
+
+  .course-dossier__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .course-dossier__title {
+    margin-top: 0.75rem;
+    max-width: 26ch;
+    font-size: clamp(1.8rem, 3.6vw, 2.75rem);
+    line-height: 1;
+    letter-spacing: -0.035em;
+  }
+
+  .course-dossier__title a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .course-dossier__title a:hover {
+    color: var(--accent);
+  }
+
+  .course-dossier__desc {
+    margin-top: 0.8rem;
+    max-width: 70ch;
+    color: var(--ink-dim);
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  .course-dossier__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: clamp(1.25rem, 3vw, 2.5rem);
+    margin-top: 1.5rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .course-dossier__label {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .course-dossier__req {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: 0.6rem;
+  }
+
+  .course-dossier__req li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    color: var(--ink-dim);
+    font-size: 0.84rem;
+  }
+
+  .course-dossier__req li span {
+    color: var(--signal);
+  }
+
+  .course-dossier__stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border-left: 1px solid var(--line);
+    padding-left: clamp(1rem, 2vw, 1.75rem);
+  }
+
+  .course-dossier__stats > div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .course-dossier__stats dt {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .course-dossier__stats dd {
+    color: var(--ink);
+    font-size: 0.84rem;
+    font-weight: 600;
+    text-align: right;
+  }
+
+  .course-dossier__foot {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1.25rem;
+    align-items: end;
+    margin-top: 1.5rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .course-dossier__progress {
+    max-width: 30rem;
+  }
+
+  .catalog-upcoming {
+    position: relative;
+    margin-top: 1.5rem;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--radius);
+    background: var(--bg-sunken);
+  }
+
+  .catalog-upcoming__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .catalog-upcoming h2 {
+    margin-top: 0.8rem;
+    max-width: 44ch;
+    font-size: clamp(1.2rem, 2vw, 1.6rem);
+    line-height: 1.2;
+  }
+
+  .catalog-upcoming p {
+    margin-top: 0.6rem;
+    max-width: 70ch;
+    color: var(--ink-dim);
+    font-size: 0.87rem;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 900px) {
+    .catalog-hero__grid,
+    .course-dossier__grid,
+    .course-dossier__foot {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .course-dossier__stats {
+      border-left: 0;
+      padding-left: 0;
+      border-top: 1px solid var(--line);
+      padding-top: 0.9rem;
+    }
+
+    .course-dossier__stats > div:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .course-dossier__foot .btn {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .catalog-facts {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .catalog-facts > div {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+
+    .catalog-facts > div + div {
+      border-left: 0;
+      border-top: 1px solid var(--line);
+    }
+  }
+</style>

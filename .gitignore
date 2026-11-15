@@ -18,5 +18,8 @@ private/
 # Env vars
 .env
 .env.*
+
+# Playwright MCP artifacts
+.playwright-mcp/
 /specs
 /AGENTS.md

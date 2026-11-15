@@ -1,0 +1,169 @@
+---
+import type { ModuleGroup } from "../lib/syllabus"
+import { formatCapituloTime, formatTotalMin } from "../lib/syllabus"
+
+interface Props {
+  modules: ModuleGroup[]
+  slug: string
+  base: string
+  current?: string // slug de la lección actual (sidebar) — vacío en índice
+  variant: "sidebar" | "page"
+}
+const { modules, slug, base, current = "", variant } = Astro.props
+const isSidebar = variant === "sidebar"
+---
+
+<div class={`sy-list sy-list--${variant}`} data-sy-list>
+  {modules.map((mod) => (
+    <details class="sy-module" open data-module-key={mod.key} data-module-count={mod.count}>
+      <summary class="sy-module__trigger">
+        {isSidebar ? (
+          <span class="sy-module__head sy-module__head--sidebar">
+            <span class="sy-module__kicker">
+              <span class="sy-module__num">MÓDULO {mod.numero}</span>
+              <span class="sy-module__sep">·</span>
+              <span>{mod.count} clases</span>
+              <span class="sy-module__done" data-module-done>
+                0/{mod.count}
+              </span>
+            </span>
+            <span class="sy-module__title">{mod.titulo}</span>
+          </span>
+        ) : (
+          <span class="sy-module__head sy-module__head--page">
+            <span class="sy-module__badge">{String(mod.numero).padStart(2, "0")}</span>
+            <span class="sy-module__head-body">
+              <span class="sy-module__kicker">
+                <span class="sy-module__num">MÓDULO {mod.numero}</span>
+                <span class="sy-module__sep">·</span>
+                <span>{mod.count} clases</span>
+                {mod.totalMin > 0 && (
+                  <>
+                    <span class="sy-module__sep">·</span>
+                    <span>~{formatTotalMin(mod.totalMin)}</span>
+                  </>
+                )}
+              </span>
+              <span class="sy-module__title">{mod.titulo}</span>
+              <span class="sy-module__bar" aria-hidden="true">
+                <i data-module-fill></i>
+              </span>
+            </span>
+            <span class="sy-module__side">
+              <span class="sy-module__done" data-module-done>
+                0/{mod.count}
+              </span>
+            </span>
+          </span>
+        )}
+        <span class="sy-module__chevron" aria-hidden="true">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </span>
+      </summary>
+      <div class="sy-module__body">
+        {(
+          mod.submodulos ?? [{ key: "__all__", numero: "", titulo: "", lecciones: mod.lecciones }]
+        ).map((sub) => (
+          <div class="sy-submodule">
+            {sub.numero && (
+              <p class="sy-submodule__label">
+                <span class="sy-submodule__num">{sub.numero}</span>
+                <span class="sy-submodule__titulo">{sub.titulo}</span>
+              </p>
+            )}
+            <ol class="sy-lessons">
+              {sub.lecciones.map((l) => {
+                const isCurrent = current === l.slug
+                const num = String(l.orden + 1).padStart(2, "0")
+                return (
+                  <li class={`sy-item${isCurrent ? " is-current" : ""}`} data-lesson-item={l.slug}>
+                    <a
+                      href={`${base}cursos/${slug}/${l.slug}/`}
+                      class={`sy-lesson sy-lesson--${variant}${isCurrent ? " is-current" : ""}`}
+                      aria-current={isCurrent ? "page" : undefined}
+                    >
+                      <span class="sy-lesson__idx">
+                        <span class="sy-lesson__num">{num}</span>
+                        <span class="sy-lesson__check" aria-hidden="true">
+                          <svg
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="3.2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <polyline points="20 6 9 17 4 10" />
+                          </svg>
+                        </span>
+                      </span>
+                      {isSidebar ? (
+                        <span class="sy-lesson__title">{l.title}</span>
+                      ) : (
+                        <span class="sy-lesson__body">
+                          <span class="sy-lesson__title">{l.title}</span>
+                          <span class="sy-lesson__meta">
+                            {l.duracion || "Video + Guía"}
+                            {l.capitulos.length > 0 && (
+                              <span> · {l.capitulos.length} capítulos</span>
+                            )}
+                          </span>
+                        </span>
+                      )}
+                      <span class="sy-lesson__state">
+                        <span class="sy-done-badge">Completada ✓</span>
+                        {!isSidebar && (
+                          <svg
+                            class="sy-lesson__arrow"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <polyline points="9 18 15 12 9 6" />
+                          </svg>
+                        )}
+                      </span>
+                    </a>
+                    {isSidebar && l.capitulos.length > 0 && (
+                      <span class="sy-chapters">
+                        {l.capitulos.map((c) => (
+                          <button
+                            type="button"
+                            class="sy-chapter"
+                            data-seek={c.t}
+                            disabled={!l.video}
+                          >
+                            <span class="sy-chapter__t">{formatCapituloTime(c.t)}</span>
+                            <span class="sy-chapter__title">{c.titulo}</span>
+                          </button>
+                        ))}
+                      </span>
+                    )}
+                  </li>
+                )
+              })}
+            </ol>
+          </div>
+        ))}
+      </div>
+    </details>
+  ))}
+</div>

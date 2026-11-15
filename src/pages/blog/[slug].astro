@@ -1,0 +1,175 @@
+---
+import { getCollection, render } from "astro:content"
+import BaseLayout from "../../layouts/BaseLayout.astro"
+import { site } from "../../data/site"
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog", ({ data }) => !data.draft)
+  return posts.map((post) => ({ params: { slug: post.id.split("/").pop()! } }))
+}
+
+const { slug } = Astro.params
+const posts = await getCollection("blog")
+const post = posts.find((p) => p.id.split("/").pop() === slug)
+if (!post) throw new Error(`Artículo no encontrado: ${slug}`)
+
+const { Content } = await render(post)
+const base = site.base
+const fmt = (d: Date) =>
+  new Intl.DateTimeFormat("es-MX", { year: "numeric", month: "long", day: "numeric" }).format(d)
+---
+
+<BaseLayout titulo={post.data.title} descripcion={post.data.description}>
+  <article class="post container-page">
+    <nav class="breadcrumb post__crumb" aria-label="Miga de pan">
+      <a href={`${base}blog/`}>Bitácora</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{post.data.title}</span>
+    </nav>
+
+    <header class="post-head">
+      <div class="post-head__meta">
+        <span class="docket">Entrada de bitácora</span>
+        <time class="meta" datetime={post.data.date.toISOString()}>
+          {fmt(post.data.date)}
+        </time>
+      </div>
+
+      <h1 class="post-head__title">{post.data.title}</h1>
+      <p class="lead post-head__desc">{post.data.description}</p>
+
+      <ul class="tags post-head__tags" aria-label="Etiquetas del artículo">
+        {post.data.tags.map((tag) => (
+          <li class="tag">{tag}</li>
+        ))}
+      </ul>
+    </header>
+
+    <div class="post-sheet sheet sheet--cut">
+      <span class="tape post-sheet__tape" aria-hidden="true"></span>
+      <div class="post-sheet__inner prose post-prose">
+        <Content />
+      </div>
+    </div>
+
+    <footer class="post-foot">
+      <a class="arrow-link" href={`${base}blog/`}>
+        <span class="arrow" aria-hidden="true">
+          ←
+        </span>{" "}
+        Volver a la bitácora
+      </a>
+      <a
+        class="meta post-foot__issue"
+        href={`${site.redes.github}/issues/new`}
+        target="_blank"
+        rel="noopener"
+      >
+        ¿Un error? Abre un issue ↗
+      </a>
+    </footer>
+  </article>
+</BaseLayout>
+
+<style>
+  .post {
+    padding-block: clamp(1.5rem, 4vw, 3rem) 0;
+  }
+
+  .post__crumb {
+    margin-bottom: 1.5rem;
+  }
+
+  .post-head {
+    max-width: 62rem;
+  }
+
+  .post-head__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.25rem;
+  }
+
+  .post-head__title {
+    margin-top: 0.8rem;
+    max-width: 22ch;
+    font-size: clamp(2.25rem, 5vw, 4.25rem);
+    line-height: 0.98;
+    letter-spacing: -0.045em;
+  }
+
+  .post-head__desc {
+    margin-top: 1rem;
+    max-width: 58ch;
+  }
+
+  .post-head__tags {
+    margin-top: 1.15rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .post-sheet {
+    --sheet-cut: 32px;
+    position: relative;
+    margin-top: 2rem;
+    background: var(--bg-raised);
+    box-shadow: var(--shadow-lift);
+  }
+
+  .post-sheet__tape {
+    top: -0.55rem;
+    right: 3rem;
+    width: 5.5rem;
+    transform: rotate(3deg);
+  }
+
+  .post-sheet__inner {
+    padding: clamp(1.35rem, 4vw, 3rem);
+    margin-inline: auto;
+  }
+
+  .post-prose {
+    max-width: var(--measure);
+  }
+
+  .post-prose > p:first-of-type::first-letter {
+    float: left;
+    margin: 0.08em 0.12em 0 0;
+    color: var(--accent);
+    font-family: var(--font-display);
+    font-size: 3.4em;
+    font-weight: 650;
+    line-height: 0.78;
+    font-variation-settings:
+      "SOFT" 60,
+      "WONK" 1;
+  }
+
+  .post-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .post-foot__issue {
+    text-decoration: none;
+  }
+
+  .post-foot__issue:hover {
+    color: var(--accent);
+  }
+
+  @media (max-width: 640px) {
+    .post-sheet__tape {
+      right: 1.5rem;
+      width: 4.25rem;
+    }
+  }
+</style>

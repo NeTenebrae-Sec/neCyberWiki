@@ -1,0 +1,747 @@
+---
+import { getCollection, render } from "astro:content"
+import BaseLayout from "../../../layouts/BaseLayout.astro"
+import VideoEmbed from "../../../components/VideoEmbed.astro"
+import Comentarios from "../../../components/Comentarios.astro"
+import CourseModuleList from "../../../components/CourseModuleList.astro"
+import { groupSyllabus, normalizeLesson } from "../../../lib/syllabus"
+import { site } from "../../../data/site"
+import { getCurso } from "../../../data/cursos"
+
+export async function getStaticPaths() {
+  const todas = await getCollection("cursos", ({ data }) => !data.draft)
+  return todas.map((entry) => ({
+    params: {
+      slug: entry.data.curso,
+      leccion: entry.id.split("/").pop()!,
+    },
+  }))
+}
+
+const { slug, leccion } = Astro.params
+const cursoInfo = getCurso(slug!)
+const entradas = await getCollection("cursos", ({ data }) => !data.draft && data.curso === slug)
+const entry = entradas.find(
+  (e) => e.id.endsWith(`/${leccion}`) || e.id === `cursos/${slug}/${leccion}`,
+)
+if (!entry) throw new Error(`Lección no encontrada: ${leccion}`)
+
+const lecciones = [...entradas].sort((a, b) => a.data.orden - b.data.orden)
+const idx = lecciones.findIndex((e) => e.id === entry.id)
+const prev = idx > 0 ? lecciones[idx - 1] : null
+const next = idx < lecciones.length - 1 ? lecciones[idx + 1] : null
+const leccionKey = (entry.id.split("/").pop() || "").replace(/\.md$/, "")
+const modules = groupSyllabus(lecciones.map((l) => normalizeLesson(l.id, l.data)))
+const currentModule = modules.find((m) => m.lecciones.some((x) => x.slug === leccionKey))
+const currentSub = currentModule?.submodulos?.find((s) =>
+  s.lecciones.some((x) => x.slug === leccionKey),
+)
+
+const { Content } = await render(entry)
+const base = site.base
+const currentLessonNumber = entry.data.orden + 1
+---
+
+<BaseLayout
+  titulo={`${entry.data.title} · ${cursoInfo?.titulo || slug}`}
+  descripcion={entry.data.description}
+>
+  <div class="player-bar">
+    <div class="container-page player-bar__inner">
+      <nav class="breadcrumb player-bar__crumb" aria-label="Miga de pan">
+        <a href={`${base}cursos/`}>Cursos</a>
+        <span aria-hidden="true">/</span>
+        <a href={`${base}cursos/${slug}/`} class="player-bar__course">
+          {cursoInfo?.titulo.split("(")[0].trim() || slug}
+        </a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">
+          Clase {currentLessonNumber} de {lecciones.length}
+        </span>
+      </nav>
+
+      <div class="player-bar__tools">
+        <div class="player-bar__progress">
+          <span id="player-progress-pct">0% completado</span>
+          <span id="player-progress-count" class="player-bar__count">
+            (0 de {lecciones.length} clases)
+          </span>
+        </div>
+        <div class="progress-track player-bar__track" aria-hidden="true">
+          <div id="player-progress-bar" class="progress-fill progress-fill--accent"></div>
+        </div>
+        <button type="button" id="temario-open" class="btn btn-ghost btn-sm">
+          Temario <span aria-hidden="true">▤</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-page player-layout">
+    <article class="player-main">
+      <div class="player-frame">
+        <div class="player-frame__bar">
+          <span class="terminal__dots" aria-hidden="true">
+            <span class="terminal__dot terminal__dot--red"></span>
+            <span class="terminal__dot terminal__dot--yellow"></span>
+            <span class="terminal__dot terminal__dot--green"></span>
+          </span>
+          <span class="terminal__title">
+            monitor · clase {String(currentLessonNumber).padStart(2, "0")}
+          </span>
+          <span class="player-frame__state">
+            <span class="status-dot status-dot--cyan" aria-hidden="true"></span> registro de campo
+          </span>
+        </div>
+        <VideoEmbed video={entry.data.video} titulo={entry.data.title} />
+      </div>
+
+      <header class="lesson-head sheet">
+        <div class="lesson-head__top">
+          <div>
+            {currentModule && (
+              <p class="lesson-head__module">
+                <span class="signal">
+                  M{currentModule.numero} · {currentModule.titulo}
+                </span>
+                {currentSub && (
+                  <>
+                    <span aria-hidden="true">/</span>
+                    <span class="accent">
+                      {currentSub.numero} · {currentSub.titulo}
+                    </span>
+                  </>
+                )}
+              </p>
+            )}
+            <p class="lesson-head__kicker">
+              <span class="accent">Clase {String(currentLessonNumber).padStart(2, "0")}</span>
+              <span aria-hidden="true">·</span>
+              <span>{entry.data.duracion || "Video + guía"}</span>
+            </p>
+            <h1 class="lesson-head__title">{entry.data.title}</h1>
+          </div>
+
+          <div class="lesson-head__arrows">
+            {prev && (
+              <a
+                href={`${base}cursos/${slug}/${prev.id.split("/").pop()}/`}
+                class="btn btn-secondary btn-sm"
+                title={`Anterior: ${prev.data.title}`}
+                aria-label="Clase anterior"
+              >
+                <span aria-hidden="true">←</span>
+              </a>
+            )}
+            {next ? (
+              <a
+                href={`${base}cursos/${slug}/${next.id.split("/").pop()}/`}
+                class="btn btn-primary btn-sm"
+                title={`Siguiente: ${next.data.title}`}
+              >
+                <span>Siguiente</span>
+                <span aria-hidden="true">→</span>
+              </a>
+            ) : (
+              <a href={`${base}certificados/verificar/`} class="btn btn-primary btn-sm">
+                <span>Concluir curso</span>
+                <span aria-hidden="true">★</span>
+              </a>
+            )}
+          </div>
+        </div>
+
+        <p class="lesson-head__desc">{entry.data.description}</p>
+
+        <div class="lesson-head__foot">
+          <button
+            id="marcar-completada"
+            class="btn btn-ghost"
+            type="button"
+            data-slug={slug}
+            data-leccion={leccionKey}
+            aria-pressed="false"
+          >
+            <span class="btn-icon" aria-hidden="true">
+              ○
+            </span>
+            <span class="btn-label">Marcar lección como completada</span>
+          </button>
+          <span class="meta">Se guarda automáticamente en tu navegador</span>
+        </div>
+      </header>
+
+      <section class="lesson-guide sheet" aria-labelledby="guia-title">
+        <div class="lesson-guide__head">
+          <span class="status-dot status-dot--cyan" aria-hidden="true"></span>
+          <h2 id="guia-title">Guía escrita del laboratorio</h2>
+          <span class="meta">Comandos y notas</span>
+        </div>
+        <div class="leccion">
+          <Content />
+        </div>
+      </section>
+
+      <nav class="lesson-nav" aria-label="Navegación entre clases">
+        {prev ? (
+          <a
+            href={`${base}cursos/${slug}/${prev.id.split("/").pop()}/`}
+            class="lesson-nav__card sheet sheet--link"
+          >
+            <span class="lesson-nav__label">← Clase anterior</span>
+            <span class="lesson-nav__title">{prev.data.title}</span>
+          </a>
+        ) : (
+          <div class="lesson-nav__spacer" aria-hidden="true"></div>
+        )}
+
+        {next ? (
+          <a
+            href={`${base}cursos/${slug}/${next.id.split("/").pop()}/`}
+            class="lesson-nav__card sheet sheet--link lesson-nav__card--next"
+          >
+            <span class="lesson-nav__label">Siguiente clase →</span>
+            <span class="lesson-nav__title">{next.data.title}</span>
+          </a>
+        ) : (
+          <a
+            href={`${base}certificados/verificar/`}
+            class="lesson-nav__card sheet sheet--link lesson-nav__card--next"
+          >
+            <span class="lesson-nav__label signal">Has llegado al final</span>
+            <span class="lesson-nav__title">Conoce tu certificado verificable →</span>
+          </a>
+        )}
+      </nav>
+
+      <Comentarios />
+    </article>
+
+    <aside class="player-aside">
+      <div class="temario" id="temario" role="complementary" aria-label="Temario del curso">
+        <div class="temario-sheet">
+          <div class="temario__head">
+            <div>
+              <h2 class="temario__title">
+                <span class="status-dot" aria-hidden="true"></span>
+                Temario
+              </h2>
+              <p class="temario__meta">
+                {modules.length} módulos · {lecciones.length} clases
+              </p>
+            </div>
+            <button
+              type="button"
+              class="temario__close btn btn-ghost btn-sm"
+              id="temario-close"
+              aria-label="Cerrar temario"
+            >
+              <span aria-hidden="true">✕</span>
+            </button>
+          </div>
+
+          <CourseModuleList
+            modules={modules}
+            slug={slug!}
+            base={base}
+            current={leccionKey}
+            variant="sidebar"
+          />
+
+          <div class="temario__foot">
+            <span>Certificado digital</span>
+            <a href={`${base}certificados/verificar/`}>Fase 2 · Verificar →</a>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="temario-overlay" id="temario-overlay" aria-hidden="true"></div>
+  <button type="button" class="fab-temario" id="fab-temario" aria-controls="temario">
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.2"
+      stroke-linecap="round"
+      aria-hidden="true"
+    >
+      <line x1="4" y1="7" x2="20" y2="7" />
+      <line x1="4" y1="12" x2="20" y2="12" />
+      <line x1="4" y1="17" x2="14" y2="17" />
+    </svg>
+    Temario · <span id="fab-count">0/{lecciones.length}</span>
+  </button>
+
+  <script is:inline define:vars={{ slug, leccionKey, totalLecciones: lecciones.length }}>
+    const key = `ncw:progress:${slug}`
+    const btn = document.getElementById("marcar-completada")
+    const label = btn?.querySelector(".btn-label")
+    const icon = btn?.querySelector(".btn-icon")
+
+    const read = () => {
+      try {
+        return JSON.parse(localStorage.getItem(key) || "[]")
+      } catch {
+        return []
+      }
+    }
+
+    const syncUI = () => {
+      const doneList = read()
+      const isDone = doneList.includes(leccionKey)
+      const count = doneList.length
+      const pct = Math.round((count / totalLecciones) * 100)
+
+      if (btn) {
+        btn.setAttribute("aria-pressed", String(isDone))
+        if (label)
+          label.textContent = isDone ? "Lección completada ✓" : "Marcar lección como completada"
+        if (icon) icon.textContent = isDone ? "✓" : "○"
+        btn.classList.toggle("btn-primary", isDone)
+        btn.classList.toggle("btn-ghost", !isDone)
+      }
+
+      const pctEl = document.getElementById("player-progress-pct")
+      const countEl = document.getElementById("player-progress-count")
+      const barEl = document.getElementById("player-progress-bar")
+      if (pctEl) pctEl.textContent = `${pct}% completado`
+      if (countEl) countEl.textContent = `(${count} de ${totalLecciones} clases)`
+      if (barEl) barEl.style.width = `${pct}%`
+
+      for (const item of document.querySelectorAll("[data-lesson-item]")) {
+        item.classList.toggle("is-done", doneList.includes(item.getAttribute("data-lesson-item")))
+      }
+      for (const mod of document.querySelectorAll("[data-module-key]")) {
+        const items = [...mod.querySelectorAll("[data-lesson-item]")]
+        const done = items.filter((i) =>
+          doneList.includes(i.getAttribute("data-lesson-item")),
+        ).length
+        const doneEl = mod.querySelector("[data-module-done]")
+        const fillEl = mod.querySelector("[data-module-fill]")
+        if (doneEl) doneEl.textContent = `${done}/${items.length}`
+        if (fillEl)
+          fillEl.style.width = items.length ? `${Math.round((done / items.length) * 100)}%` : "0%"
+      }
+      const fabCount = document.getElementById("fab-count")
+      if (fabCount) fabCount.textContent = `${count}/${totalLecciones}`
+    }
+
+    btn?.addEventListener("click", () => {
+      const done = new Set(read())
+      if (done.has(leccionKey)) {
+        done.delete(leccionKey)
+      } else {
+        done.add(leccionKey)
+      }
+      try {
+        localStorage.setItem(key, JSON.stringify([...done]))
+      } catch {}
+      syncUI()
+    })
+
+    syncUI()
+
+    // Temario drawer on mobile: FAB, overlay, close button, Escape.
+    const temario = document.getElementById("temario")
+    const overlay = document.getElementById("temario-overlay")
+    const setDrawer = (open) => {
+      temario?.classList.toggle("is-open", open)
+      overlay?.classList.toggle("is-open", open)
+      document.body.style.overflow = open ? "hidden" : ""
+    }
+    document.getElementById("fab-temario")?.addEventListener("click", () => setDrawer(true))
+    document.getElementById("temario-open")?.addEventListener("click", () => setDrawer(true))
+    document.getElementById("temario-close")?.addEventListener("click", () => setDrawer(false))
+    overlay?.addEventListener("click", () => setDrawer(false))
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") setDrawer(false)
+    })
+    temario
+      ?.querySelectorAll("a[href]")
+      .forEach((a) => a.addEventListener("click", () => setDrawer(false)))
+
+    // Remember open modules across visits.
+    const modulesKey = `ncw:modules:${slug}`
+    const readOpen = () => {
+      try {
+        const v = JSON.parse(localStorage.getItem(modulesKey) || "null")
+        return Array.isArray(v) ? v : null
+      } catch {
+        return null
+      }
+    }
+    const persistOpen = () => {
+      const openKeys = [...document.querySelectorAll(".sy-module[open]")].map((d) =>
+        d.getAttribute("data-module-key"),
+      )
+      try {
+        localStorage.setItem(modulesKey, JSON.stringify(openKeys))
+      } catch {}
+    }
+    const savedOpen = readOpen()
+    document.querySelectorAll(".sy-module").forEach((d) => {
+      if (savedOpen) d.open = savedOpen.includes(d.getAttribute("data-module-key"))
+      d.addEventListener("toggle", persistOpen)
+    })
+    const currentModuleEl = document.querySelector(".sy-item.is-current")?.closest(".sy-module")
+    if (currentModuleEl) {
+      currentModuleEl.open = true
+      persistOpen()
+    }
+
+    // Chapters: seek inside the YouTube player (enablejsapi).
+    const iframe = document.getElementById("lesson-video")
+    for (const ch of document.querySelectorAll(".sy-chapter[data-seek]")) {
+      ch.addEventListener("click", () => {
+        const t = parseInt(ch.getAttribute("data-seek") || "0", 10)
+        iframe?.contentWindow?.postMessage(
+          JSON.stringify({ event: "command", func: "seekTo", args: [t, true] }),
+          "*",
+        )
+      })
+    }
+  </script>
+</BaseLayout>
+
+<style>
+  .player-bar {
+    position: sticky;
+    top: 4rem;
+    z-index: var(--z-sticky);
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in srgb, var(--bg) 90%, transparent);
+    backdrop-filter: blur(10px);
+  }
+
+  .player-bar__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    min-height: 3rem;
+    padding-block: 0.4rem;
+  }
+
+  .player-bar__crumb {
+    min-width: 0;
+  }
+
+  .player-bar__course {
+    max-width: 26ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .player-bar__tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .player-bar__progress {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--signal);
+  }
+
+  .player-bar__count {
+    color: var(--ink-muted);
+    font-size: 0.6rem;
+  }
+
+  .player-bar__track {
+    width: 5.5rem;
+    height: 5px;
+  }
+
+  .player-layout {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 2rem;
+    align-items: start;
+    padding-block: clamp(1.25rem, 3vw, 2rem);
+  }
+
+  .player-main {
+    grid-column: span 8;
+    min-width: 0;
+  }
+
+  .player-aside {
+    grid-column: span 4;
+    min-width: 0;
+  }
+
+  .player-frame {
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    background: var(--bg-deep);
+    overflow: hidden;
+    box-shadow: var(--shadow-paper);
+  }
+
+  .player-frame__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-sunken);
+  }
+
+  .player-frame__state {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: var(--font-mono);
+    font-size: 0.56rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .lesson-head {
+    margin-top: 1.25rem;
+    padding: clamp(1.1rem, 2.4vw, 1.6rem);
+  }
+
+  .lesson-head__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .lesson-head__module {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35rem 0.55rem;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .lesson-head__kicker {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem;
+    margin-top: 0.55rem;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    color: var(--ink-muted);
+  }
+
+  .lesson-head__title {
+    margin-top: 0.35rem;
+    max-width: 24ch;
+    font-size: clamp(1.75rem, 3.2vw, 2.5rem);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+  }
+
+  .lesson-head__arrows {
+    display: flex;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
+
+  .lesson-head__desc {
+    margin-top: 0.9rem;
+    max-width: 68ch;
+    color: var(--ink-dim);
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }
+
+  .lesson-head__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 1.1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .lesson-guide {
+    margin-top: 1.25rem;
+    padding: clamp(1.15rem, 2.6vw, 1.9rem);
+  }
+
+  .lesson-guide__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.55rem;
+    padding-bottom: 0.85rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .lesson-guide__head h2 {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .lesson-guide__head .meta {
+    margin-left: auto;
+  }
+
+  .lesson-nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+    margin-top: 1.25rem;
+  }
+
+  .lesson-nav__spacer {
+    display: block;
+  }
+
+  .lesson-nav__card {
+    padding: 0.9rem 1rem;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .lesson-nav__label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .lesson-nav__card--next .lesson-nav__label {
+    color: var(--accent);
+  }
+
+  .lesson-nav__title {
+    display: block;
+    margin-top: 0.3rem;
+    color: var(--ink);
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .lesson-nav__card--next {
+    text-align: right;
+  }
+
+  .temario-sheet {
+    padding: 0.95rem;
+  }
+
+  .temario__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .temario__title {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 1.05rem;
+    letter-spacing: -0.02em;
+  }
+
+  .temario__meta {
+    margin-top: 0.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: var(--ink-muted);
+  }
+
+  .temario__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    color: var(--ink-muted);
+  }
+
+  .temario__foot a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  @media (max-width: 1023.98px) {
+    .player-main,
+    .player-aside {
+      grid-column: 1 / -1;
+    }
+
+    .player-aside {
+      height: 0;
+      overflow: visible;
+    }
+
+    .temario-sheet {
+      padding: 1rem;
+    }
+
+    .player-bar__crumb {
+      max-width: 100%;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .player-bar__track {
+      display: none;
+    }
+
+    .player-frame__state {
+      display: none;
+    }
+
+    .lesson-nav {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .lesson-nav__card--next {
+      text-align: left;
+    }
+
+    .lesson-head__arrows {
+      width: 100%;
+    }
+
+    .lesson-head__arrows .btn {
+      flex: 1;
+    }
+  }
+</style>

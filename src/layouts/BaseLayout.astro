@@ -1,0 +1,443 @@
+---
+import "../styles/global.css"
+import { site } from "../data/site"
+
+interface Props {
+  titulo: string
+  descripcion?: string
+}
+const { titulo, descripcion = site.descripcion } = Astro.props
+const base = site.base
+const year = new Date().getFullYear()
+
+const path = Astro.url.pathname.replace(/\/+$/, "/")
+const isActive = (href: string) => (href === base ? path === base : path.startsWith(href))
+
+const nav = [
+  { label: "Inicio", href: base },
+  { label: "Cursos", href: `${base}cursos/` },
+  { label: "Mapa", href: `${base}categorias/` },
+  { label: "Bitácora", href: `${base}blog/` },
+]
+---
+
+<!doctype html>
+<html lang="es" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{titulo} · {site.nombre}</title>
+    <meta name="description" content={descripcion} />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#070a08" />
+    <meta name="color-scheme" content="dark light" />
+    <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <script is:inline>
+      try {
+        const stored = localStorage.getItem("ncw-theme")
+        const theme = stored === "light" ? "light" : "dark"
+        document.documentElement.dataset.theme = theme
+        document
+          .querySelector('meta[name="theme-color"]')
+          ?.setAttribute("content", theme === "light" ? "#e9e1cf" : "#070a08")
+      } catch {}
+    </script>
+  </head>
+  <body class="antialiased">
+    <a href="#contenido" class="skip-link">
+      Saltar al contenido
+    </a>
+
+    <header class="site-header">
+      <div class="container-page site-header__inner">
+        <a href={base} class="brand" aria-label="neCyberWiki — inicio">
+          <span class="brand__mark" aria-hidden="true">
+            N
+          </span>
+          <span class="brand__text">
+            <span class="brand__name">
+              ne<span>Cyber</span>Wiki
+            </span>
+            <span class="brand__tag">Archivo de campo · 2026</span>
+          </span>
+        </a>
+
+        <nav class="site-nav" aria-label="Navegación principal">
+          {nav.map((item) => (
+            <a
+              href={item.href}
+              class="site-nav__link"
+              aria-current={isActive(item.href) ? "page" : undefined}
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
+
+        <div class="site-actions">
+          <button
+            id="theme-toggle"
+            class="theme-switch"
+            type="button"
+            aria-label="Cambiar tema: Noche o Archivo"
+          >
+            <span class="theme-switch__opt theme-switch__opt--dark">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true"
+              >
+                <path
+                  d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <span>Noche</span>
+            </span>
+            <span class="theme-switch__opt theme-switch__opt--light">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" />
+              </svg>
+              <span>Archivo</span>
+            </span>
+          </button>
+
+          <a href={`${base}cursos/arch-linux-facil/`} class="btn btn-primary btn-sm header-cta">
+            Empezar <span aria-hidden="true">→</span>
+          </a>
+
+          <button
+            id="open-sidebar-btn"
+            class="icon-btn"
+            type="button"
+            aria-label="Abrir menú de navegación"
+            aria-expanded="false"
+            aria-controls="lateral-sidebar"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <dialog id="lateral-sidebar" class="drawer" aria-label="Menú de navegación">
+      <div class="drawer__head">
+        <a href={base} class="brand" aria-label="neCyberWiki — inicio">
+          <span class="brand__mark" aria-hidden="true">
+            N
+          </span>
+          <span class="brand__text">
+            <span class="brand__name">
+              ne<span>Cyber</span>Wiki
+            </span>
+          </span>
+        </a>
+        <button id="close-sidebar-btn" class="icon-btn" type="button" aria-label="Cerrar menú">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="drawer__progress">
+        <div class="drawer__progress-head">
+          <span>Arch Linux fácil</span>
+          <strong id="mobile-progress-label">0 / 8</strong>
+        </div>
+        <div
+          class="progress-track"
+          role="progressbar"
+          aria-label="Progreso del curso Arch Linux fácil"
+          aria-valuemin="0"
+          aria-valuemax="8"
+          aria-valuenow="0"
+        >
+          <div id="mobile-progress-fill" class="progress-fill"></div>
+        </div>
+        <a href={`${base}cursos/arch-linux-facil/`} class="drawer__continue">
+          Continuar el curso <span aria-hidden="true">→</span>
+        </a>
+      </div>
+
+      <nav class="drawer__nav" aria-label="Secciones del sitio">
+        <a href={base} class="drawer__link" aria-current={isActive(base) ? "page" : undefined}>
+          <span class="drawer__num">01</span>
+          <span>Inicio</span>
+        </a>
+        <a
+          href={`${base}cursos/`}
+          class="drawer__link"
+          aria-current={isActive(`${base}cursos/`) ? "page" : undefined}
+        >
+          <span class="drawer__num">02</span>
+          <span>Cursos</span>
+        </a>
+        <a
+          href={`${base}categorias/`}
+          class="drawer__link"
+          aria-current={isActive(`${base}categorias/`) ? "page" : undefined}
+        >
+          <span class="drawer__num">03</span>
+          <span>Mapa de sectores</span>
+        </a>
+        <a
+          href={`${base}blog/`}
+          class="drawer__link"
+          aria-current={isActive(`${base}blog/`) ? "page" : undefined}
+        >
+          <span class="drawer__num">04</span>
+          <span>Bitácora</span>
+        </a>
+        <a
+          href={`${base}certificados/verificar/`}
+          class="drawer__link"
+          aria-current={isActive(`${base}certificados/`) ? "page" : undefined}
+        >
+          <span class="drawer__num">05</span>
+          <span>Verificar certificados</span>
+        </a>
+      </nav>
+
+      <div class="drawer__foot">
+        <p class="drawer__note">
+          Aprende a atacar para saber defender. Pruebas solo en laboratorios propios o con
+          autorización.
+        </p>
+        {site.koFi && (
+          <a href={site.koFi} class="btn btn-primary btn-sm btn-block">
+            Apoyar en Ko-fi
+          </a>
+        )}
+      </div>
+    </dialog>
+
+    <main id="contenido" class="site-main">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="container-page footer-grid">
+        <div class="footer-brand">
+          <a href={base} class="footer-brand__name" aria-label="neCyberWiki — inicio">
+            ne<span>Cyber</span>Wiki
+          </a>
+          <p>
+            Cursos, laboratorios y notas de campo de ciberseguridad en español. Sin registro, sin
+            costo y con el progreso guardado en tu navegador.
+          </p>
+          <div class="footer-stamp">
+            <span class="stamp">Permiso o nada</span>
+          </div>
+        </div>
+
+        <div>
+          <p class="footer-heading" data-index="01">
+            Navegación
+          </p>
+          <ul class="footer-list">
+            <li>
+              <a class="footer-link" href={base}>
+                Inicio
+              </a>
+            </li>
+            <li>
+              <a class="footer-link" href={`${base}cursos/`}>
+                Cursos
+              </a>
+            </li>
+            <li>
+              <a class="footer-link" href={`${base}categorias/`}>
+                Mapa de sectores
+              </a>
+            </li>
+            <li>
+              <a class="footer-link" href={`${base}blog/`}>
+                Bitácora
+              </a>
+            </li>
+            <li>
+              <a class="footer-link" href={`${base}certificados/verificar/`}>
+                Verificar certificados
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <p class="footer-heading" data-index="02">
+            Comunidad
+          </p>
+          <ul class="footer-list">
+            <li>
+              <a class="footer-link" href={site.redes.github} target="_blank" rel="noopener">
+                GitHub <span aria-hidden="true">↗</span>
+              </a>
+            </li>
+            <li>
+              <a class="footer-link" href={site.redes.threads} target="_blank" rel="noopener">
+                Threads <span aria-hidden="true">↗</span>
+              </a>
+            </li>
+            {site.redes.youtube && (
+              <li>
+                <a class="footer-link" href={site.redes.youtube} target="_blank" rel="noopener">
+                  YouTube <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+            )}
+            <li>
+              <a
+                class="footer-link"
+                href="https://github.com/NeTenebraes/neCyberWiki/blob/main/content/Codigo%20de%20conducta.md"
+                target="_blank"
+                rel="noopener"
+              >
+                Código de conducta <span aria-hidden="true">↗</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <p class="footer-heading" data-index="03">
+            Proyecto libre
+          </p>
+          <p class="dim" style="font-size: 0.85rem; line-height: 1.65; margin-bottom: 1rem">
+            Si un tutorial o writeup te ahorró una tarde, puedes apoyar el proyecto.
+          </p>
+          {site.koFi ? (
+            <a
+              class="btn btn-primary btn-sm btn-block"
+              href={site.koFi}
+              target="_blank"
+              rel="noopener"
+            >
+              Invítame un Ko-fi
+            </a>
+          ) : (
+            <span class="btn btn-ghost btn-sm btn-block" aria-disabled="true">
+              Ko-fi — próximamente
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div class="container-page footer-bottom__inner">
+          <span>
+            Pruebas solo en laboratorios propios o con autorización. Aprende a atacar para saber
+            defender.
+          </span>
+          <span>neCyberWiki · {year} · MIT</span>
+        </div>
+      </div>
+    </footer>
+
+    <script is:inline>
+      const root = document.documentElement
+      const themeToggle = document.getElementById("theme-toggle")
+      const themeMeta = document.querySelector('meta[name="theme-color"]')
+
+      const themeLabel = () =>
+        root.dataset.theme === "light"
+          ? "Tema Archivo activo. Cambiar a Noche"
+          : "Tema Noche activo. Cambiar a Archivo"
+
+      const syncTheme = () => {
+        if (themeToggle) themeToggle.setAttribute("aria-label", themeLabel())
+        if (themeMeta)
+          themeMeta.setAttribute("content", root.dataset.theme === "light" ? "#e9e1cf" : "#070a08")
+      }
+
+      syncTheme()
+
+      themeToggle?.addEventListener("click", () => {
+        const next = root.dataset.theme === "dark" ? "light" : "dark"
+        root.dataset.theme = next
+        try {
+          localStorage.setItem("ncw-theme", next)
+        } catch {}
+        syncTheme()
+      })
+
+      const openBtn = document.getElementById("open-sidebar-btn")
+      const closeBtn = document.getElementById("close-sidebar-btn")
+      const drawer = document.getElementById("lateral-sidebar")
+
+      const openDrawer = () => {
+        if (!(drawer instanceof HTMLDialogElement) || drawer.open) return
+        drawer.showModal()
+        openBtn?.setAttribute("aria-expanded", "true")
+      }
+
+      const closeDrawer = () => {
+        if (!(drawer instanceof HTMLDialogElement) || !drawer.open) return
+        drawer.close()
+      }
+
+      openBtn?.addEventListener("click", openDrawer)
+      closeBtn?.addEventListener("click", closeDrawer)
+      drawer?.addEventListener("click", (event) => {
+        if (event.target === drawer) closeDrawer()
+      })
+      drawer?.addEventListener("close", () => {
+        openBtn?.setAttribute("aria-expanded", "false")
+        openBtn?.focus({ preventScroll: true })
+      })
+      drawer?.querySelectorAll("a[href]").forEach((link) => {
+        link.addEventListener("click", closeDrawer)
+      })
+
+      const syncGlobalProgress = () => {
+        try {
+          const done = JSON.parse(localStorage.getItem("ncw:progress:arch-linux-facil") || "[]")
+          const count = Array.isArray(done) ? done.length : 0
+          const total = 8
+          const pct = Math.round((count / total) * 100)
+          const label = document.getElementById("mobile-progress-label")
+          const fill = document.getElementById("mobile-progress-fill")
+          const track = fill?.closest('[role="progressbar"]')
+          if (label) label.textContent = `${count} / ${total}`
+          if (fill) fill.style.width = `${pct}%`
+          track?.setAttribute("aria-valuenow", String(count))
+        } catch {}
+      }
+
+      syncGlobalProgress()
+      window.addEventListener("storage", syncGlobalProgress)
+    </script>
+  </body>
+</html>
