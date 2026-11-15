@@ -33,7 +33,7 @@ mobile-first navigation (FAB + drawer).
 - `src/components/VideoEmbed.astro` — YouTube embed with `enablejsapi=1&rel=0`
   (required for chapter seeking) and `id="lesson-video"`. Empty `video`
   renders the "Video en producción" placeholder.
-- `src/styles/global.css` — `.sy-*` accordion system, `.temario` drawer /
+- `src/styles/syllabus.css` — `.sy-*` accordion system, `.temario` drawer /
   sticky sidebar (mobile drawer; `lg:` sticky, `max-height: calc(100vh - 7.5rem)`),
   `.fab-temario`.
 
@@ -56,9 +56,9 @@ mobile-first navigation (FAB + drawer).
   reader accessible without JS; JS only persists state + syncs progress.
 - Stacking rule: `<main>` must NOT create a stacking context (no `z-index`).
   The mobile drawer/overlay are `position: fixed` inside `<main>`; any z-index
-  on `<main>` would cap them below the site header (root-level, `z-50`). Sidebars
-  that must paint above page chrome (`.temario` z-70, `.temario-overlay` z-60,
-  `.lateral-sidebar` z-100) rely on this.
+  on `<main>` would cap them below the site header (`--z-header`, 50). Sidebars
+  that must paint above page chrome (`.temario` at `--z-drawer` 80,
+  `.temario-overlay` at 70, `.fab-temario` at 65) rely on this.
 
 ## Chapters: how to add them
 
@@ -80,6 +80,6 @@ On the index page they show as a "N capítulos" meta hint per lesson.
 - `npm run check` — 0 errors (was 3 pre-existing type errors in
   `src/data/categorias.ts`, now fixed by widening the `nivel` union).
 - `npm test` — `tests/syllabus.test.mjs`, 7/7.
-- Live: dev server + Playwright at 360px and 1440px (RNF-04), sidebar drawer/
-  FAB at 360px, accordion toggle, chapters click (needs a published `video`
-  to observe seeking).
+- Live: dev server + Playwright at 360px, 768px and 1440px (RNF-04) in Noche
+  and Archivo, sidebar drawer/FAB at 360px, accordion toggle, chapters click
+  (needs a published `video` to observe seeking).
