@@ -154,6 +154,18 @@
   transform: scaleX(1);
 }
 
+.site-nav__proto {
+  margin-left: 0.35rem;
+  padding: 0.1rem 0.3rem;
+  border: 1px solid color-mix(in srgb, var(--stamp) 50%, transparent);
+  color: var(--stamp);
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  vertical-align: 0.1em;
+}
+
 .site-actions {
   display: flex;
   align-items: center;

@@ -427,6 +427,57 @@ const lessonData = lecciones.map((leccion) => ({
     </div>
   </section>
 
+  <section class="game-teaser">
+    <div class="container-page">
+      <div class="game-teaser__inner">
+        <div class="game-teaser__copy">
+          <p class="kicker">Prototipo · Ciber-RPG educativo</p>
+          <h2 class="game-teaser__title">
+            El archivo entrena.
+            <br />
+            El abismo prueba.
+          </h2>
+          <p class="game-teaser__text">
+            El juego todavía no está implementado, pero el mundo ya tiene mapa: daemons, sectores y
+            comandos reales del curso. Entra al dossier de diseño y mira cómo se conecta con lo que
+            aprendes aquí.
+          </p>
+          <div class="game-teaser__actions">
+            <a class="btn btn-primary" href={`${base}juego/`}>
+              Ver el dossier del juego <span aria-hidden="true">→</span>
+            </a>
+            <span class="meta">Sin fecha de lanzamiento</span>
+          </div>
+        </div>
+        <div class="game-teaser__terminal terminal terminal--crt" aria-hidden="true">
+          <div class="terminal__bar">
+            <span class="terminal__dots">
+              <span class="terminal__dot terminal__dot--red"></span>
+              <span class="terminal__dot terminal__dot--yellow"></span>
+              <span class="terminal__dot terminal__dot--green"></span>
+            </span>
+            <span class="terminal__title">ncw://operacion</span>
+          </div>
+          <div class="terminal__body">
+            <p class="terminal__line">
+              <span class="terminal__prompt">operador@abismo:~$</span>
+              <span class="terminal__cmd">ncw status</span>
+            </p>
+            <p class="terminal__line">
+              <span class="terminal__ok">[ok]</span> manual sincronizado
+            </p>
+            <p class="terminal__line">
+              <span class="terminal__warn">[--]</span> motor de juego: en diseño
+            </p>
+            <p class="terminal__line">
+              <span class="terminal__comment">// sigue el curso para abrir el próximo sector</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <script
     is:inline
     type="application/json"
@@ -1244,10 +1295,63 @@ const lessonData = lecciones.map((leccion) => ({
     gap: 0.9rem;
   }
 
+  /* --- Game teaser ------------------------------------------------------ */
+
+  .game-teaser {
+    padding-block: clamp(3rem, 6vw, 5rem);
+  }
+
+  .game-teaser__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: 0;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    background: var(--bg-card);
+    overflow: hidden;
+  }
+
+  .game-teaser__copy {
+    padding: clamp(1.5rem, 3.5vw, 2.75rem);
+  }
+
+  .game-teaser__title {
+    margin-top: 0.85rem;
+    font-size: clamp(2rem, 3.4vw, 3.1rem);
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+  }
+
+  .game-teaser__text {
+    margin-top: 0.9rem;
+    max-width: 52ch;
+    color: var(--ink-dim);
+    font-size: 0.9rem;
+    line-height: 1.7;
+  }
+
+  .game-teaser__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.9rem 1.25rem;
+    margin-top: 1.4rem;
+  }
+
+  .game-teaser__terminal {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 1rem;
+    border: 1px solid var(--line-strong);
+  }
+
   @media (max-width: 960px) {
     .home-hero__grid,
     .home-section__grid,
-    .recent-grid {
+    .recent-grid,
+    .game-teaser__inner {
       grid-template-columns: minmax(0, 1fr);
     }
 
@@ -1261,6 +1365,10 @@ const lessonData = lecciones.map((leccion) => ({
 
     .dossier-cover {
       max-width: 34rem;
+    }
+
+    .game-teaser__terminal {
+      margin-top: 0;
     }
   }
 

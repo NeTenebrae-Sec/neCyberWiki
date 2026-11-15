@@ -1,0 +1,27 @@
+---
+interface Props {
+  activos?: number
+  total?: number
+}
+
+const { activos = 2, total = 4 } = Astro.props
+const pips = Array.from({ length: total }, (_, index) => index < activos)
+---
+
+<div class="turn-track">
+  <span class="turn-track__label" aria-hidden="true">
+    Press Turn
+  </span>
+  <div
+    class="turn-track__pips"
+    role="img"
+    aria-label={`Press Turn: ${activos} de ${total} turnos disponibles`}
+  >
+    {pips.map((activo) => (
+      <span class:list={["turn-track__pip", activo && "is-active"]} aria-hidden="true"></span>
+    ))}
+  </div>
+  <span class="turn-track__count" aria-hidden="true">
+    {activos}/{total}
+  </span>
+</div>

@@ -1,0 +1,69 @@
+---
+import type { GameEnemy } from "../../data/juego"
+
+interface Props {
+  enemy: GameEnemy
+  hp?: number
+  maxHp?: number
+  activo?: boolean
+}
+
+const { enemy, hp = enemy.hp, maxHp = enemy.maxHp, activo = false } = Astro.props
+const pct = Math.round((hp / maxHp) * 100)
+---
+
+<article class:list={["enemy-card", activo && "enemy-card--active"]}>
+  <header class="enemy-card__head">
+    <p class="docket">
+      Ficha de enemigo · <strong>{enemy.clase}</strong>
+    </p>
+    <span class="chip chip--stamp enemy-card__state">{enemy.estado}</span>
+  </header>
+
+  <div class="enemy-card__title-row">
+    <h3 class="enemy-card__title">{enemy.nombre}</h3>
+    <span class="enemy-card__level">Nv. {enemy.nivel}</span>
+  </div>
+
+  <p class="enemy-card__desc">{enemy.descripcion}</p>
+
+  <div class="game-hp">
+    <div class="game-hp__head">
+      <span>Integridad</span>
+      <strong>
+        {hp} / {maxHp}
+      </strong>
+    </div>
+    <div
+      class="game-hp__track"
+      role="progressbar"
+      aria-label={`Integridad de ${enemy.nombre}`}
+      aria-valuemin="0"
+      aria-valuemax={maxHp}
+      aria-valuenow={hp}
+    >
+      <span class="game-hp__fill" style={`width: ${pct}%`}></span>
+    </div>
+  </div>
+
+  <dl class="enemy-card__stats">
+    <div>
+      <dt>Debilidad</dt>
+      <dd>
+        <code>{enemy.debilidad}</code>
+      </dd>
+    </div>
+    <div>
+      <dt>Resiste</dt>
+      <dd>
+        <code>{enemy.resistencia}</code>
+      </dd>
+    </div>
+    <div>
+      <dt>Lee con</dt>
+      <dd>
+        <code>{enemy.comando}</code>
+      </dd>
+    </div>
+  </dl>
+</article>

@@ -1,0 +1,32 @@
+---
+import type { GameDaemon, GameSector } from "../../data/juego"
+
+interface Props {
+  daemon: GameDaemon
+  sector?: GameSector
+}
+
+const { daemon, sector } = Astro.props
+---
+
+<article class="daemon-card">
+  <header class="daemon-card__head">
+    <span class="daemon-card__sigil" aria-hidden="true"></span>
+    <div>
+      <p class="docket">{daemon.rol}</p>
+      <h3 class="daemon-card__title">{daemon.nombre}</h3>
+    </div>
+    <span class="daemon-card__cost">
+      {daemon.coste} <span>turno{daemon.coste === 1 ? "" : "s"}</span>
+    </span>
+  </header>
+
+  <p class="daemon-card__ability">{daemon.habilidad}</p>
+  <p class="daemon-card__desc">{daemon.descripcion}</p>
+
+  {sector && (
+    <p class="daemon-card__sector">
+      Asignado a <span>{sector.nombre}</span>
+    </p>
+  )}
+</article>

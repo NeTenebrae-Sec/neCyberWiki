@@ -1,0 +1,1682 @@
+/* ==========================================================================
+   Game — «Archivo del Abismo» dossier surface
+   Scoped under [data-surface="game"]. Imported only by /juego/.
+   ========================================================================== */
+
+[data-surface="game"] {
+  /* The combat stage is a screen: it keeps a dark palette in both themes so
+     contrast and fiction stay stable. Page chrome still follows the theme. */
+  --game-screen: #050806;
+  --game-screen-raised: #0b110d;
+  --game-screen-line: rgba(233, 228, 212, 0.16);
+  --game-screen-line-strong: rgba(233, 228, 212, 0.32);
+  --game-screen-ink: #ede8d8;
+  --game-screen-dim: #b9bbaa;
+  --game-screen-muted: #8f9788;
+  --game-screen-accent: #5de4e6;
+  --game-screen-signal: #b6f36b;
+  --game-screen-warn: #e6c65c;
+  --game-screen-danger: #e06a5a;
+}
+
+/* --- Hero ---------------------------------------------------------------- */
+
+.game-hero {
+  position: relative;
+  padding-block: clamp(2.5rem, 6vw, 5rem) clamp(2.5rem, 5vw, 4rem);
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.game-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 1px 1px, var(--line) 0.7px, transparent 0.8px),
+    linear-gradient(
+      90deg,
+      transparent 0 68%,
+      color-mix(in srgb, var(--accent) 16%, transparent) 68% 68.15%,
+      transparent 68.15% 100%
+    ),
+    linear-gradient(
+      0deg,
+      transparent 0 78%,
+      color-mix(in srgb, var(--stamp) 18%, transparent) 78% 78.2%,
+      transparent 78.2% 100%
+    );
+  background-size:
+    22px 22px,
+    100% 100%,
+    100% 100%;
+  mask-image: linear-gradient(180deg, #000 0%, transparent 84%);
+  opacity: 0.55;
+}
+
+.game-hero .container-page {
+  position: relative;
+  z-index: 1;
+}
+
+.game-hero__docket {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem 1rem;
+  margin-bottom: 1.35rem;
+}
+
+.game-hero__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.28fr) minmax(300px, 0.72fr);
+  gap: clamp(2rem, 5vw, 4.5rem);
+  align-items: center;
+}
+
+.game-hero__title {
+  max-width: 15ch;
+  font-size: clamp(2.6rem, 6.2vw, 5.4rem);
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+}
+
+.game-hero__title em {
+  color: var(--stamp);
+  font-style: italic;
+  font-variation-settings:
+    "SOFT" 60,
+    "WONK" 1,
+    "opsz" 144;
+}
+
+.game-hero__lead {
+  margin-top: 1.5rem;
+  max-width: 54ch;
+}
+
+.game-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 2rem;
+}
+
+.game-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin-top: 2.2rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--line);
+}
+
+.game-facts > div {
+  padding-right: 1.5rem;
+}
+
+.game-facts > div + div {
+  padding-left: 1.5rem;
+  border-left: 1px solid var(--line);
+}
+
+.game-facts dt {
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.game-facts dd {
+  margin-top: 0.25rem;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.game-facts dd span {
+  display: block;
+  margin-top: 0.15rem;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--ink-muted);
+}
+
+/* Cartridge / box art panel */
+.game-cartridge {
+  position: relative;
+  padding: clamp(1.2rem, 2.5vw, 1.7rem);
+  border: 1px solid var(--line-strong);
+  background:
+    linear-gradient(135deg, transparent 0 78%, var(--line) 78% 78.4%, transparent 78.4%),
+    var(--bg-card);
+  box-shadow: var(--shadow-paper);
+}
+
+.game-cartridge::before {
+  content: "";
+  position: absolute;
+  inset: 0.45rem;
+  border: 1px dashed var(--line);
+  pointer-events: none;
+}
+
+.game-cartridge__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.game-cartridge__title {
+  margin-top: 1.1rem;
+  font-size: clamp(1.7rem, 2.8vw, 2.3rem);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+}
+
+.game-cartridge__sub {
+  margin-top: 0.55rem;
+  color: var(--ink-dim);
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+
+.game-cartridge__rows {
+  margin-top: 1.1rem;
+  border-top: 1px solid var(--line);
+}
+
+.game-cartridge__rows > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 0.55rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.game-cartridge__rows dt {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.game-cartridge__rows dd {
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  text-align: right;
+}
+
+.game-cartridge__rows dd.is-pending {
+  color: var(--warn);
+}
+
+.game-cartridge__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.game-cartridge__stamp {
+  transform: rotate(-4deg);
+}
+
+/* --- Sections ------------------------------------------------------------ */
+
+.game-section {
+  position: relative;
+  padding-block: clamp(3rem, 6vw, 5.5rem);
+  border-bottom: 1px solid var(--line);
+}
+
+.game-section--sunken {
+  background: var(--bg-sunken);
+}
+
+.game-section__head {
+  display: grid;
+  grid-template-columns: minmax(0, 0.36fr) minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: end;
+  margin-bottom: clamp(1.75rem, 3.5vw, 2.75rem);
+}
+
+.game-section__title {
+  margin-top: 0.7rem;
+  font-size: clamp(1.9rem, 3.2vw, 2.9rem);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+}
+
+.game-section__lead {
+  max-width: 62ch;
+  color: var(--ink-dim);
+  font-size: 0.94rem;
+  line-height: 1.7;
+}
+
+.game-section__lead code {
+  padding: 0.12em 0.35em;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--accent);
+  font-size: 0.86em;
+}
+
+/* --- Combat simulation --------------------------------------------------- */
+
+.game-sim {
+  position: relative;
+  border: 1px solid var(--game-screen-line-strong);
+  background: var(--game-screen);
+  color: var(--game-screen-ink);
+  box-shadow: var(--shadow-lift);
+  overflow: hidden;
+}
+
+.game-sim::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.14) 0 1px, transparent 1px 4px);
+  opacity: 0.4;
+}
+
+.game-sim__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem 1rem;
+  padding: 0.55rem 0.8rem;
+  border-bottom: 1px solid var(--game-screen-line);
+  background: var(--game-screen-raised);
+}
+
+.game-sim__bar-title {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--game-screen-muted);
+}
+
+.game-sim__bar-tag {
+  padding: 0.16rem 0.4rem;
+  border: 1px solid color-mix(in srgb, var(--game-screen-warn) 55%, transparent);
+  color: var(--game-screen-warn);
+  font-family: var(--font-mono);
+  font-size: 0.54rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.game-sim__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr);
+}
+
+.game-sim__stage {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: clamp(1rem, 2.6vw, 1.75rem);
+  border-right: 1px solid var(--game-screen-line);
+}
+
+.game-sim__hud {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.game-sim__turn-note {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--game-screen-muted);
+}
+
+.game-sim__side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: clamp(1rem, 2.6vw, 1.5rem);
+  background: var(--game-screen-raised);
+}
+
+.game-sim__side-label {
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--game-screen-muted);
+}
+
+.game-sim__note {
+  margin-top: auto;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--game-screen-line);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  line-height: 1.65;
+  color: var(--game-screen-muted);
+}
+
+.game-sim__intent {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--game-screen-line);
+}
+
+.game-sim__intent-text {
+  margin-top: 0.25rem;
+  color: var(--game-screen-dim);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+
+.game-sim__intent-pips {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.game-sim__intent-pips i {
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--game-screen-warn);
+  transform: rotate(45deg);
+}
+
+.game-sim__intent-pips i:first-child {
+  background: var(--game-screen-warn);
+}
+
+/* Turn track */
+.turn-track {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.turn-track__label {
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--game-screen-accent);
+}
+
+.turn-track__pips {
+  display: flex;
+  gap: 5px;
+}
+
+.turn-track__pip {
+  width: 11px;
+  height: 11px;
+  border: 1px solid var(--game-screen-line-strong);
+  transform: rotate(45deg);
+}
+
+.turn-track__pip.is-active {
+  border-color: var(--game-screen-accent);
+  background: var(--game-screen-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--game-screen-accent) 14%, transparent);
+}
+
+.turn-track__count {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--game-screen-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Enemy card */
+.enemy-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding: clamp(1rem, 2.2vw, 1.35rem);
+  border: 1px solid var(--line-strong);
+  background: var(--bg-card);
+}
+
+.enemy-card--active {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.enemy-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.enemy-card__state {
+  font-size: 0.54rem;
+}
+
+.enemy-card__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.enemy-card__title {
+  font-size: clamp(1.35rem, 2.2vw, 1.65rem);
+  letter-spacing: -0.03em;
+}
+
+.enemy-card__level {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.enemy-card__desc {
+  color: var(--ink-dim);
+  font-size: 0.82rem;
+  line-height: 1.65;
+}
+
+.enemy-card__stats {
+  border-top: 1px solid var(--line);
+}
+
+.enemy-card__stats > div {
+  display: grid;
+  grid-template-columns: 5.4rem minmax(0, 1fr);
+  gap: 0.6rem;
+  align-items: baseline;
+  padding-block: 0.45rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.enemy-card__stats > div:last-child {
+  border-bottom: 0;
+}
+
+.enemy-card__stats dt {
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.enemy-card__stats dd {
+  min-width: 0;
+}
+
+.enemy-card__stats code {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--signal);
+  overflow-wrap: anywhere;
+}
+
+/* Dark-stage overrides */
+.game-sim .enemy-card {
+  border-color: var(--game-screen-line);
+  background: transparent;
+  color: var(--game-screen-ink);
+}
+
+.game-sim .enemy-card--active {
+  border-color: color-mix(in srgb, var(--game-screen-accent) 60%, transparent);
+  box-shadow: inset 3px 0 0 var(--game-screen-accent);
+}
+
+.game-sim .enemy-card .docket {
+  color: var(--game-screen-muted);
+}
+
+.game-sim .enemy-card .docket strong {
+  color: var(--game-screen-dim);
+}
+
+.game-sim .enemy-card .chip--stamp {
+  border-color: color-mix(in srgb, var(--game-screen-warn) 50%, transparent);
+  background: transparent;
+  color: var(--game-screen-warn);
+}
+
+.game-sim .enemy-card__title {
+  color: var(--game-screen-ink);
+}
+
+.game-sim .enemy-card__level {
+  color: var(--game-screen-accent);
+}
+
+.game-sim .enemy-card__desc {
+  color: var(--game-screen-dim);
+}
+
+.game-sim .enemy-card__stats,
+.game-sim .enemy-card__stats > div {
+  border-color: var(--game-screen-line);
+}
+
+.game-sim .enemy-card__stats dt {
+  color: var(--game-screen-muted);
+}
+
+.game-sim .enemy-card__stats code {
+  color: var(--game-screen-signal);
+}
+
+/* HP meter */
+.game-hp__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--game-screen-muted);
+}
+
+.game-hp__head strong {
+  color: var(--game-screen-ink);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.game-hp__track {
+  height: 8px;
+  overflow: hidden;
+  border: 1px solid var(--game-screen-line-strong);
+  background: var(--game-screen-raised);
+}
+
+.game-hp__fill {
+  display: block;
+  height: 100%;
+  background: var(--game-screen-danger);
+}
+
+/* Console */
+.game-console {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--game-screen-line);
+  background: var(--game-screen);
+  color: var(--game-screen-ink);
+  min-width: 0;
+}
+
+.game-console__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.45rem 0.65rem;
+  border-bottom: 1px solid var(--game-screen-line);
+  background: var(--game-screen-raised);
+}
+
+.game-console__stamp {
+  transform: none;
+  border-color: var(--game-screen-warn);
+  color: var(--game-screen-warn);
+  font-size: 0.48rem;
+  padding: 0.12rem 0.3rem;
+  mix-blend-mode: normal;
+}
+
+.game-console__body {
+  padding: 0.85rem 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  line-height: 1.7;
+}
+
+.game-console__prompt {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  color: var(--game-screen-accent);
+  overflow-wrap: anywhere;
+}
+
+.game-console__prompt code {
+  color: var(--game-screen-ink);
+  font-size: inherit;
+}
+
+.game-console__lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin-top: 0.6rem;
+}
+
+.game-console__line {
+  color: var(--game-screen-dim);
+  overflow-wrap: anywhere;
+}
+
+.game-console__line.is-ok {
+  color: var(--game-screen-signal);
+}
+
+.game-console__line.is-warn {
+  color: var(--game-screen-warn);
+}
+
+.game-console__line.is-dim {
+  color: var(--game-screen-muted);
+}
+
+.game-console__line.is-accent {
+  color: var(--game-screen-accent);
+}
+
+.game-console__options {
+  margin-top: 0.9rem;
+  padding-top: 0.7rem;
+  border-top: 1px dashed var(--game-screen-line);
+}
+
+.game-console__options-head {
+  font-size: 0.54rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--game-screen-muted);
+}
+
+.game-command {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto;
+  gap: 0.35rem 0.6rem;
+  align-items: baseline;
+  padding-block: 0.4rem;
+  border-bottom: 1px solid var(--game-screen-line);
+}
+
+.game-command:last-child {
+  border-bottom: 0;
+}
+
+.game-command code {
+  color: var(--game-screen-ink);
+  font-size: 0.72rem;
+  overflow-wrap: anywhere;
+}
+
+.game-command.is-active code {
+  color: var(--game-screen-accent);
+}
+
+.game-command__note {
+  color: var(--game-screen-muted);
+  font-size: 0.62rem;
+  line-height: 1.45;
+}
+
+.game-command__tag {
+  padding: 0.08rem 0.28rem;
+  border: 1px solid color-mix(in srgb, var(--game-screen-signal) 55%, transparent);
+  color: var(--game-screen-signal);
+  font-size: 0.48rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* --- Typing drill -------------------------------------------------------- */
+
+.typing-trial {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(280px, 0.88fr);
+  margin-top: 1.25rem;
+  border: 1px solid var(--line-strong);
+  background: var(--bg-card);
+}
+
+.typing-trial__main {
+  padding: clamp(1.1rem, 2.6vw, 1.75rem);
+}
+
+.typing-trial__title {
+  font-size: clamp(1.35rem, 2.2vw, 1.7rem);
+  letter-spacing: -0.03em;
+}
+
+.typing-trial__hint {
+  margin-top: 0.4rem;
+  max-width: 58ch;
+  color: var(--ink-dim);
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+
+.typing-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 1.1rem;
+}
+
+.typing-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.typing-field label {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.typing-input {
+  width: 100%;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-sunken);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  line-height: 1.4;
+  transition:
+    border-color var(--dur-ui) var(--ease-out),
+    background-color var(--dur-ui) var(--ease-out);
+}
+
+.typing-input::placeholder {
+  color: var(--ink-muted);
+}
+
+.typing-input:focus-visible {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.typing-input[aria-invalid="true"] {
+  border-color: var(--danger);
+  box-shadow: inset 3px 0 0 var(--danger);
+}
+
+.typing-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1rem;
+}
+
+.typing-modes {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.typing-mode {
+  padding: 0.38rem 0.6rem;
+  border: 0;
+  background: transparent;
+  color: var(--ink-dim);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-ui) var(--ease-out),
+    color var(--dur-ui) var(--ease-out);
+}
+
+.typing-mode + .typing-mode {
+  border-left: 1px solid var(--line-strong);
+}
+
+.typing-mode[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.typing-mode:hover:not([aria-pressed="true"]) {
+  background: var(--bg-raised);
+  color: var(--ink);
+}
+
+.typing-timer {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.typing-timer.is-pressure {
+  color: var(--warn);
+}
+
+.typing-timer.is-expired {
+  color: var(--danger);
+}
+
+.typing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.typing-feedback {
+  min-height: 1.5em;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+}
+
+.typing-feedback[data-state="ok"] {
+  color: var(--signal);
+}
+
+.typing-feedback[data-state="error"] {
+  color: var(--danger);
+}
+
+.typing-trial__note {
+  margin-top: 0.8rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  line-height: 1.6;
+  color: var(--ink-muted);
+}
+
+.typing-trial__side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: clamp(1.1rem, 2.6vw, 1.5rem);
+  border-left: 1px solid var(--line);
+  background: var(--bg-sunken);
+}
+
+.typing-trial__side-label {
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.typing-trial__command {
+  display: block;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid var(--game-screen-line-strong);
+  background: var(--game-screen);
+  color: var(--game-screen-accent);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.typing-trial__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+}
+
+.typing-trial__meta a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.typing-trial__meta a:hover {
+  border-bottom-color: currentColor;
+}
+
+.typing-trial__rules {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: auto;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--line);
+}
+
+.typing-trial__rules li {
+  display: grid;
+  grid-template-columns: 1.4rem minmax(0, 1fr);
+  gap: 0.45rem;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  line-height: 1.55;
+}
+
+.typing-trial__rules span {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* --- Bestiary and daemons ------------------------------------------------ */
+
+.game-catalog {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr);
+  gap: clamp(1.25rem, 3vw, 2rem);
+  align-items: start;
+}
+
+.game-catalog__group {
+  min-width: 0;
+}
+
+.game-catalog__label {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.game-catalog__label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.enemy-list,
+.daemon-list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.enemy-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.enemy-list > :first-child {
+  grid-column: 1 / -1;
+}
+
+.daemon-list {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.daemon-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1.1rem;
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--blog);
+  background: var(--bg-card);
+}
+
+.daemon-card__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+}
+
+.daemon-card__sigil {
+  width: 1.7rem;
+  height: 1.7rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  border: 1px solid var(--blog);
+  background:
+    linear-gradient(45deg, transparent 44%, var(--blog) 44% 56%, transparent 56%),
+    linear-gradient(-45deg, transparent 44%, var(--blog) 44% 56%, transparent 56%);
+  opacity: 0.85;
+}
+
+.daemon-card__title {
+  margin-top: 0.15rem;
+  font-size: 1.2rem;
+  letter-spacing: -0.03em;
+}
+
+.daemon-card__cost {
+  margin-left: auto;
+  padding: 0.18rem 0.4rem;
+  border: 1px solid var(--line-strong);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.daemon-card__cost span {
+  font-size: 0.52rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+}
+
+.daemon-card__ability {
+  color: var(--blog);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.daemon-card__desc {
+  color: var(--ink-dim);
+  font-size: 0.8rem;
+  line-height: 1.65;
+}
+
+.daemon-card__sector {
+  margin-top: auto;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: var(--ink-muted);
+}
+
+.daemon-card__sector span {
+  color: var(--ink-dim);
+}
+
+/* The daemon card also appears inside the dark combat stage. */
+.game-sim .daemon-card {
+  border-color: var(--game-screen-line);
+  border-top-color: var(--game-screen-accent);
+  background: transparent;
+  color: var(--game-screen-ink);
+}
+
+.game-sim .daemon-card .docket {
+  color: var(--game-screen-muted);
+}
+
+.game-sim .daemon-card__sigil {
+  border-color: var(--game-screen-accent);
+  background:
+    linear-gradient(45deg, transparent 44%, var(--game-screen-accent) 44% 56%, transparent 56%),
+    linear-gradient(-45deg, transparent 44%, var(--game-screen-accent) 44% 56%, transparent 56%);
+}
+
+.game-sim .daemon-card__title {
+  color: var(--game-screen-ink);
+}
+
+.game-sim .daemon-card__cost {
+  border-color: var(--game-screen-line-strong);
+  color: var(--game-screen-accent);
+}
+
+.game-sim .daemon-card__ability {
+  color: var(--game-screen-accent);
+}
+
+.game-sim .daemon-card__desc {
+  color: var(--game-screen-dim);
+}
+
+.game-sim .daemon-card__sector {
+  border-color: var(--game-screen-line);
+  color: var(--game-screen-muted);
+}
+
+.game-sim .daemon-card__sector span {
+  color: var(--game-screen-dim);
+}
+
+/* --- Sector map ---------------------------------------------------------- */
+
+.game-sectors {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.game-sector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: clamp(1rem, 2.2vw, 1.35rem);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--line-strong);
+  background: var(--bg-card);
+}
+
+.game-sector--prototipo {
+  border-top-color: var(--accent);
+}
+
+.game-sector--disenado {
+  border-top-color: var(--warn);
+}
+
+.game-sector__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+}
+
+.game-sector__index {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 650;
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  color: var(--line-strong);
+}
+
+.game-sector__heading {
+  min-width: 0;
+}
+
+.game-sector__title {
+  margin-top: 0.2rem;
+  font-size: 1.15rem;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.game-sector__lesson {
+  margin-left: auto;
+  font-size: 0.62rem;
+  white-space: nowrap;
+}
+
+.game-sector__briefing {
+  color: var(--ink-dim);
+  font-size: 0.8rem;
+  line-height: 1.65;
+}
+
+.game-sector__map {
+  margin-top: auto;
+  border-top: 1px solid var(--line);
+}
+
+.game-sector__map > div {
+  display: grid;
+  grid-template-columns: 4.2rem minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: baseline;
+  padding-block: 0.38rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.game-sector__map dt {
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.game-sector__map dd {
+  color: var(--ink-dim);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.game-sector__command {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--line);
+}
+
+.game-sector__command span {
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.game-sector__command code {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  overflow-wrap: anywhere;
+}
+
+/* --- Course connection chain --------------------------------------------- */
+
+.game-chain {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.game-chain__step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1.15rem 1.25rem 1.15rem 0;
+}
+
+.game-chain__step + .game-chain__step {
+  padding-left: 1.25rem;
+  border-left: 1px solid var(--line);
+}
+
+.game-chain__step:not(:last-child)::after {
+  content: "→";
+  position: absolute;
+  right: 0.35rem;
+  bottom: 1rem;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  opacity: 0.6;
+}
+
+.game-chain__num {
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.game-chain__label {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.game-chain__value {
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.game-chain__value code {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0;
+  color: var(--signal);
+  overflow-wrap: anywhere;
+}
+
+.game-chain__value a {
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.game-chain__value a:hover {
+  color: var(--accent);
+}
+
+.game-chain__note {
+  margin-top: auto;
+  padding-top: 0.4rem;
+  font-size: 0.7rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+}
+
+.game-chain__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  margin-top: 1.1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  line-height: 1.6;
+  color: var(--ink-muted);
+}
+
+.game-chain__footer a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+/* --- Project status ------------------------------------------------------ */
+
+.game-status {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  align-items: start;
+}
+
+.game-status__panel {
+  border: 1px solid var(--line);
+  background: var(--bg-card);
+  padding: clamp(1.2rem, 2.6vw, 1.75rem);
+}
+
+.game-status__panel-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.game-status__panel-title h3 {
+  font-size: 1.2rem;
+  letter-spacing: -0.025em;
+}
+
+.game-status__list {
+  margin-top: 0.3rem;
+}
+
+.game-status__item {
+  display: grid;
+  grid-template-columns: 1.1rem minmax(0, 1fr);
+  gap: 0.6rem;
+  align-items: baseline;
+  padding-block: 0.55rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.game-status__item:last-child {
+  border-bottom: 0;
+}
+
+.game-status__mark {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.game-status__item.is-done .game-status__mark {
+  color: var(--signal);
+}
+
+.game-status__item.is-pending .game-status__mark {
+  color: var(--warn);
+}
+
+.game-status__item.is-out .game-status__mark {
+  color: var(--danger);
+}
+
+.game-status__item p {
+  color: var(--ink-dim);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.game-status__item strong {
+  color: var(--ink);
+}
+
+.game-status__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+}
+
+.game-status__note {
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  line-height: 1.65;
+  color: var(--ink-muted);
+}
+
+/* --- Responsive ---------------------------------------------------------- */
+
+@media (max-width: 1080px) {
+  .game-hero__grid,
+  .game-section__head,
+  .game-catalog,
+  .game-status {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .game-hero__grid {
+    align-items: start;
+  }
+
+  .game-cartridge {
+    max-width: 34rem;
+  }
+
+  .game-catalog {
+    gap: 2rem;
+  }
+
+  .game-sim__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .game-sim__stage {
+    border-right: 0;
+    border-bottom: 1px solid var(--game-screen-line);
+  }
+
+  .game-sectors {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .game-sector:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .typing-trial {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .typing-trial__side {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 900px) {
+  .game-chain {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .game-chain__step {
+    padding: 1rem 1rem 1rem 0;
+  }
+
+  .game-chain__step + .game-chain__step {
+    padding-left: 1rem;
+  }
+
+  .game-chain__step:nth-child(3) {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .game-chain__step:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+  }
+
+  .game-chain__step:not(:last-child)::after {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .game-facts {
+    gap: 0.9rem 0;
+  }
+
+  .game-facts > div {
+    width: 100%;
+    padding-right: 0;
+  }
+
+  .game-facts > div + div {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .game-facts dd span {
+    display: inline;
+    margin-left: 0.35rem;
+  }
+
+  .game-sectors {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .game-sector:last-child {
+    grid-column: auto;
+  }
+
+  .game-chain {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .game-chain__step {
+    padding: 1rem 0;
+  }
+
+  .game-chain__step + .game-chain__step {
+    padding-left: 0;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .game-chain__step:nth-child(3) {
+    padding-left: 0;
+  }
+
+  .game-chain__step:not(:last-child)::after {
+    display: block;
+    content: "↓";
+    right: 0;
+    bottom: 0.2rem;
+  }
+
+  .enemy-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .enemy-list > :first-child {
+    grid-column: auto;
+  }
+
+  .game-command {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .game-command__note {
+    grid-column: 1 / -1;
+  }
+
+  .typing-actions .btn {
+    flex: 1;
+  }
+}
+
+@media (max-width: 420px) {
+  .game-hero__title {
+    font-size: clamp(2.2rem, 11vw, 3rem);
+  }
+
+  .game-cartridge {
+    padding: 1rem;
+  }
+
+  .game-sector__head {
+    flex-wrap: wrap;
+  }
+
+  .game-sector__lesson {
+    width: 100%;
+    margin-left: 0;
+    padding-left: 2.7rem;
+  }
+
+  .game-sim__stage,
+  .game-sim__side,
+  .game-console__body,
+  .typing-trial__main,
+  .typing-trial__side {
+    padding-inline: 0.85rem;
+  }
+}

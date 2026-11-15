@@ -1,0 +1,702 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro"
+import TurnTrack from "../../components/juego/TurnTrack.astro"
+import EnemyCard from "../../components/juego/EnemyCard.astro"
+import DaemonCard from "../../components/juego/DaemonCard.astro"
+import CommandConsole from "../../components/juego/CommandConsole.astro"
+import GameSectorMap from "../../components/juego/GameSectorMap.astro"
+import {
+  GAME_DAEMONS,
+  GAME_ENEMIES,
+  GAME_SECTORS,
+  GAME_TYPING_DRILL,
+  getDaemon,
+  getEnemy,
+} from "../../data/juego"
+import { site } from "../../data/site"
+import "../../styles/game.css"
+
+const base = site.base
+const demoEnemy = getEnemy("troll-dhcp")
+const demoDaemon = getDaemon("nmap-bot")
+
+if (!demoEnemy || !demoDaemon) {
+  throw new Error("El simulacro de /juego/ requiere troll-dhcp y nmap-bot en src/data/juego.ts")
+}
+
+const drillHref = `${base}cursos/arch-linux-facil/${GAME_TYPING_DRILL.leccion}/`
+const cursoHref = `${base}cursos/arch-linux-facil/`
+const firstSector = GAME_SECTORS[0]
+---
+
+<BaseLayout
+  titulo="Juego · Dossier y prototipo de interfaz"
+  descripcion="Dossier del Ciber-RPG educativo de neCyberWiki: bestiario, daemons, sectores y un simulacro de combate. Diseño y prototipo visual; el motor de juego no está implementado."
+>
+  <div data-surface="game">
+    <section class="game-hero" aria-labelledby="game-title">
+      <div class="container-page">
+        <div class="game-hero__docket">
+          <span class="docket">
+            Prototipo de interfaz · <strong>Ciber-RPG educativo</strong>
+          </span>
+          <span class="stamp">No jugable</span>
+        </div>
+
+        <div class="game-hero__grid">
+          <div>
+            <h1 id="game-title" class="game-hero__title">
+              El archivo <em>entrena</em>.<br />
+              El abismo prueba.
+            </h1>
+            <p class="lead game-hero__lead">
+              El wiki es el manual de campo; el juego es la operación. Comparten mundo, vocabulario
+              y comandos reales del curso, pero todavía no comparten motor. Aquí ves el dossier y un
+              simulacro de interfaz, no una partida.
+            </p>
+
+            <div class="game-hero__actions">
+              <a class="btn btn-primary btn-lg" href="#bestiario">
+                Ver el bestiario <span aria-hidden="true">→</span>
+              </a>
+              <a class="btn btn-secondary btn-lg" href={cursoHref}>
+                Practicar el curso <span aria-hidden="true">→</span>
+              </a>
+            </div>
+
+            <dl class="game-facts">
+              <div>
+                <dt>Motor</dt>
+                <dd>
+                  No implementado<span>Diseño y prototipo</span>
+                </dd>
+              </div>
+              <div>
+                <dt>Mundo</dt>
+                <dd>
+                  {GAME_SECTORS.length} sectores
+                  <span>
+                    {GAME_ENEMIES.length} enemigos · {GAME_DAEMONS.length} daemons
+                  </span>
+                </dd>
+              </div>
+              <div>
+                <dt>Progreso</dt>
+                <dd>
+                  Separado<span>ncw:game:* (futuro)</span>
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+          <aside class="game-cartridge" aria-labelledby="cartridge-title">
+            <div class="game-cartridge__top">
+              <span class="docket">
+                Cartucho 00 · <strong>borrador</strong>
+              </span>
+              <span class="chip">v0.1</span>
+            </div>
+
+            <h2 id="cartridge-title" class="game-cartridge__title">
+              Archivo del Abismo
+            </h2>
+            <p class="game-cartridge__sub">
+              La Placa Base del Desierto, el Abismo del Chroot y los daemons que custodian los
+              sectores del curso.
+            </p>
+
+            <dl class="game-cartridge__rows">
+              <div>
+                <dt>Estado</dt>
+                <dd>Diseño y prototipo</dd>
+              </div>
+              <div>
+                <dt>Combate</dt>
+                <dd class="is-pending">No implementado</dd>
+              </div>
+              <div>
+                <dt>Guardado</dt>
+                <dd class="is-pending">No implementado</dd>
+              </div>
+              <div>
+                <dt>Cuentas</dt>
+                <dd>Ninguna</dd>
+              </div>
+            </dl>
+
+            <div class="game-cartridge__foot">
+              <span class="stamp game-cartridge__stamp">Sin fecha</span>
+              <span class="meta">Sin correo · sin registro</span>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section
+      id="simulacro"
+      class="game-section game-section--sunken"
+      aria-labelledby="simulacro-title"
+    >
+      <div class="container-page">
+        <div class="game-section__head">
+          <div>
+            <p class="label-rule">01 / Simulacro</p>
+            <h2 id="simulacro-title" class="game-section__title">
+              Un turno, sin motor.
+            </h2>
+          </div>
+          <p class="game-section__lead">
+            Mock de combate construido en HTML y CSS. No hay lógica, no hay turnos reales y nada de
+            lo que ves se ejecuta. La ficción está etiquetada como simulacro para no confundirla con
+            el progreso del curso.
+          </p>
+        </div>
+
+        <div
+          class="game-sim"
+          role="group"
+          aria-label="Simulacro de combate contra el Troll de Red/DHCP"
+        >
+          <div class="game-sim__bar">
+            <span class="game-sim__bar-title">ncw://operacion · encuentro 01</span>
+            <span class="game-sim__bar-tag">Mock sin lógica</span>
+          </div>
+
+          <div class="game-sim__grid">
+            <div class="game-sim__stage">
+              <div class="game-sim__hud">
+                <TurnTrack activos={2} total={4} />
+                <span class="game-sim__turn-note">Operador · turno 02</span>
+              </div>
+
+              <EnemyCard enemy={demoEnemy} activo />
+
+              <div class="game-sim__hud">
+                <span class="game-sim__turn-note">La debilidad está expuesta un turno</span>
+                <span class="chip chip--signal">
+                  <span class="status-dot" aria-hidden="true"></span> lectura activa
+                </span>
+              </div>
+
+              <div class="game-sim__intent">
+                <div>
+                  <p class="game-sim__side-label">Intención del enemigo</p>
+                  <p class="game-sim__intent-text">
+                    Renovar la concesión y dejar al operador sin ruta.
+                  </p>
+                </div>
+                <span class="game-sim__intent-pips" aria-hidden="true">
+                  <i></i>
+                  <i></i>
+                  <i></i>
+                </span>
+              </div>
+            </div>
+
+            <div class="game-sim__side">
+              <p class="game-sim__side-label">Daemon equipado</p>
+              <DaemonCard daemon={demoDaemon} sector={firstSector} />
+
+              <CommandConsole
+                enemigo={demoEnemy.nombre}
+                comando="nmap -sV 10.0.0.1"
+                lineas={[
+                  { texto: "22/tcp  open  ssh", tono: "dim" },
+                  { texto: "80/tcp  open  http", tono: "dim" },
+                  { texto: "[ok] nmap-bot: debilidad detectada", tono: "ok" },
+                  { texto: "[!] el enemigo prepara una renovación DHCP", tono: "warn" },
+                  { texto: "// elige un comando de la lección", tono: "accent" },
+                ]}
+                opciones={[
+                  {
+                    comando: "systemctl restart NetworkManager",
+                    nota: "Fuerza una concesión nueva. Ataca la debilidad.",
+                    activa: true,
+                  },
+                  {
+                    comando: "ip a",
+                    nota: "Lee interfaces y direcciones antes de actuar.",
+                  },
+                  {
+                    comando: "ping -c 1 10.0.0.1",
+                    nota: "Comprueba alcance; no revela la causa.",
+                  },
+                ]}
+              />
+
+              <p class="game-sim__note">
+                El panel no es interactivo. Los comandos mostrados pertenecen al curso y se
+                practican en una máquina propia o en una VM.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div id="micro-reto" class="typing-trial">
+          <div class="typing-trial__main">
+            <p class="kicker">Micro-reto opcional</p>
+            <h3 class="typing-trial__title">Escribe la orden de UFW.</h3>
+            <p id="typing-hint" class="typing-trial__hint">
+              Copia el comando objetivo con exactitud. El modo estudio no tiene temporizador; el
+              modo presión es opt-in y dura {GAME_TYPING_DRILL.segundos} segundos. Un fallo detiene
+              el intento.
+            </p>
+
+            <form
+              id="typing-form"
+              class="typing-form"
+              data-command={GAME_TYPING_DRILL.comando}
+              data-seconds={GAME_TYPING_DRILL.segundos}
+              novalidate
+            >
+              <div class="typing-field">
+                <label for="typing-input">Comando a escribir</label>
+                <input
+                  id="typing-input"
+                  class="typing-input"
+                  type="text"
+                  name="comando"
+                  autocomplete="off"
+                  autocapitalize="off"
+                  spellcheck="false"
+                  placeholder="sudo …"
+                  aria-describedby="typing-hint typing-timer typing-feedback"
+                />
+              </div>
+
+              <div class="typing-toolbar">
+                <div class="typing-modes" role="group" aria-label="Modo del micro-reto">
+                  <button
+                    type="button"
+                    class="typing-mode"
+                    data-typing-mode="estudio"
+                    aria-pressed="true"
+                  >
+                    Estudio
+                  </button>
+                  <button
+                    type="button"
+                    class="typing-mode"
+                    data-typing-mode="presion"
+                    aria-pressed="false"
+                  >
+                    Presión · {GAME_TYPING_DRILL.segundos} s
+                  </button>
+                </div>
+                <span id="typing-timer" class="typing-timer" role="status" aria-live="off">
+                  Sin temporizador
+                </span>
+              </div>
+
+              <div class="typing-actions">
+                <button type="submit" class="btn btn-primary">
+                  Comprobar
+                </button>
+                <button type="button" id="typing-reset" class="btn btn-ghost">
+                  Reiniciar
+                </button>
+              </div>
+
+              <p id="typing-feedback" class="typing-feedback" role="status" aria-live="polite"></p>
+            </form>
+
+            <p class="typing-trial__note">
+              No ejecuta nada en tu equipo: es una comparación de texto en el navegador. Se ignoran
+              los espacios sobrantes al inicio, al final y entre palabras; el resto debe coincidir.
+            </p>
+          </div>
+
+          <aside class="typing-trial__side" aria-label="Comando objetivo y lección relacionada">
+            <p class="typing-trial__side-label">Objetivo</p>
+            <code class="typing-trial__command">{GAME_TYPING_DRILL.comando}</code>
+            <p class="typing-trial__meta">
+              <span>{GAME_TYPING_DRILL.pista}</span>
+              <a href={drillHref}>
+                Lección 08 · {GAME_TYPING_DRILL.leccionTitulo} <span aria-hidden="true">→</span>
+              </a>
+            </p>
+
+            <ul class="typing-trial__rules">
+              <li>
+                <span>01</span> Estudio: sin temporizador. Es el modo por defecto.
+              </li>
+              <li>
+                <span>02</span> Presión: {GAME_TYPING_DRILL.segundos} s opt-in; un fallo detiene el
+                intento.
+              </li>
+              <li>
+                <span>03</span> Nada se ejecuta: solo se compara texto en el navegador.
+              </li>
+            </ul>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section id="bestiario" class="game-section" aria-labelledby="bestiario-title">
+      <div class="container-page">
+        <div class="game-section__head">
+          <div>
+            <p class="label-rule">02 / Bestiario y daemons</p>
+            <h2 id="bestiario-title" class="game-section__title">
+              Lo que habita el sector.
+            </h2>
+          </div>
+          <p class="game-section__lead">
+            Cada enemigo tiene una debilidad tomada de un comando real. Los daemons no son premios:
+            son herramientas con un coste y una lectura que hacer. Los datos viven en
+            <code>src/data/juego.ts</code>.
+          </p>
+        </div>
+
+        <div class="game-catalog">
+          <div class="game-catalog__group">
+            <p class="game-catalog__label">Bestiario · {GAME_ENEMIES.length} fichas</p>
+            <div class="enemy-list">
+              {GAME_ENEMIES.map((enemy) => (
+                <EnemyCard enemy={enemy} />
+              ))}
+            </div>
+          </div>
+
+          <div class="game-catalog__group">
+            <p class="game-catalog__label">Daemons · {GAME_DAEMONS.length}</p>
+            <div class="daemon-list">
+              {GAME_DAEMONS.map((daemon) => {
+                const sector = GAME_SECTORS.find((item) => item.daemonId === daemon.id)
+                return <DaemonCard daemon={daemon} sector={sector} />
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section
+      id="sectores"
+      class="game-section game-section--sunken"
+      aria-labelledby="sectores-title"
+    >
+      <div class="container-page">
+        <div class="game-section__head">
+          <div>
+            <p class="label-rule">03 / Mapa de sectores</p>
+            <h2 id="sectores-title" class="game-section__title">
+              Tres puertas, tres lecciones.
+            </h2>
+          </div>
+          <p class="game-section__lead">
+            Los sectores no inventan contenido: apuntan a lecciones publicadas del curso. El estado
+            de cada uno distingue lo que ya tiene prototipo de lo que solo está diseñado.
+          </p>
+        </div>
+
+        <GameSectorMap sectores={GAME_SECTORS} />
+      </div>
+    </section>
+
+    <section id="conexion" class="game-section" aria-labelledby="conexion-title">
+      <div class="container-page">
+        <div class="game-section__head">
+          <div>
+            <p class="label-rule">04 / Del manual al abismo</p>
+            <h2 id="conexion-title" class="game-section__title">
+              La ruta no se salta.
+            </h2>
+          </div>
+          <p class="game-section__lead">
+            Una lección enseña el comando; el comando abre el sector; el daemon cambia el turno. Ese
+            es el contrato. El juego no puede ser la única vía para completar un curso.
+          </p>
+        </div>
+
+        <div class="game-chain">
+          <div class="game-chain__step">
+            <span class="game-chain__num">01 · Lección</span>
+            <span class="game-chain__value">
+              <a href={`${base}cursos/arch-linux-facil/03-archiso-red-y-ssh/`}>
+                Archiso: terminal, red y SSH
+              </a>
+            </span>
+            <span class="game-chain__label">Manual de campo</span>
+            <span class="game-chain__note">Aprendes a leer la red antes de tocar el servicio.</span>
+          </div>
+
+          <div class="game-chain__step">
+            <span class="game-chain__num">02 · Comando</span>
+            <span class="game-chain__value">
+              <code>systemctl enable dhcpcd</code>
+            </span>
+            <span class="game-chain__label">Orden de entrada</span>
+            <span class="game-chain__note">
+              La misma orden del curso; el juego la convierte en turno.
+            </span>
+          </div>
+
+          <div class="game-chain__step">
+            <span class="game-chain__num">03 · Daemon</span>
+            <span class="game-chain__value">Nmap-bot</span>
+            <span class="game-chain__label">Herramienta</span>
+            <span class="game-chain__note">
+              Revela la debilidad, pero consume un turno de Press Turn.
+            </span>
+          </div>
+
+          <div class="game-chain__step">
+            <span class="game-chain__num">04 · Sector</span>
+            <span class="game-chain__value">Umbral del DHCP</span>
+            <span class="game-chain__label">Operación</span>
+            <span class="game-chain__note">
+              El primer enclave del mapa. Estado: prototipo visual.
+            </span>
+          </div>
+        </div>
+
+        <p class="game-chain__footer">
+          <span>
+            Progreso del curso: <code>ncw:progress:&lt;slug&gt;</code> · Progreso del juego:{" "}
+            <code>ncw:game:&lt;sector&gt;</code> (futuro)
+          </span>
+          <a href={cursoHref}>
+            Volver al curso <span aria-hidden="true">→</span>
+          </a>
+        </p>
+      </div>
+    </section>
+
+    <section id="estado" class="game-section" aria-labelledby="estado-title">
+      <div class="container-page">
+        <div class="game-status">
+          <div>
+            <p class="label-rule">05 / Estado del proyecto</p>
+            <h2 id="estado-title" class="game-section__title">
+              Lo que existe y lo que no.
+            </h2>
+            <p class="game-section__lead">
+              Diseño y prototipo visual. El motor de juego no está implementado, no hay fecha de
+              lanzamiento y no hay captura de correos ni cuentas. Si algo de esta página parece
+              jugable, es ficción de interfaz debidamente etiquetada.
+            </p>
+
+            <div class="game-status__actions">
+              <a class="btn btn-secondary" href={site.redes.github} target="_blank" rel="noopener">
+                Ver el repositorio <span aria-hidden="true">↗</span>
+              </a>
+              <a class="btn btn-ghost" href={site.redes.threads} target="_blank" rel="noopener">
+                Seguir en Threads <span aria-hidden="true">↗</span>
+              </a>
+            </div>
+
+            <p class="game-status__note">
+              El dossier es estático y no añade JavaScript de juego al resto del sitio. La futura
+              partida vivirá en rutas separadas y cargará su bundle solo ahí.
+            </p>
+          </div>
+
+          <div class="game-status__panel">
+            <div class="game-status__panel-title">
+              <h3>Inventario honesto</h3>
+              <span class="chip">v0.1</span>
+            </div>
+
+            <ul class="game-status__list">
+              <li class="game-status__item is-done">
+                <span class="game-status__mark" aria-hidden="true">
+                  ✓
+                </span>
+                <p>
+                  <strong>Existe:</strong> este dossier, el manifiesto, los componentes y los
+                  estilos.
+                </p>
+              </li>
+              <li class="game-status__item is-done">
+                <span class="game-status__mark" aria-hidden="true">
+                  ✓
+                </span>
+                <p>
+                  <strong>Existe:</strong> el micro-reto de tipeo con modo estudio y modo presión
+                  opt-in.
+                </p>
+              </li>
+              <li class="game-status__item is-pending">
+                <span class="game-status__mark" aria-hidden="true">
+                  …
+                </span>
+                <p>
+                  <strong>En diseño:</strong> GameLayout, motor de combate, guardado, audio y fusión
+                  de daemons.
+                </p>
+              </li>
+              <li class="game-status__item is-out">
+                <span class="game-status__mark" aria-hidden="true">
+                  —
+                </span>
+                <p>
+                  <strong>No existe:</strong> <code>/juego/partida/</code>, combate real, cuentas o
+                  progreso compartido.
+                </p>
+              </li>
+              <li class="game-status__item is-out">
+                <span class="game-status__mark" aria-hidden="true">
+                  —
+                </span>
+                <p>
+                  <strong>No existe:</strong> fecha de lanzamiento ni promesa de que el motor llegue
+                  a v1.
+                </p>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script is:inline>
+    ;(() => {
+      const form = document.getElementById("typing-form")
+      const input = document.getElementById("typing-input")
+      const feedback = document.getElementById("typing-feedback")
+      const timerEl = document.getElementById("typing-timer")
+      const resetBtn = document.getElementById("typing-reset")
+      const modeButtons = [...document.querySelectorAll("[data-typing-mode]")]
+
+      if (!(form instanceof HTMLFormElement) || !(input instanceof HTMLInputElement)) return
+
+      const expected = (form.dataset.command || "").trim()
+      const seconds = Number(form.dataset.seconds) || 6
+      const normalize = (value) => value.trim().replace(/\s+/g, " ")
+
+      let mode = "estudio"
+      let remaining = seconds
+      let interval = null
+      let expired = false
+      let running = false
+
+      const setFeedback = (message, state = "") => {
+        if (!feedback) return
+        feedback.textContent = message
+        if (state) feedback.dataset.state = state
+        else delete feedback.dataset.state
+      }
+
+      const setTimer = (message, state = "") => {
+        if (!timerEl) return
+        timerEl.textContent = message
+        timerEl.classList.toggle("is-pressure", state === "pressure")
+        timerEl.classList.toggle("is-expired", state === "expired")
+      }
+
+      const stopTimer = () => {
+        if (interval !== null) {
+          window.clearInterval(interval)
+          interval = null
+        }
+        running = false
+      }
+
+      const expire = () => {
+        stopTimer()
+        expired = true
+        setTimer("Tiempo agotado", "expired")
+        setFeedback("Tiempo agotado. Pulsa Reiniciar o cambia a modo estudio.", "error")
+        input.setAttribute("aria-invalid", "true")
+      }
+
+      const tick = () => {
+        remaining -= 1
+        if (remaining <= 0) {
+          expire()
+          return
+        }
+        setTimer(`${remaining} s`, "pressure")
+      }
+
+      const startTimer = () => {
+        if (running || expired) return
+        running = true
+        setTimer(`${remaining} s`, "pressure")
+        interval = window.setInterval(tick, 1000)
+      }
+
+      const reset = () => {
+        stopTimer()
+        expired = false
+        remaining = seconds
+        input.value = ""
+        input.removeAttribute("aria-invalid")
+        setFeedback("")
+        if (mode === "presion") setTimer(`Presión · ${seconds} s`, "pressure")
+        else setTimer("Sin temporizador")
+        input.focus()
+      }
+
+      const setMode = (next) => {
+        mode = next
+        modeButtons.forEach((button) => {
+          button.setAttribute("aria-pressed", String(button.dataset.typingMode === next))
+        })
+        stopTimer()
+        expired = false
+        remaining = seconds
+        input.removeAttribute("aria-invalid")
+        setFeedback("")
+        if (mode === "presion") setTimer(`Presión · ${seconds} s`, "pressure")
+        else setTimer("Sin temporizador")
+        input.focus()
+      }
+
+      modeButtons.forEach((button) => {
+        button.addEventListener("click", () => setMode(button.dataset.typingMode || "estudio"))
+      })
+
+      input.addEventListener("input", () => {
+        if (mode === "presion" && !expired && !running) startTimer()
+        if (input.getAttribute("aria-invalid") === "true" && !expired) {
+          input.removeAttribute("aria-invalid")
+          setFeedback("")
+        }
+      })
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault()
+
+        if (!normalize(input.value)) {
+          input.setAttribute("aria-invalid", "true")
+          setFeedback("Escribe el comando antes de comprobar.", "error")
+          input.focus()
+          return
+        }
+
+        if (mode === "presion" && expired) {
+          setFeedback("El intento ya terminó. Pulsa Reiniciar para volver a probar.", "error")
+          input.focus()
+          return
+        }
+
+        const correct = normalize(input.value) === normalize(expected)
+        stopTimer()
+
+        if (correct) {
+          input.removeAttribute("aria-invalid")
+          setFeedback(
+            "Correcto. La orden activaría UFW al arrancar en un sistema real; este simulacro no ejecutó nada.",
+            "ok",
+          )
+          setTimer(mode === "presion" ? "Completado" : "Sin temporizador")
+        } else {
+          input.setAttribute("aria-invalid", "true")
+          setFeedback(
+            "Todavía no. Revisa el orden de las palabras y los espacios. Puedes intentarlo otra vez.",
+            "error",
+          )
+          setTimer(mode === "presion" ? "Intento detenido" : "Sin temporizador")
+        }
+        input.focus()
+      })
+
+      resetBtn?.addEventListener("click", reset)
+    })()
+  </script>
+</BaseLayout>

@@ -1,0 +1,65 @@
+---
+import type { GameSector } from "../../data/juego"
+import { getDaemon, getEnemy } from "../../data/juego"
+import { site } from "../../data/site"
+
+interface Props {
+  sectores: GameSector[]
+}
+
+const { sectores } = Astro.props
+const base = site.base
+---
+
+<ol class="game-sectors">
+  {sectores.map((sector) => {
+    const enemigo = getEnemy(sector.enemigoId)
+    const daemon = getDaemon(sector.daemonId)
+
+    if (!enemigo || !daemon) {
+      throw new Error(`Sector ${sector.id} referencia datos inexistentes en src/data/juego.ts`)
+    }
+
+    return (
+      <li class:list={["game-sector", `game-sector--${sector.estado}`]}>
+        <div class="game-sector__head">
+          <span class="game-sector__index">{sector.indice}</span>
+          <div class="game-sector__heading">
+            <p class="docket">
+              Sector {sector.indice} · <strong>{sector.estado}</strong>
+            </p>
+            <h3 class="game-sector__title">{sector.nombre}</h3>
+          </div>
+          <a
+            class="arrow-link game-sector__lesson"
+            href={`${base}cursos/${sector.cursoSlug}/${sector.leccion}/`}
+          >
+            Lección {sector.leccion.slice(0, 2)} <span aria-hidden="true">→</span>
+          </a>
+        </div>
+
+        <p class="game-sector__briefing">{sector.briefing}</p>
+
+        <dl class="game-sector__map">
+          <div>
+            <dt>Lección</dt>
+            <dd>{sector.leccionTitulo}</dd>
+          </div>
+          <div>
+            <dt>Enemigo</dt>
+            <dd>{enemigo.nombre}</dd>
+          </div>
+          <div>
+            <dt>Daemon</dt>
+            <dd>{daemon.nombre}</dd>
+          </div>
+        </dl>
+
+        <div class="game-sector__command">
+          <span>Comando de entrada</span>
+          <code>{sector.comando}</code>
+        </div>
+      </li>
+    )
+  })}
+</ol>

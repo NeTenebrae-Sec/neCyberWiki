@@ -1,0 +1,60 @@
+---
+interface ConsoleLine {
+  texto: string
+  tono?: "ok" | "warn" | "dim" | "accent"
+}
+
+interface CommandOption {
+  comando: string
+  nota: string
+  activa?: boolean
+}
+
+interface Props {
+  enemigo: string
+  comando: string
+  lineas: ConsoleLine[]
+  opciones: CommandOption[]
+}
+
+const { enemigo, comando, lineas, opciones } = Astro.props
+---
+
+<section class="game-console" aria-label={`Consola de combate contra ${enemigo}`}>
+  <div class="game-console__bar">
+    <span class="terminal__dots" aria-hidden="true">
+      <span class="terminal__dot terminal__dot--red"></span>
+      <span class="terminal__dot terminal__dot--yellow"></span>
+      <span class="terminal__dot terminal__dot--green"></span>
+    </span>
+    <span class="terminal__title">operacion://{enemigo}</span>
+    <span class="stamp stamp--straight game-console__stamp">Simulacro</span>
+  </div>
+
+  <div class="game-console__body">
+    <p class="game-console__prompt">
+      <span aria-hidden="true">operador@abismo:~$</span>
+      <span class="sr-only">Comando ejecutado en el simulacro:</span>
+      <code>{comando}</code>
+    </p>
+
+    <ol class="game-console__lines">
+      {lineas.map((linea) => (
+        <li class:list={["game-console__line", linea.tono && `is-${linea.tono}`]}>{linea.texto}</li>
+      ))}
+    </ol>
+
+    <div class="game-console__options">
+      <p class="game-console__options-head">Comandos de ejemplo</p>
+      <ul>
+        {opciones.map((opcion) => (
+          <li class:list={["game-command", opcion.activa && "is-active"]}>
+            <code>{opcion.comando}</code>
+            <span class="game-command__note">{opcion.nota}</span>
+            {opcion.activa && <span class="game-command__tag">recomendado</span>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>
