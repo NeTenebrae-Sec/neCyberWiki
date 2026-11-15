@@ -700,6 +700,10 @@ const currentLessonNumber = entry.data.orden + 1
   }
 
   @media (max-width: 1023.98px) {
+    .player-layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
     .player-main,
     .player-aside {
       grid-column: 1 / -1;
