@@ -1,7 +1,8 @@
 ---
+module: sistemas-y-redes
 title: "OTW Bandit: 4"
 cover:
-description:
+description: Cómo identificar el único archivo legible por humanos entre varios archivos binarios con el comando file, incluyendo una variante automatizada que combina find y file.
 tags:
   - linux
   - bash
@@ -12,7 +13,7 @@ tags:
   - find
 difficulty:
   - ★☆☆☆☆
-publishDate: 2025-10-26
+date: 2025-10-26
 ---
 ### Resumen
 Este write-up detalla el proceso para identificar un archivo de texto plano (legible por humanos) entre múltiples archivos binarios en un directorio. La solución principal se basa en el uso del comando `file` para analizar el contenido de cada archivo. Se incluye un método alternativo que combina `find` y `file` para automatizar la búsqueda.

@@ -1,7 +1,8 @@
 ---
+module: sistemas-y-redes
 title: "OTW Bandit: 8"
 cover:
-description:
+description: Cómo encontrar la única línea que aparece una sola vez en data.txt procesando el archivo para eliminar duplicados e identificar la línea única.
 tags:
   - linux
   - bash
@@ -12,7 +13,7 @@ tags:
   - texto
 difficulty:
   - ★☆☆☆☆
-publishDate: 2025-10-29
+date: 2025-10-29
 ---
 ### Resumen
 El objetivo es encontrar la contraseña que es representada por la única línea que aparece una sola vez en el archivo `data.txt`. Esto requiere procesar el archivo para identificar líneas únicas.

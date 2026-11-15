@@ -1,6 +1,8 @@
 ---
+module: maquinas-y-ctfs
 title: "VulnHub: IMF"
-publishDate: 2025-10-31
+description: Writeup de la máquina IMF de VulnHub: un Boot2Root con estética de agencia de inteligencia que encadena flags progresivas, desde SQLi boolean blind hasta un Buffer Overflow que permite ejecución remota y escalada final.
+date: 2025-10-31
 tags:
   - writeup
   - vulnhub

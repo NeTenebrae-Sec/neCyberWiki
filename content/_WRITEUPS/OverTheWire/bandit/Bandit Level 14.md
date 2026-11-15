@@ -1,4 +1,5 @@
 ---
+module: sistemas-y-redes
 title: "OTW Bandit: 14"
 description: Conecta como bandit14, lee la contraseña en /etc/bandit_pass/bandit14 y envíala a localhost:30000 con nc para que el servicio devuelva la credencial de bandit15. ​Incluye pasos concisos con SSH, uso de nc y recomendaciones para evitar bloqueos al enviar la entrada.
 tags:
@@ -10,7 +11,7 @@ tags:
   - ss
 difficulty:
   - ★☆☆☆☆
-publishDate: 2025-11-13
+date: 2025-11-13
 ---
 ## Introducción
 En este nivel aprenderás a interactuar con un servicio local mediante conexiones TCP. Debes conectarte al localhost en el puerto 30000 y enviar la contraseña de bandit14 para recibir la contraseña de bandit15 como respuesta. Este ejercicio introduce el uso práctico de netcat en una sesión de terminal y el entendimiento básico de conexiones TCP. 
