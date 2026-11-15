@@ -64,13 +64,13 @@ no simulated terminal, no decorative stats.
 - `npm run build` — 16 pages, no errors.
 - `npm run test`, `npm run check`, `npm run lint`,
   `npx prettier . --check` — green.
-- Playwright at 1440×1000, 360×800 and 320×800: no horizontal overflow,
-  eight accordions, first accordion opens with mouse and keyboard, focus ring
-  visible.
+- Playwright at 1440×1000, 768×900 and 360×800 in Noche and Archivo: no
+  horizontal overflow, eight accordions, first accordion opens with mouse and
+  keyboard, focus ring visible.
 - Seed two lesson slugs in `ncw:progress:arch-linux-facil`, reload: label
   `2 / 8`, fill `25%`, `aria-valuenow="2"` and continue link to lesson 03.
 - Seed all eight: label `8 / 8`, continue link to the course index and text
   "Repasar el curso". Clear storage: `0 / 8` and "Empezar el curso".
 - Light and dark themes: `meta[name="theme-color"]` follows the stored theme.
-- `npm run preview -- --port 4323` — home, CSS and Bricolage `.woff2` resolve
+- `npm run preview -- --port 4323` — home, CSS and Fraunces `.woff2` resolve
   under `/neCyberWiki/`.
