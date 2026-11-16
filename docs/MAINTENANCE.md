@@ -4,6 +4,7 @@
 
 ```bash
 npm run build
+npx pagefind --site dist
 npm run check
 npm run lint
 npm test

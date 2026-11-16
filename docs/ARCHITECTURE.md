@@ -6,7 +6,7 @@
 - Tailwind CSS 4 mediante el plugin de Vite.
 - TypeScript y JavaScript vanilla. Sin React, Vue ni Svelte.
 - Content Collections con `glob` y schemas Zod.
-- Pagefind para búsqueda estática (pendiente, Tanda 3).
+- Pagefind para búsqueda estática. Se ejecuta tras cada build (`npx pagefind --site dist`).
 - GitHub Pages bajo `/neCyberWiki/`.
 
 ## Estado por tanda
@@ -16,7 +16,7 @@
 | 0     | Documentación y limpieza.                       | Hecha       |
 | 1     | Categorías, cursos, Bandit y rutas anidadas.    | Hecha       |
 | 2     | Shell, candado legal bloqueante y perfil local. | En revisión |
-| 3     | Bitácora, roadmap, comunidad, Ko-fi y Pagefind. | Pendiente   |
+| 3     | Bitácora, roadmap, comunidad, Ko-fi y Pagefind. | En revisión |
 | 4     | QA, accesibilidad, rendimiento, E2E y release.  | Pendiente   |
 
 La tabla de rutas distingue lo que ya existe de lo que forma parte del MVP pero aún no se
@@ -24,21 +24,21 @@ implementa. No se documenta como disponible algo que el build todavía no genera
 
 ## Rutas
 
-| Ruta                                     | Página                         | Estado    |
-| ---------------------------------------- | ------------------------------ | --------- |
-| `/`                                      | Portada.                       | Hecha     |
-| `/cursos/`                               | Índice de categorías.          | Hecha     |
-| `/cursos/<categoria>/`                   | Cursos de una categoría.       | Hecha     |
-| `/cursos/<categoria>/<curso>/`           | Portada del curso.             | Hecha     |
-| `/cursos/<categoria>/<curso>/<leccion>/` | Lección.                       | Hecha     |
-| `/blog/`                                 | Índice de la bitácora.         | Temporal  |
-| `/blog/<slug>/`                          | Entrada de la bitácora.        | Temporal  |
-| `/terminos/`                             | Términos y uso legal.          | Hecha     |
-| `/buscar/`                               | Buscador.                      | Pendiente |
-| `/bitacora/`                             | Índice definitivo de bitácora. | Pendiente |
-| `/bitacora/<slug>/`                      | Entrada definitiva.            | Pendiente |
-| `/roadmap/`                              | Cambios y planes.              | Pendiente |
-| `/perfil/`                               | Perfil local.                  | Hecha     |
+| Ruta                                     | Página                         | Estado   |
+| ---------------------------------------- | ------------------------------ | -------- |
+| `/`                                      | Portada.                       | Hecha    |
+| `/cursos/`                               | Índice de categorías.          | Hecha    |
+| `/cursos/<categoria>/`                   | Cursos de una categoría.       | Hecha    |
+| `/cursos/<categoria>/<curso>/`           | Portada del curso.             | Hecha    |
+| `/cursos/<categoria>/<curso>/<leccion>/` | Lección.                       | Hecha    |
+| `/blog/`                                 | Índice de la bitácora.         | Temporal |
+| `/blog/<slug>/`                          | Entrada de la bitácora.        | Temporal |
+| `/terminos/`                             | Términos y uso legal.          | Hecha    |
+| `/buscar/`                               | Buscador.                      | Hecha    |
+| `/bitacora/`                             | Índice definitivo de bitácora. | Hecha    |
+| `/bitacora/<slug>/`                      | Entrada definitiva.            | Hecha    |
+| `/roadmap/`                              | Cambios y planes.              | Hecha    |
+| `/perfil/`                               | Perfil local.                  | Hecha    |
 
 Redirecciones activas:
 
@@ -63,7 +63,7 @@ una URL rota en GitHub Pages.
 ```text
 src/data/categorias.ts   Taxonomía canónica (8 categorías)
 src/data/cursos.ts       Metadatos editoriales de cada curso
-src/data/roadmap.ts      Roadmap público (pendiente, Tanda 3)
+src/data/roadmap.ts      Roadmap público
 src/lib/catalog.ts       Deriva cursos publicados y categorías con contenido
 src/lib/syllabus.ts      Agrupa lecciones en módulos y submódulos
 src/lib/profile.ts       Lógica pura del perfil local (lista, valida y aplica)
@@ -96,14 +96,19 @@ No existe una colección `notas`. Bandit vive en `content/cursos/bandit/` y se p
 
 ## Búsqueda
 
-Pagefind indexará `dist/` después de `astro build` (Tanda 3).
+Pagefind está instalado (`npm i -D pagefind`) y se ejecuta tras cada build:
 
-- `BaseLayout` pondrá `data-pagefind-body` en el contenido principal.
-- `data-pagefind-meta="type"` identificará curso, lección, bitácora, roadmap o página.
-- `indexable={false}` excluirá perfil, búsqueda, 404 y gate legal.
-- La UI vivirá en `src/pages/buscar.astro` y cargará `pagefind.js` en cliente.
-- El índice se generará con `pagefind --site dist`.
-- En desarrollo no habrá índice; habrá que usar `npm run build && npm run preview`.
+```bash
+npm run build
+npx pagefind --site dist
+```
+
+- `BaseLayout` pone `data-pagefind-body` en el contenido principal; las páginas con `noindex`
+  (perfil, búsqueda, 404 y gate legal) añaden `data-pagefind-ignore`.
+- `src/pages/buscar.astro` carga el UI prebuilt de Pagefind (`pagefind-component-ui`) y el trigger
+  abre el modal de búsqueda.
+- El índice se genera en `dist/pagefind/`; el bundle se sirve bajo la base (`/neCyberWiki/pagefind/`).
+- En desarrollo no habrá índice; hay que usar `npm run build && npm run preview`.
 
 ## Almacenamiento local
 

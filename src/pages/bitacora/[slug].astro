@@ -27,7 +27,7 @@ const fmt = (d: Date) =>
 <BaseLayout titulo={post.data.title} descripcion={post.data.description}>
   <article class="post container-page">
     <nav class="breadcrumb post__crumb" aria-label="Miga de pan">
-      <a href={`${base}blog/`}>Bitácora</a>
+      <a href={`${base}bitacora/`}>Bitácora</a>
       <span aria-hidden="true">/</span>
       <span aria-current="page">{post.data.title}</span>
     </nav>
@@ -58,7 +58,7 @@ const fmt = (d: Date) =>
     </div>
 
     <footer class="post-foot">
-      <a class="arrow-link" href={`${base}blog/`}>
+      <a class="arrow-link" href={`${base}bitacora/`}>
         <span class="arrow" aria-hidden="true">
           ←
         </span>{" "}

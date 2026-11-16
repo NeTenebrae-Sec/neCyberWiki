@@ -31,7 +31,7 @@ const rutaDestacada = cursoDestacado ? cursoUrl(cursoDestacado, base) : `${base}
 const nav = [
   { label: "Inicio", href: base },
   { label: "Cursos", href: `${base}cursos/` },
-  { label: "Bitácora", href: `${base}blog/` },
+  { label: "Bitácora", href: `${base}bitacora/` },
 ]
 ---
 
@@ -90,6 +90,29 @@ const nav = [
         </nav>
 
         <div class="site-actions">
+          <a
+            href={`${base}buscar/`}
+            class="icon-btn"
+            aria-label="Buscar en el archivo"
+            title="Buscar en el archivo"
+            aria-current={isActive(`${base}buscar/`) ? "page" : undefined}
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <line x1="21" y1="21" x2="16.5" y2="16.5" />
+            </svg>
+          </a>
+
           <a
             href={`${base}perfil/`}
             class="icon-btn"
@@ -254,9 +277,9 @@ const nav = [
           <span>Cursos</span>
         </a>
         <a
-          href={`${base}blog/`}
+          href={`${base}bitacora/`}
           class="drawer__link"
-          aria-current={isActive(`${base}blog/`) ? "page" : undefined}
+          aria-current={isActive(`${base}bitacora/`) ? "page" : undefined}
         >
           <span class="drawer__num">03</span>
           <span>Bitácora</span>
@@ -292,7 +315,12 @@ const nav = [
       </div>
     </dialog>
 
-    <main id="contenido" class="site-main">
+    <main
+      id="contenido"
+      class="site-main"
+      data-pagefind-body
+      data-pagefind-ignore={noindex ? "true" : undefined}
+    >
       <slot />
     </main>
 
@@ -324,7 +352,7 @@ const nav = [
               </a>
             </li>
             <li>
-              <a class="footer-link" href={`${base}blog/`}>
+              <a class="footer-link" href={`${base}bitacora/`}>
                 Bitácora
               </a>
             </li>

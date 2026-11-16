@@ -1,0 +1,76 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro"
+import { site } from "../data/site"
+
+const base = site.base
+---
+
+<BaseLayout
+  titulo="Buscar"
+  descripcion="Búsqueda estática en el archivo: cursos, lecciones, bitácora y roadmap."
+  noindex
+>
+  <section class="buscar container-page">
+    <div class="buscar__docket">
+      <span class="docket">Buscador</span>
+      <span class="chip">Página estática</span>
+    </div>
+
+    <h1 class="display buscar__title">Buscar en el archivo.</h1>
+    <p class="lead buscar__lead">
+      El archivo se busca en lo que ya está publicado: cursos, lecciones, bitácora y roadmap. Sin
+      backend, sin rastreo.
+    </p>
+
+    <div class="buscar__form">
+      <button type="button" class="btn btn-primary btn-lg" id="abrir-busqueda">
+        Buscar en el archivo <span aria-hidden="true">→</span>
+      </button>
+    </div>
+
+    <p class="buscar__hint">
+      El buscador indexa el build completo: cursos, lecciones, bitácora y roadmap.
+    </p>
+  </section>
+
+  <link href={`${base}pagefind/pagefind-component-ui.css`} rel="stylesheet" />
+  <script src={`${base}pagefind/pagefind-component-ui.js`} type="module"></script>
+  <pagefind-modal-trigger></pagefind-modal-trigger>
+  <pagefind-modal></pagefind-modal>
+
+  <style>
+    .buscar {
+      max-width: 860px;
+      padding-block: clamp(2.5rem, 6vw, 5rem) 0;
+    }
+
+    .buscar__docket {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .buscar__title {
+      font-size: clamp(2.4rem, 5.5vw, 4.5rem);
+      line-height: 0.95;
+    }
+
+    .buscar__lead {
+      margin-top: 1.1rem;
+    }
+
+    .buscar__form {
+      margin-top: 2rem;
+    }
+
+    .buscar__hint {
+      margin-top: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.64rem;
+      letter-spacing: 0.03em;
+      color: var(--ink-muted);
+    }
+  </style>
+</BaseLayout>

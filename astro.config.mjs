@@ -32,6 +32,14 @@ const banditRedirects = Object.fromEntries([
   ]),
 ])
 
+const blogRedirects = Object.fromEntries([
+  ["/blog", `${base}bitacora/`],
+  [
+    "/blog/2026-11-09-arch-no-es-dificil-es-manual",
+    `${base}bitacora/2026-11-09-arch-no-es-dificil-es-manual/`,
+  ],
+])
+
 // https://astro.build/config
 export default defineConfig({
   site: "https://netenebraes.github.io",
@@ -39,6 +47,7 @@ export default defineConfig({
   redirects: {
     ...archRedirects,
     ...banditRedirects,
+    ...blogRedirects,
     "/categorias": `${base}cursos/`,
     "/certificados": `${base}cursos/`,
     "/certificados/verificar": `${base}cursos/`,

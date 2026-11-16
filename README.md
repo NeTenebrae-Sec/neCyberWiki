@@ -10,8 +10,8 @@ guardado en el navegador.
 - **Buscador:** Pagefind (Tanda 3), índice estático generado después del build.
 - **Perfil:** Almacén local con exportar, importar y borrar.
 
-Estado actual: Tanda 2 (shell, candado legal bloqueante y perfil local) en revisión. La
-bitácora definitiva, el roadmap, la comunidad de YouTube, Ko-fi y el buscador llegan en la Tanda 3.
+Estado actual: Tanda 3 (bitácora definitiva, roadmap, buscador Pagefind) en revisión. La
+comunidad de YouTube, el release y la QA final llegan en la Tanda 4.
 
 ## Arranque
 

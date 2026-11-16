@@ -19,7 +19,7 @@ const featuredSlug = featured?.id.split("/").pop()
 ---
 
 <BaseLayout
-  titulo="Blog & Bitácora de Aprendizaje"
+  titulo="Bitácora de Aprendizaje"
   descripcion="Artículos, notas de investigación y reflexiones sobre informática, Linux, ciberseguridad y herramientas por NeTenebrae."
 >
   <section class="blog-hero">
@@ -61,7 +61,7 @@ const featuredSlug = featured?.id.split("/").pop()
                 </time>
               </div>
               <h2 class="featured-post__title">
-                <a href={`${base}blog/${featuredSlug}/`}>{featured.data.title}</a>
+                <a href={`${base}bitacora/${featuredSlug}/`}>{featured.data.title}</a>
               </h2>
               <p class="featured-post__desc">{featured.data.description}</p>
               <ul class="tags featured-post__tags" aria-label="Etiquetas del artículo">
@@ -69,7 +69,7 @@ const featuredSlug = featured?.id.split("/").pop()
                   <li class="tag">{tag}</li>
                 ))}
               </ul>
-              <a class="arrow-link featured-post__link" href={`${base}blog/${featuredSlug}/`}>
+              <a class="arrow-link featured-post__link" href={`${base}bitacora/${featuredSlug}/`}>
                 Leer el artículo{" "}
                 <span class="arrow" aria-hidden="true">
                   →
@@ -86,7 +86,7 @@ const featuredSlug = featured?.id.split("/").pop()
                   const slug = post.id.split("/").pop()
                   return (
                     <li>
-                      <a class="post-row" href={`${base}blog/${slug}/`}>
+                      <a class="post-row" href={`${base}bitacora/${slug}/`}>
                         <time class="post-row__date" datetime={post.data.date.toISOString()}>
                           {fmt(post.data.date)}
                         </time>
@@ -108,7 +108,10 @@ const featuredSlug = featured?.id.split("/").pop()
       ) : (
         <div class="empty">
           <h2>La bitácora está en pausa.</h2>
-          <p>Los avances se publican primero en Threads. Vuelve pronto o empieza por un curso.</p>
+          <p>
+            Los avances se publican cuando el laboratorio los justifica. Vuelve pronto o empieza por
+            un curso.
+          </p>
           <a class="btn btn-primary" href={`${base}cursos/`}>
             Ver los cursos <span aria-hidden="true">→</span>
           </a>

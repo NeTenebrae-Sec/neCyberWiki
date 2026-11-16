@@ -3,6 +3,7 @@ import { getCollection } from "astro:content"
 import BaseLayout from "../layouts/BaseLayout.astro"
 import CourseCard from "../components/CourseCard.astro"
 import { getCategoriasConContenido, getCursosPublicados, leccionUrl } from "../lib/catalog"
+import { roadmap } from "../data/roadmap"
 import { site } from "../data/site"
 
 const base = site.base
@@ -18,6 +19,9 @@ const totalLecciones = cursos.reduce((total, curso) => total + curso.lecciones.l
 
 const posts = (await getCollection("blog", ({ data }) => !data.draft))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3)
+const entradasRoadmap = [...roadmap]
+  .sort((a, b) => (b.fecha ?? "").localeCompare(a.fecha ?? ""))
   .slice(0, 3)
 const fecha = (date: Date) =>
   new Intl.DateTimeFormat("es-MX", {
@@ -53,7 +57,7 @@ const fecha = (date: Date) =>
           <a class="btn btn-primary btn-lg" href={`${base}cursos/`}>
             Explorar los cursos <span aria-hidden="true">→</span>
           </a>
-          <a class="btn btn-secondary btn-lg" href={`${base}blog/`}>
+          <a class="btn btn-secondary btn-lg" href={`${base}bitacora/`}>
             Leer la bitácora
           </a>
         </div>
@@ -210,7 +214,7 @@ const fecha = (date: Date) =>
           <p class="running-head">03 / Bitácora</p>
           <h2 class="home-section__title">Lo último que salió del laboratorio.</h2>
         </div>
-        <a class="arrow-link" href={`${base}blog/`}>
+        <a class="arrow-link" href={`${base}bitacora/`}>
           Ver toda la bitácora <span aria-hidden="true">→</span>
         </a>
       </div>
@@ -221,7 +225,7 @@ const fecha = (date: Date) =>
             const slug = post.id.split("/").pop()
             return (
               <li>
-                <a class="post-row" href={`${base}blog/${slug}/`}>
+                <a class="post-row" href={`${base}bitacora/${slug}/`}>
                   <time class="post-row__date" datetime={post.data.date.toISOString()}>
                     {fecha(post.data.date)}
                   </time>
@@ -243,6 +247,39 @@ const fecha = (date: Date) =>
           aquí.
         </p>
       )}
+    </div>
+  </section>
+
+  <section class="home-section">
+    <div class="container-page">
+      <div class="home-section__head">
+        <div>
+          <p class="running-head">05 / Cambios</p>
+          <h2 class="home-section__title">Lo que ha cambiado en el archivo.</h2>
+        </div>
+        <a class="arrow-link" href={`${base}roadmap/`}>
+          Ver el roadmap <span aria-hidden="true">→</span>
+        </a>
+      </div>
+
+      <ul class="post-list">
+        {entradasRoadmap.map((item) => (
+          <li>
+            <a class="post-row" href={item.enlace ? `${base}${item.enlace}` : `${base}roadmap/`}>
+              <time class="post-row__date" datetime={item.fecha ?? ""}>
+                {item.fecha}
+              </time>
+              <span class="post-row__main">
+                <span class="post-row__title">{item.titulo}</span>
+                <span class="post-row__desc">{item.resumen}</span>
+              </span>
+              <span class="post-row__arrow" aria-hidden="true">
+                →
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
     </div>
   </section>
 
