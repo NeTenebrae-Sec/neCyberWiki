@@ -49,7 +49,7 @@ const grupos: { estado: EstadoRoadmap; titulo: string; items: typeof roadmap }[]
               <h3 class="roadmap__item-titulo">{item.titulo}</h3>
               <p class="roadmap__item-resumen">{item.resumen}</p>
               {item.enlace && (
-                <a class="arrow-link" href={`${base}${item.enlace}`}>
+                <a class="arrow-link" href={`${base}${item.enlace.replace(/^\//, "")}`}>
                   Abrir <span aria-hidden="true">→</span>
                 </a>
               )}
