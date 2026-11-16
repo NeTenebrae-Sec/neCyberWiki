@@ -7,17 +7,26 @@ interface Props {
   titulo: string
   descripcion?: string
   mostrarAvisoTerminos?: boolean
+  noindex?: boolean
 }
-const { titulo, descripcion = site.descripcion, mostrarAvisoTerminos = true } = Astro.props
+const {
+  titulo,
+  descripcion = site.descripcion,
+  mostrarAvisoTerminos = true,
+  noindex = false,
+} = Astro.props
 const base = site.base
 const year = new Date().getFullYear()
 
-const cursosPublicados = await getCursosPublicados()
-const cursoDestacado = cursosPublicados[0]
-const rutaDestacada = cursoDestacado ? cursoUrl(cursoDestacado, base) : `${base}cursos/`
-
 const path = Astro.url.pathname.replace(/\/+$/, "/")
 const isActive = (href: string) => (href === base ? path === base : path.startsWith(href))
+
+const cursosPublicados = await getCursosPublicados()
+const cursoActual = cursosPublicados.find((curso) =>
+  path.startsWith(`${base}cursos/${curso.categoria}/${curso.slug}/`),
+)
+const cursoDestacado = cursoActual ?? cursosPublicados[0]
+const rutaDestacada = cursoDestacado ? cursoUrl(cursoDestacado, base) : `${base}cursos/`
 
 const nav = [
   { label: "Inicio", href: base },
@@ -33,6 +42,7 @@ const nav = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{titulo} · {site.nombre}</title>
     <meta name="description" content={descripcion} />
+    {noindex && <meta name="robots" content="noindex" />}
     <meta name="generator" content={Astro.generator} />
     <meta name="theme-color" content="#070a08" />
     <meta name="color-scheme" content="dark light" />
@@ -80,6 +90,29 @@ const nav = [
         </nav>
 
         <div class="site-actions">
+          <a
+            href={`${base}perfil/`}
+            class="icon-btn"
+            aria-label="Perfil local"
+            title="Perfil local"
+            aria-current={isActive(`${base}perfil/`) ? "page" : undefined}
+          >
+            <svg
+              width="17"
+              height="17"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4.5 21a7.5 7.5 0 0 1 15 0" />
+            </svg>
+          </a>
+
           <button
             id="theme-toggle"
             class="theme-switch"
@@ -201,7 +234,8 @@ const nav = [
             <div id="mobile-progress-fill" class="progress-fill"></div>
           </div>
           <a href={rutaDestacada} class="drawer__continue">
-            Abrir el curso <span aria-hidden="true">→</span>
+            {cursoActual ? "Continuar el curso" : "Abrir el curso"}{" "}
+            <span aria-hidden="true">→</span>
           </a>
         </div>
       )}
@@ -228,11 +262,19 @@ const nav = [
           <span>Bitácora</span>
         </a>
         <a
+          href={`${base}perfil/`}
+          class="drawer__link"
+          aria-current={isActive(`${base}perfil/`) ? "page" : undefined}
+        >
+          <span class="drawer__num">04</span>
+          <span>Perfil</span>
+        </a>
+        <a
           href={`${base}terminos/`}
           class="drawer__link"
           aria-current={isActive(`${base}terminos/`) ? "page" : undefined}
         >
-          <span class="drawer__num">04</span>
+          <span class="drawer__num">05</span>
           <span>Términos</span>
         </a>
       </nav>
@@ -284,6 +326,11 @@ const nav = [
             <li>
               <a class="footer-link" href={`${base}blog/`}>
                 Bitácora
+              </a>
+            </li>
+            <li>
+              <a class="footer-link" href={`${base}perfil/`}>
+                Perfil local
               </a>
             </li>
             <li>
@@ -360,34 +407,15 @@ const nav = [
       >
         <div class="terms-dialog__head">
           <span class="docket">Aviso de uso</span>
-          <button
-            type="button"
-            class="icon-btn terms-dialog__close"
-            id="terminos-cerrar"
-            aria-label="Cerrar aviso de términos"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              aria-hidden="true"
-            >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
+          <span class="terms-dialog__required">Obligatorio para continuar</span>
         </div>
 
         <h2 class="terms-dialog__title" id="terminos-title">
           Gratis para aprender. Úsalo con criterio.
         </h2>
         <p class="terms-dialog__lead" id="terminos-desc">
-          Este sitio es gratuito y su contenido tiene finalidad exclusivamente educativa. Antes de
-          continuar, ten en cuenta estas tres reglas:
+          Este sitio es gratuito y su contenido tiene finalidad exclusivamente educativa. Para
+          entrar, ten en cuenta estas tres reglas:
         </p>
 
         <ul class="terms-dialog__list">
@@ -500,19 +528,25 @@ const nav = [
       }
 
       if (termsDialog instanceof HTMLDialogElement) {
+        // El aviso es bloqueante: ni Escape ni el clic fuera lo cierran.
+        termsDialog.addEventListener("cancel", (event) => event.preventDefault())
+
+        let accepted = false
         try {
-          if (!localStorage.getItem(termsKey)) termsDialog.showModal()
+          accepted = Boolean(localStorage.getItem(termsKey))
         } catch {}
+
+        if (!accepted) {
+          if (typeof termsDialog.showModal === "function") termsDialog.showModal()
+          else termsDialog.setAttribute("open", "")
+        }
 
         document.getElementById("terminos-aceptar")?.addEventListener("click", () => {
           try {
             localStorage.setItem(termsKey, new Date().toISOString())
           } catch {}
           closeTerms()
-        })
-        document.getElementById("terminos-cerrar")?.addEventListener("click", closeTerms)
-        termsDialog.addEventListener("click", (event) => {
-          if (event.target === termsDialog) closeTerms()
+          window.dispatchEvent(new CustomEvent("ncw:legal-accepted"))
         })
       }
     </script>

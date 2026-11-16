@@ -1,0 +1,395 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro"
+import { site } from "../data/site"
+import { cursoUrl, getCursosPublicados } from "../lib/catalog"
+
+const base = site.base
+const cursos = await getCursosPublicados()
+const totalLecciones = cursos.reduce((total, curso) => total + curso.lecciones.length, 0)
+---
+
+<BaseLayout
+  titulo="Perfil local"
+  descripcion="Tu alias, tu tema y tu progreso guardados solo en este navegador. Exporta, importa o borra tus datos cuando quieras."
+  noindex
+>
+  <div class="container-page profile">
+    <header class="profile__head">
+      <div class="profile__docket">
+        <span class="docket">Perfil local</span>
+        <span class="stamp">Sin cuenta</span>
+      </div>
+      <h1 class="display profile__title">
+        Tu progreso, <em>en tu navegador</em>.
+      </h1>
+      <p class="lead">
+        neCyberWiki no tiene cuentas ni servidor. El alias, el tema, la aceptación legal y los
+        cursos completados viven en el almacenamiento local de este navegador. Si borras los datos
+        del sitio, se pierden.
+      </p>
+    </header>
+
+    <div class="profile__grid">
+      <section class="sheet profile-card" aria-labelledby="profile-identidad">
+        <header class="profile-card__head">
+          <span class="profile-card__num">01</span>
+          <h2 class="profile-card__title" id="profile-identidad">
+            Identidad local
+          </h2>
+        </header>
+        <p class="profile-card__lead">
+          Un alias opcional para reconocer tu perfil. No se publica ni se envía a ninguna parte.
+        </p>
+
+        <form id="alias-form" class="profile-form">
+          <div class="field">
+            <label for="alias">Alias (opcional)</label>
+            <input
+              id="alias"
+              name="alias"
+              class="input"
+              type="text"
+              maxlength="40"
+              autocomplete="nickname"
+              placeholder="Cómo quieres que te llame el archivo"
+            />
+            <span class="field__hint">Máximo 40 caracteres. Solo se guarda en este navegador.</span>
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm">
+            Guardar alias
+          </button>
+        </form>
+      </section>
+
+      <section class="sheet profile-card" aria-labelledby="profile-estado">
+        <header class="profile-card__head">
+          <span class="profile-card__num">02</span>
+          <h2 class="profile-card__title" id="profile-estado">
+            Estado
+          </h2>
+        </header>
+
+        <dl class="profile-status-list">
+          <div>
+            <dt>Tema</dt>
+            <dd id="profile-theme">—</dd>
+          </div>
+          <div>
+            <dt>Aceptación legal</dt>
+            <dd id="profile-legal">—</dd>
+          </div>
+          <div>
+            <dt>Lecciones completadas</dt>
+            <dd id="profile-total">—</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="sheet profile-card profile-card--wide" aria-labelledby="profile-progreso">
+        <header class="profile-card__head">
+          <span class="profile-card__num">03</span>
+          <h2 class="profile-card__title" id="profile-progreso">
+            Progreso por curso
+          </h2>
+          <span class="profile-card__aside" id="profile-global">
+            0 / {totalLecciones}
+          </span>
+        </header>
+
+        {cursos.length ? (
+          <ul class="profile-courses">
+            {cursos.map((curso) => (
+              <li
+                class="profile-course"
+                data-profile-course
+                data-course={curso.slug}
+                data-total={curso.lecciones.length}
+                data-lessons={curso.lecciones.map((leccion) => leccion.slug).join(" ")}
+              >
+                <div class="profile-course__head">
+                  <a href={cursoUrl(curso, base)} class="profile-course__name">
+                    {curso.titulo}
+                  </a>
+                  <span class="profile-course__count" data-course-count>
+                    0 / {curso.lecciones.length}
+                  </span>
+                </div>
+                <div
+                  class="progress-track"
+                  role="progressbar"
+                  aria-label={`Progreso del curso ${curso.titulo}`}
+                  aria-valuemin="0"
+                  aria-valuemax={curso.lecciones.length}
+                  aria-valuenow="0"
+                >
+                  <div class="progress-fill progress-fill--accent" data-course-fill></div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="dim">Todavía no hay cursos publicados.</p>
+        )}
+      </section>
+
+      <section class="sheet profile-card profile-card--wide" aria-labelledby="profile-datos">
+        <header class="profile-card__head">
+          <span class="profile-card__num">04</span>
+          <h2 class="profile-card__title" id="profile-datos">
+            Tus datos
+          </h2>
+        </header>
+        <p class="profile-card__lead">
+          Exporta un JSON para mover el perfil a otro navegador, importa uno existente o borra todo
+          lo que este sitio guardó. El archivo no incluye contraseñas ni datos de terceros.
+        </p>
+
+        <div class="profile-actions">
+          <button type="button" class="btn btn-secondary" id="exportar-perfil">
+            Exportar JSON
+          </button>
+          <button type="button" class="btn btn-secondary" id="importar-perfil">
+            Importar JSON
+          </button>
+          <input
+            type="file"
+            id="archivo-perfil"
+            class="sr-only"
+            accept="application/json,.json"
+            aria-label="Archivo de perfil para importar"
+          />
+          <button type="button" class="btn btn-danger" id="borrar-perfil">
+            Borrar datos
+          </button>
+        </div>
+
+        <p class="profile-status" id="profile-status" role="status" aria-live="polite"></p>
+        <p class="field__hint">
+          El archivo incluye alias, tema, fecha de aceptación y progreso. Guárdalo en un lugar
+          seguro: cualquiera que lo lea puede ver qué lecciones completaste.
+        </p>
+      </section>
+    </div>
+  </div>
+
+  <dialog
+    id="borrar-dialog"
+    class="confirm-dialog"
+    aria-labelledby="borrar-title"
+    aria-describedby="borrar-desc"
+  >
+    <h2 class="confirm-dialog__title" id="borrar-title">
+      ¿Borrar todos los datos locales?
+    </h2>
+    <p class="confirm-dialog__desc" id="borrar-desc">
+      Se eliminarán el alias, el tema, la aceptación legal y el progreso de todos los cursos. Esta
+      acción no se puede deshacer.
+    </p>
+    <div class="confirm-dialog__actions">
+      <button type="button" class="btn btn-secondary" id="borrar-cancelar">
+        Cancelar
+      </button>
+      <button type="button" class="btn btn-danger" id="borrar-confirmar">
+        Borrar y recargar
+      </button>
+    </div>
+  </dialog>
+</BaseLayout>
+
+<script>
+  import {
+    PROFILE_NAME_KEY,
+    applyProfile,
+    clearProfile,
+    collectProfile,
+    emptyProfile,
+    parseProfile,
+    serializeProfile,
+  } from "../lib/profile"
+
+  const MAX_ALIAS = 40
+  const storage = (() => {
+    try {
+      return window.localStorage
+    } catch {
+      return null
+    }
+  })()
+
+  const aliasForm = document.getElementById("alias-form") as HTMLFormElement | null
+  const aliasInput = document.getElementById("alias") as HTMLInputElement | null
+  const status = document.getElementById("profile-status")
+  const themeValue = document.getElementById("profile-theme")
+  const legalValue = document.getElementById("profile-legal")
+  const totalValue = document.getElementById("profile-total")
+  const globalValue = document.getElementById("profile-global")
+  const courseNodes = Array.from(document.querySelectorAll<HTMLElement>("[data-profile-course]"))
+  const courseSlugs = courseNodes
+    .map((node) => node.dataset.course)
+    .filter((slug): slug is string => Boolean(slug))
+
+  const setStatus = (message: string, tone: "ok" | "error" = "ok") => {
+    if (!status) return
+    status.textContent = message
+    status.dataset.tone = tone
+  }
+
+  const formatDate = (iso: string): string => {
+    const date = new Date(iso)
+    if (Number.isNaN(date.getTime())) return "Sin aceptar"
+    return new Intl.DateTimeFormat("es-MX", {
+      dateStyle: "medium",
+      timeZone: "UTC",
+    }).format(date)
+  }
+
+  const readProfile = () => {
+    if (!storage) return emptyProfile()
+    return collectProfile(storage, courseSlugs)
+  }
+
+  const render = () => {
+    const profile = readProfile()
+
+    if (aliasInput && document.activeElement !== aliasInput) {
+      aliasInput.value = profile.alias
+    }
+
+    if (themeValue) {
+      themeValue.textContent = profile.theme === "light" ? "Archivo (claro)" : "Noche (oscuro)"
+    }
+    if (legalValue) {
+      legalValue.textContent = profile.legalAcceptedAt
+        ? formatDate(profile.legalAcceptedAt)
+        : "Sin aceptar"
+    }
+
+    let completed = 0
+    let total = 0
+
+    for (const node of courseNodes) {
+      const slug = node.dataset.course || ""
+      const courseTotal = Number(node.dataset.total || 0)
+      const lessons = new Set(
+        (node.dataset.lessons || "").split(/\s+/).filter((lesson) => lesson.length > 0),
+      )
+      const done = (profile.courses[slug] || []).filter(
+        (lesson) => lessons.size === 0 || lessons.has(lesson),
+      )
+      const count = done.length
+      const pct = courseTotal > 0 ? Math.min(100, Math.round((count / courseTotal) * 100)) : 0
+
+      completed += count
+      total += courseTotal
+
+      const countLabel = node.querySelector<HTMLElement>("[data-course-count]")
+      const fill = node.querySelector<HTMLElement>("[data-course-fill]")
+      const track = fill?.closest<HTMLElement>('[role="progressbar"]')
+      if (countLabel) countLabel.textContent = `${count} / ${courseTotal}`
+      if (fill) fill.style.width = `${pct}%`
+      track?.setAttribute("aria-valuenow", String(count))
+    }
+
+    if (totalValue) totalValue.textContent = `${completed} / ${total}`
+    if (globalValue) globalValue.textContent = `${completed} / ${total}`
+
+    if (!storage) {
+      setStatus(
+        "Este navegador bloquea el almacenamiento local. El perfil no se puede guardar.",
+        "error",
+      )
+    } else if (status?.dataset.tone === "error") {
+      setStatus("")
+    }
+  }
+
+  aliasForm?.addEventListener("submit", (event) => {
+    event.preventDefault()
+    if (!aliasInput) return
+    const value = aliasInput.value.trim().slice(0, MAX_ALIAS)
+    aliasInput.value = value
+    try {
+      if (!storage) throw new Error("sin almacenamiento")
+      if (value) storage.setItem(PROFILE_NAME_KEY, value)
+      else storage.removeItem(PROFILE_NAME_KEY)
+      setStatus("Alias guardado en este navegador.")
+    } catch {
+      setStatus("No se pudo guardar: el navegador bloquea el almacenamiento local.", "error")
+    }
+  })
+
+  document.getElementById("exportar-perfil")?.addEventListener("click", () => {
+    if (!storage) {
+      setStatus("No se pudo exportar: el navegador bloquea el almacenamiento local.", "error")
+      return
+    }
+
+    try {
+      const profile = collectProfile(storage, courseSlugs)
+      const blob = new Blob([serializeProfile(profile)], { type: "application/json" })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = `necyberwiki-perfil-${new Date().toISOString().slice(0, 10)}.json`
+      document.body.append(link)
+      link.click()
+      link.remove()
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+      setStatus("Perfil exportado. Guárdalo en un lugar seguro.")
+    } catch {
+      setStatus("No se pudo exportar el perfil.", "error")
+    }
+  })
+
+  const fileInput = document.getElementById("archivo-perfil") as HTMLInputElement | null
+  document.getElementById("importar-perfil")?.addEventListener("click", () => fileInput?.click())
+
+  fileInput?.addEventListener("change", async () => {
+    const file = fileInput.files?.[0]
+    if (!file) return
+
+    try {
+      if (!storage) throw new Error("sin almacenamiento")
+      const result = parseProfile(await file.text())
+      if (!result.ok) {
+        setStatus(result.error, "error")
+        return
+      }
+      applyProfile(storage, result.profile)
+      setStatus("Perfil importado. Recargando…")
+      window.setTimeout(() => window.location.reload(), 600)
+    } catch {
+      setStatus("No se pudo leer el archivo o guardar los datos.", "error")
+    } finally {
+      fileInput.value = ""
+    }
+  })
+
+  const deleteDialog = document.getElementById("borrar-dialog")
+  const closeDeleteDialog = () => {
+    if (deleteDialog instanceof HTMLDialogElement && deleteDialog.open) deleteDialog.close()
+  }
+
+  document.getElementById("borrar-perfil")?.addEventListener("click", () => {
+    if (deleteDialog instanceof HTMLDialogElement) deleteDialog.showModal()
+  })
+  document.getElementById("borrar-cancelar")?.addEventListener("click", closeDeleteDialog)
+  deleteDialog?.addEventListener("click", (event) => {
+    if (event.target === deleteDialog) closeDeleteDialog()
+  })
+
+  document.getElementById("borrar-confirmar")?.addEventListener("click", () => {
+    try {
+      if (!storage) throw new Error("sin almacenamiento")
+      clearProfile(storage)
+      setStatus("Datos borrados. Recargando…")
+      window.setTimeout(() => window.location.reload(), 400)
+    } catch {
+      setStatus("No se pudieron borrar los datos.", "error")
+    }
+  })
+
+  window.addEventListener("storage", render)
+  window.addEventListener("ncw:legal-accepted", render)
+  render()
+</script>

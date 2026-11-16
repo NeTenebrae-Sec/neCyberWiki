@@ -418,8 +418,13 @@ html:has(dialog[open]) {
   margin-bottom: 0.9rem;
 }
 
-.terms-dialog__close {
-  flex-shrink: 0;
+.terms-dialog__required {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--warn);
 }
 
 .terms-dialog__title {

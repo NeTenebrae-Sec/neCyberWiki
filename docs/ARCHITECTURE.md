@@ -14,8 +14,8 @@
 | Tanda | Alcance                                         | Estado      |
 | ----- | ----------------------------------------------- | ----------- |
 | 0     | Documentación y limpieza.                       | Hecha       |
-| 1     | Categorías, cursos, Bandit y rutas anidadas.    | En revisión |
-| 2     | Shell, candado legal bloqueante y perfil local. | Pendiente   |
+| 1     | Categorías, cursos, Bandit y rutas anidadas.    | Hecha       |
+| 2     | Shell, candado legal bloqueante y perfil local. | En revisión |
 | 3     | Bitácora, roadmap, comunidad, Ko-fi y Pagefind. | Pendiente   |
 | 4     | QA, accesibilidad, rendimiento, E2E y release.  | Pendiente   |
 
@@ -38,7 +38,7 @@ implementa. No se documenta como disponible algo que el build todavía no genera
 | `/bitacora/`                             | Índice definitivo de bitácora. | Pendiente |
 | `/bitacora/<slug>/`                      | Entrada definitiva.            | Pendiente |
 | `/roadmap/`                              | Cambios y planes.              | Pendiente |
-| `/perfil/`                               | Perfil local.                  | Pendiente |
+| `/perfil/`                               | Perfil local.                  | Hecha     |
 
 Redirecciones activas:
 
@@ -66,7 +66,7 @@ src/data/cursos.ts       Metadatos editoriales de cada curso
 src/data/roadmap.ts      Roadmap público (pendiente, Tanda 3)
 src/lib/catalog.ts       Deriva cursos publicados y categorías con contenido
 src/lib/syllabus.ts      Agrupa lecciones en módulos y submódulos
-src/lib/profile.ts       Lógica pura del perfil local (pendiente, Tanda 2)
+src/lib/profile.ts       Lógica pura del perfil local (lista, valida y aplica)
 ```
 
 La fuente de lecciones es `content/cursos/`. Un curso solo aparece si tiene lecciones publicadas.
@@ -119,27 +119,33 @@ No hay cookies, cuentas ni llamadas a un backend.
 
 ## Candado legal
 
-Estado actual (Tanda 1): el diálogo existe, guarda `ncw:legal:v1` y puede cerrarse con Escape, con
-la X o con un clic fuera.
-
-Estado objetivo (Tanda 2): `BaseLayout` renderiza un `<dialog>` bloqueante salvo en `/terminos/`.
+Estado (Tanda 2): `BaseLayout` renderiza un `<dialog>` bloqueante salvo en `/terminos/`.
 
 - Se abre con `showModal()` si no hay aceptación guardada.
-- No tiene botón de cierre.
-- `cancel` se intercepta para que Escape no lo cierre.
-- El clic en el backdrop no lo cierra.
-- El botón «Acepto y entro» guarda la fecha y cierra.
-- La página de términos ofrece el mismo botón para aceptar y volver.
+- No tiene botón de cierre ni se acepta cierre por Escape: se intercepta `cancel` y se ignora el
+  clic en el backdrop.
+- El botón «Acepto y entro» guarda `ncw:legal:v1` y cierra.
+- Al aceptar dispara `ncw:legal-accepted` para que otras vistas se actualicen.
+- La página de términos no usa el diálogo; ofrece «Acepto y explorar los cursos».
+
+Solo `/terminos/` funciona sin aceptación. Fuera de ella el diálogo es el primer elemento enfocado
+y el contenido del fondo queda inert durante la modalidad.
 
 ## Perfil
 
-`/perfil/` leerá las claves `ncw:*`, mostrará el resumen y permitirá (Tanda 2):
+`/perfil/` expone el estado local y permite:
 
-- Exportar un JSON versionado con alias, tema, aceptación y progreso.
-- Importar un JSON validado y reemplazar los datos locales.
-- Borrar los datos y recargar.
+- Guardar un alias opcional (`ncw:profile:name`).
+- Ver tema, aceptación legal y progreso total (`ncw-theme`, `ncw:legal:v1`, `ncw:progress:<curso>`).
+- Exportar un JSON versionado con alias, tema, aceptación y progreso (`serializeProfile`/`parseProfile`).
+- Importar un JSON validado y reemplazar los datos locales (`applyProfile`).
+- Borrar los datos y recargar (`clearProfile`).
 
-La lógica pura vivirá en `src/lib/profile.ts` para poder testearla sin navegador.
+La lógica pura vive en `src/lib/profile.ts`, que solo acepta un objeto compatible con
+`localStorage` para poder testearse sin navegador.
+
+El shell del drawer muestra ahora el curso actual de la ruta activa (bandit en curso, Arch en home)
+con su progreso y un enlace de continuación. La cabecera tiene acceso directo a `/perfil/`.
 
 ## Accesibilidad y rendimiento
 

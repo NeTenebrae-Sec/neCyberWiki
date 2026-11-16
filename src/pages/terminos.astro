@@ -130,14 +130,34 @@ const actualizado = "15 de noviembre de 2026"
     </div>
 
     <div class="legal__actions">
-      <a class="btn btn-primary" href={`${base}cursos/`}>
-        Explorar los cursos <span aria-hidden="true">→</span>
-      </a>
+      <button
+        type="button"
+        class="btn btn-primary"
+        id="aceptar-terminos"
+        data-destino={`${base}cursos/`}
+      >
+        Acepto y explorar los cursos <span aria-hidden="true">→</span>
+      </button>
       <a class="btn btn-secondary" href={base}>
         Volver al inicio
       </a>
     </div>
+    <p class="legal__note">
+      Al aceptar se guarda la fecha en este navegador. No se envía nada a un servidor.
+    </p>
   </article>
+
+  <script is:inline>
+    document.getElementById("aceptar-terminos")?.addEventListener("click", (event) => {
+      const button = event.currentTarget
+      try {
+        localStorage.setItem("ncw:legal:v1", new Date().toISOString())
+      } catch {}
+      if (button instanceof HTMLElement && button.dataset.destino) {
+        window.location.href = button.dataset.destino
+      }
+    })
+  </script>
 </BaseLayout>
 
 <style>
@@ -236,6 +256,15 @@ const actualizado = "15 de noviembre de 2026"
     margin-top: 2.5rem;
     padding-top: 1.2rem;
     border-top: 1px solid var(--line);
+  }
+
+  .legal__note {
+    margin-top: 0.8rem;
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    line-height: 1.6;
+    letter-spacing: 0.03em;
+    color: var(--ink-muted);
   }
 
   @media (max-width: 420px) {

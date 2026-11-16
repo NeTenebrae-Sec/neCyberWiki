@@ -6,6 +6,9 @@ la historia.
 | Fecha      | Decisión                                                                               | Motivo                                                                                |
 | ---------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | 2026-11-15 | Eliminar `specs/` y reconstruir la documentación en `docs/`.                           | El material anterior era caótico y difícil de mantener.                               |
+| 2026-11-15 | El aviso legal se vuelve bloqueante salvo en `/terminos/`.                             | Escape, cierre o backdrop no cierran el gate; el botón acepta y guarda la fecha.      |
+| 2026-11-15 | El perfil local se implementa con lógica pura y exportación/importación validada.      | Los datos viven en `localStorage`; el JSON versionado permite mover el perfil.        |
+| 2026-11-15 | El drawer destaca el curso actual de la ruta, no siempre el primero.                   | El progreso continuo debe corresponder a dónde está el lector.                        |
 | 2026-11-15 | Mantener el nombre neCyberWiki, pero presentarlo como archivo personal de aprendizaje. | “Wiki” promete cobertura; el valor real está en el criterio y la curaduría.           |
 | 2026-11-15 | Añadir buscador estático al MVP con Pagefind.                                          | Un archivo consultable necesita búsqueda; no requiere backend.                        |
 | 2026-11-15 | Mantener ocho categorías y encender solo las que tienen contenido.                     | La taxonomía da dirección, pero no debe aparentar contenido inexistente.              |

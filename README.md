@@ -8,9 +8,10 @@ guardado en el navegador.
 - **Stack:** Astro 7, Tailwind CSS 4, TypeScript y JavaScript vanilla.
 - **Contenido:** Markdown validado en build con Content Collections.
 - **Buscador:** Pagefind (Tanda 3), índice estático generado después del build.
+- **Perfil:** Almacén local con exportar, importar y borrar.
 
-Estado actual: Tanda 1 (categorías, cursos y Bandit) en revisión. El shell, el candado legal
-bloqueante, el perfil, el roadmap y el buscador llegan en las tandas 2 y 3.
+Estado actual: Tanda 2 (shell, candado legal bloqueante y perfil local) en revisión. La
+bitácora definitiva, el roadmap, la comunidad de YouTube, Ko-fi y el buscador llegan en la Tanda 3.
 
 ## Arranque
 
