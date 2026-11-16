@@ -189,6 +189,9 @@
 /* --- Confirm dialog ------------------------------------------------------ */
 
 .confirm-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
   width: min(460px, calc(100vw - 2rem));
   padding: 1.4rem;
   border: 1px solid var(--line-strong);

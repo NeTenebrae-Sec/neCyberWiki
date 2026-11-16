@@ -394,6 +394,9 @@ html:has(dialog[open]) {
 }
 
 .terms-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
   width: min(560px, calc(100vw - 2rem));
   max-height: min(82vh, 680px);
   padding: 1.35rem 1.4rem 1.4rem;
