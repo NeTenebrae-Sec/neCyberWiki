@@ -21,5 +21,3 @@ private/
 
 # Playwright MCP artifacts
 .playwright-mcp/
-/specs
-/AGENTS.md
