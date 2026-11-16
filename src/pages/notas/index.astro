@@ -1,0 +1,446 @@
+---
+import { getCollection } from "astro:content"
+import BaseLayout from "../../layouts/BaseLayout.astro"
+import SeriesCard from "../../components/SeriesCard.astro"
+import { getSeriesConNotas } from "../../lib/catalog"
+import { site } from "../../data/site"
+
+const base = site.base
+const series = (await getSeriesConNotas()).filter((serie) => serie.notas > 0)
+const notas = (await getCollection("notas", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime() || a.data.orden - b.data.orden,
+)
+const totalNotas = notas.length
+const ultimas = notas.slice(0, 5)
+const fmt = (date: Date) =>
+  new Intl.DateTimeFormat("es-MX", { year: "numeric", month: "short", day: "numeric" }).format(date)
+---
+
+<BaseLayout
+  titulo="Notas de laboratorio · Series y writeups"
+  descripcion="Series de notas de laboratorios legales: OverTheWire Bandit y próximos entornos de práctica. Comandos, capturas y solución paso a paso."
+>
+  <section class="notes-hero">
+    <div class="container-page">
+      <div class="notes-hero__docket">
+        <span class="docket">Archivo de notas</span>
+        <span class="stamp">Laboratorios legales</span>
+      </div>
+
+      <div class="notes-hero__grid">
+        <div>
+          <h1 class="display notes-hero__title">Notas de campo.</h1>
+          <p class="lead notes-hero__lead">
+            Series de laboratorios resueltos paso a paso. Cada nota documenta el objetivo, los
+            comandos y el razonamiento detrás de la solución, sin atajos y sin contraseñas.
+          </p>
+        </div>
+
+        <dl class="notes-hero__facts">
+          <div>
+            <dt>Series</dt>
+            <dd>{String(series.length).padStart(2, "0")}</dd>
+          </div>
+          <div>
+            <dt>Notas</dt>
+            <dd>{String(totalNotas).padStart(2, "0")}</dd>
+          </div>
+          <div>
+            <dt>Acceso</dt>
+            <dd>Libre</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="notes-body">
+    <div class="container-page notes-grid">
+      <div class="notes-main">
+        <p class="label-rule">Series publicadas</p>
+
+        {series.length > 0 ? (
+          <div class="notes-series">
+            {series.map((serie) => (
+              <SeriesCard serie={serie} />
+            ))}
+          </div>
+        ) : (
+          <div class="empty">
+            <h2>Todavía no hay series publicadas.</h2>
+            <p>Las notas aparecerán aquí cuando termine la primera serie de laboratorio.</p>
+          </div>
+        )}
+
+        {ultimas.length > 0 && (
+          <section class="notes-latest" aria-labelledby="ultimas-notas">
+            <div class="notes-latest__head">
+              <p class="label-rule" id="ultimas-notas">
+                Últimos niveles publicados
+              </p>
+              <a class="arrow-link" href={`${base}notas/${ultimas[0]?.data.serie}/`}>
+                Ver la serie{" "}
+                <span class="arrow" aria-hidden="true">
+                  →
+                </span>
+              </a>
+            </div>
+
+            <ol class="notes-latest__list">
+              {ultimas.map((nota) => {
+                const nivel = nota.id.split("/").pop()
+                return (
+                  <li>
+                    <a class="note-row" href={`${base}notas/${nota.data.serie}/${nivel}/`}>
+                      <span class="note-row__num">
+                        {String(nota.data.orden).padStart(2, "0")}
+                      </span>
+                      <span class="note-row__main">
+                        <span class="note-row__title">{nota.data.title}</span>
+                        <span class="note-row__desc">{nota.data.description}</span>
+                      </span>
+                      <time class="note-row__date" datetime={nota.data.date.toISOString()}>
+                        {fmt(nota.data.date)}
+                      </time>
+                      <span class="note-row__arrow" aria-hidden="true">
+                        →
+                      </span>
+                    </a>
+                  </li>
+                )
+              })}
+            </ol>
+          </section>
+        )}
+      </div>
+
+      <aside class="notes-aside" aria-labelledby="como-leer">
+        <div class="notes-aside__sheet sheet sheet--flat">
+          <p class="docket">Cómo leer una nota</p>
+          <h2 class="notes-aside__title" id="como-leer">Objetivo, comandos, solución.</h2>
+          <ol class="notes-aside__steps">
+            <li>
+              <span>01</span>
+              <div>
+                <strong>Entiende el objetivo</strong>
+                <p>Qué pide el nivel y por qué importa antes de ejecutar nada.</p>
+              </div>
+            </li>
+            <li>
+              <span>02</span>
+              <div>
+                <strong>Reproduce los comandos</strong>
+                <p>Las capturas muestran la terminal real del laboratorio.</p>
+              </div>
+            </li>
+            <li>
+              <span>03</span>
+              <div>
+                <strong>Compara tu solución</strong>
+                <p>Contrasta el resultado con tu propio razonamiento.</p>
+              </div>
+            </li>
+          </ol>
+          <p class="notes-aside__note">
+            Las contraseñas de los niveles están censuradas. Practica siempre en la plataforma
+            oficial.
+          </p>
+        </div>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .notes-hero {
+    position: relative;
+    padding-block: clamp(2.5rem, 5vw, 4.5rem);
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+  }
+
+  .notes-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(circle at 1px 1px, var(--line) 0.7px, transparent 0.8px),
+      linear-gradient(
+        90deg,
+        transparent 0 72%,
+        color-mix(in srgb, var(--blog) 18%, transparent) 72% 72.15%,
+        transparent 72.15% 100%
+      );
+    background-size:
+      22px 22px,
+      100% 100%;
+    mask-image: linear-gradient(180deg, #000, transparent 80%);
+    opacity: 0.55;
+  }
+
+  .notes-hero .container-page {
+    position: relative;
+    z-index: 1;
+  }
+
+  .notes-hero__docket {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .notes-hero__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(250px, 0.65fr);
+    gap: clamp(1.75rem, 4vw, 3.5rem);
+    align-items: end;
+  }
+
+  .notes-hero__title {
+    font-size: clamp(2.4rem, 5.5vw, 4.75rem);
+    line-height: 0.94;
+  }
+
+  .notes-hero__lead {
+    margin-top: 1.2rem;
+    max-width: 58ch;
+  }
+
+  .notes-hero__facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-top: 1px solid var(--line-strong);
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .notes-hero__facts > div {
+    padding: 0.9rem 0.75rem;
+  }
+
+  .notes-hero__facts > div + div {
+    border-left: 1px solid var(--line);
+  }
+
+  .notes-hero__facts dt {
+    font-family: var(--font-mono);
+    font-size: 0.56rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .notes-hero__facts dd {
+    margin-top: 0.35rem;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+  }
+
+  .notes-body {
+    padding-block: clamp(2.5rem, 5vw, 4.5rem);
+  }
+
+  .notes-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 0.38fr);
+    gap: clamp(1.75rem, 4vw, 3.5rem);
+    align-items: start;
+  }
+
+  .notes-main {
+    min-width: 0;
+  }
+
+  .notes-series {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .notes-latest {
+    margin-top: 2.5rem;
+  }
+
+  .notes-latest__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .notes-latest__list {
+    margin-top: 0.75rem;
+    border-top: 1px solid var(--line-strong);
+    list-style: none;
+    padding: 0;
+  }
+
+  .note-row {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr) auto 1rem;
+    gap: 0.75rem;
+    align-items: baseline;
+    padding-block: 0.9rem;
+    border-bottom: 1px solid var(--line);
+    text-decoration: none;
+  }
+
+  .note-row__num {
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .note-row__title {
+    display: block;
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-size: 1.12rem;
+    font-weight: 600;
+    letter-spacing: -0.018em;
+    line-height: 1.2;
+  }
+
+  .note-row__desc {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    overflow: hidden;
+    margin-top: 0.2rem;
+    color: var(--ink-dim);
+    font-size: 0.8rem;
+    line-height: 1.55;
+  }
+
+  .note-row__date {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    color: var(--ink-muted);
+    white-space: nowrap;
+  }
+
+  .note-row__arrow {
+    color: var(--accent);
+    transition: transform var(--dur-ui) var(--ease-out);
+  }
+
+  .note-row:hover .note-row__title {
+    color: var(--accent);
+  }
+
+  .note-row:hover .note-row__arrow {
+    transform: translateX(3px);
+  }
+
+  .notes-aside {
+    position: sticky;
+    top: 6rem;
+  }
+
+  .notes-aside__sheet {
+    padding: 1.1rem 1.15rem 1.2rem;
+    border-left: 3px solid var(--blog);
+  }
+
+  .notes-aside__title {
+    margin-top: 0.55rem;
+    font-size: 1.35rem;
+    line-height: 1.08;
+    letter-spacing: -0.028em;
+  }
+
+  .notes-aside__steps {
+    display: grid;
+    gap: 0.9rem;
+    margin-top: 1.1rem;
+    list-style: none;
+    padding: 0;
+  }
+
+  .notes-aside__steps li {
+    display: grid;
+    grid-template-columns: 1.5rem minmax(0, 1fr);
+    gap: 0.5rem;
+    align-items: baseline;
+  }
+
+  .notes-aside__steps li > span {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    color: var(--accent);
+  }
+
+  .notes-aside__steps strong {
+    font-size: 0.84rem;
+    color: var(--ink);
+  }
+
+  .notes-aside__steps p {
+    margin-top: 0.15rem;
+    color: var(--ink-dim);
+    font-size: 0.76rem;
+    line-height: 1.55;
+  }
+
+  .notes-aside__note {
+    margin-top: 1.1rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    line-height: 1.6;
+    color: var(--ink-muted);
+  }
+
+  @media (max-width: 900px) {
+    .notes-hero__grid,
+    .notes-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .notes-aside {
+      position: static;
+      order: -1;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .notes-hero__facts {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .notes-hero__facts > div {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+
+    .notes-hero__facts > div + div {
+      border-left: 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .note-row {
+      grid-template-columns: 1.6rem minmax(0, 1fr) 1rem;
+      gap: 0.35rem 0.6rem;
+    }
+
+    .note-row__date {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    .note-row__arrow {
+      grid-column: 3;
+      grid-row: 1 / span 2;
+      align-self: center;
+    }
+  }
+</style>

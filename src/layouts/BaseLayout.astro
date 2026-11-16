@@ -1,14 +1,24 @@
 ---
 import "../styles/global.css"
 import { site } from "../data/site"
+import { getCursosPublicados } from "../lib/catalog"
 
 interface Props {
   titulo: string
   descripcion?: string
+  mostrarAvisoTerminos?: boolean
 }
-const { titulo, descripcion = site.descripcion } = Astro.props
+const { titulo, descripcion = site.descripcion, mostrarAvisoTerminos = true } = Astro.props
 const base = site.base
 const year = new Date().getFullYear()
+
+const cursosPublicados = await getCursosPublicados()
+const cursoDestacado = cursosPublicados[0]
+const primeraLeccion = cursoDestacado?.lecciones[0]
+const empezarHref =
+  cursoDestacado && primeraLeccion
+    ? `${base}cursos/${cursoDestacado.slug}/${primeraLeccion.slug}/`
+    : `${base}cursos/`
 
 const path = Astro.url.pathname.replace(/\/+$/, "/")
 const isActive = (href: string) => (href === base ? path === base : path.startsWith(href))
@@ -16,7 +26,7 @@ const isActive = (href: string) => (href === base ? path === base : path.startsW
 const nav = [
   { label: "Inicio", href: base },
   { label: "Cursos", href: `${base}cursos/` },
-  { label: "Mapa", href: `${base}categorias/` },
+  { label: "Notas", href: `${base}notas/` },
   { label: "Bitácora", href: `${base}blog/` },
 ]
 ---
@@ -80,6 +90,7 @@ const nav = [
             class="theme-switch"
             type="button"
             aria-label="Cambiar tema: Noche o Archivo"
+            title="Cambiar tema"
           >
             <span class="theme-switch__opt theme-switch__opt--dark">
               <svg
@@ -95,7 +106,6 @@ const nav = [
                   stroke-linejoin="round"
                 />
               </svg>
-              <span>Noche</span>
             </span>
             <span class="theme-switch__opt theme-switch__opt--light">
               <svg
@@ -108,13 +118,15 @@ const nav = [
                 <circle cx="12" cy="12" r="4" />
                 <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" />
               </svg>
-              <span>Archivo</span>
             </span>
           </button>
+          <span id="theme-status" class="sr-only" aria-live="polite"></span>
 
-          <a href={`${base}cursos/arch-linux-facil/`} class="btn btn-primary btn-sm header-cta">
-            Empezar <span aria-hidden="true">→</span>
-          </a>
+          {cursoDestacado && (
+            <a href={empezarHref} class="btn btn-primary btn-sm header-cta">
+              Empezar <span aria-hidden="true">→</span>
+            </a>
+          )}
 
           <button
             id="open-sidebar-btn"
@@ -172,25 +184,32 @@ const nav = [
         </button>
       </div>
 
-      <div class="drawer__progress">
-        <div class="drawer__progress-head">
-          <span>Arch Linux fácil</span>
-          <strong id="mobile-progress-label">0 / 8</strong>
-        </div>
+      {cursoDestacado && (
         <div
-          class="progress-track"
-          role="progressbar"
-          aria-label="Progreso del curso Arch Linux fácil"
-          aria-valuemin="0"
-          aria-valuemax="8"
-          aria-valuenow="0"
+          class="drawer__progress"
+          data-drawer-progress
+          data-course-slug={cursoDestacado.slug}
+          data-total={cursoDestacado.lecciones.length}
         >
-          <div id="mobile-progress-fill" class="progress-fill"></div>
+          <div class="drawer__progress-head">
+            <span>{cursoDestacado.titulo.split("(")[0].trim()}</span>
+            <strong id="mobile-progress-label">0 / {cursoDestacado.lecciones.length}</strong>
+          </div>
+          <div
+            class="progress-track"
+            role="progressbar"
+            aria-label={`Progreso del curso ${cursoDestacado.titulo}`}
+            aria-valuemin="0"
+            aria-valuemax={cursoDestacado.lecciones.length}
+            aria-valuenow="0"
+          >
+            <div id="mobile-progress-fill" class="progress-fill"></div>
+          </div>
+          <a href={`${base}cursos/${cursoDestacado.slug}/`} class="drawer__continue">
+            Continuar el curso <span aria-hidden="true">→</span>
+          </a>
         </div>
-        <a href={`${base}cursos/arch-linux-facil/`} class="drawer__continue">
-          Continuar el curso <span aria-hidden="true">→</span>
-        </a>
-      </div>
+      )}
 
       <nav class="drawer__nav" aria-label="Secciones del sitio">
         <a href={base} class="drawer__link" aria-current={isActive(base) ? "page" : undefined}>
@@ -206,12 +225,12 @@ const nav = [
           <span>Cursos</span>
         </a>
         <a
-          href={`${base}categorias/`}
+          href={`${base}notas/`}
           class="drawer__link"
-          aria-current={isActive(`${base}categorias/`) ? "page" : undefined}
+          aria-current={isActive(`${base}notas/`) ? "page" : undefined}
         >
           <span class="drawer__num">03</span>
-          <span>Mapa de sectores</span>
+          <span>Notas</span>
         </a>
         <a
           href={`${base}blog/`}
@@ -228,6 +247,14 @@ const nav = [
         >
           <span class="drawer__num">05</span>
           <span>Verificar certificados</span>
+        </a>
+        <a
+          href={`${base}terminos/`}
+          class="drawer__link"
+          aria-current={isActive(`${base}terminos/`) ? "page" : undefined}
+        >
+          <span class="drawer__num">06</span>
+          <span>Términos</span>
         </a>
       </nav>
 
@@ -279,8 +306,8 @@ const nav = [
               </a>
             </li>
             <li>
-              <a class="footer-link" href={`${base}categorias/`}>
-                Mapa de sectores
+              <a class="footer-link" href={`${base}notas/`}>
+                Notas
               </a>
             </li>
             <li>
@@ -291,6 +318,11 @@ const nav = [
             <li>
               <a class="footer-link" href={`${base}certificados/verificar/`}>
                 Verificar certificados
+              </a>
+            </li>
+            <li>
+              <a class="footer-link" href={`${base}terminos/`}>
+                Términos y licencia
               </a>
             </li>
           </ul>
@@ -321,7 +353,7 @@ const nav = [
             <li>
               <a
                 class="footer-link"
-                href="https://github.com/NeTenebraes/neCyberWiki/blob/main/content/Codigo%20de%20conducta.md"
+                href="https://github.com/NeTenebrae-Sec/neCyberWiki/blob/main/content/Codigo%20de%20conducta.md"
                 target="_blank"
                 rel="noopener"
               >
@@ -361,14 +393,75 @@ const nav = [
             Pruebas solo en laboratorios propios o con autorización. Aprende a atacar para saber
             defender.
           </span>
-          <span>neCyberWiki · {year} · MIT</span>
+          <span>
+            neCyberWiki · {year} ·{" "}
+            <a href={`${base}terminos/`}>Código MIT · Contenido educativo</a>
+          </span>
         </div>
       </div>
     </footer>
 
+    {mostrarAvisoTerminos && (
+      <dialog
+        id="terminos-dialog"
+        class="terms-dialog"
+        aria-labelledby="terminos-title"
+        aria-describedby="terminos-desc"
+      >
+        <div class="terms-dialog__head">
+          <span class="docket">Aviso de uso</span>
+          <button
+            type="button"
+            class="icon-btn terms-dialog__close"
+            id="terminos-cerrar"
+            aria-label="Cerrar aviso de términos"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        <h2 class="terms-dialog__title" id="terminos-title">
+          Gratis para aprender. No para redistribuir.
+        </h2>
+        <p class="terms-dialog__lead" id="terminos-desc">
+          Este sitio es gratuito y su contenido tiene finalidad exclusivamente educativa. Antes de
+          continuar, ten en cuenta estas tres reglas:
+        </p>
+
+        <ul class="terms-dialog__list">
+          <li>Puedes leer, estudiar y practicar el contenido sin pagar ni registrarte.</li>
+          <li>Practica solo en sistemas propios o en entornos con autorización expresa.</li>
+          <li>
+            No está permitido copiar, republicar, vender ni redistribuir el contenido. Sí puedes
+            enlazar a las páginas originales y citar con atribución.
+          </li>
+        </ul>
+
+        <div class="terms-dialog__actions">
+          <a class="btn btn-secondary" href={`${base}terminos/`}>Leer términos completos</a>
+          <button type="button" class="btn btn-primary" id="terminos-aceptar" autofocus>
+            Entendido
+          </button>
+        </div>
+      </dialog>
+    )}
+
     <script is:inline>
       const root = document.documentElement
       const themeToggle = document.getElementById("theme-toggle")
+      const themeStatus = document.getElementById("theme-status")
       const themeMeta = document.querySelector('meta[name="theme-color"]')
 
       const themeLabel = () =>
@@ -391,6 +484,10 @@ const nav = [
           localStorage.setItem("ncw-theme", next)
         } catch {}
         syncTheme()
+        if (themeStatus) {
+          themeStatus.textContent =
+            next === "light" ? "Tema Archivo activado" : "Tema Noche activado"
+        }
       })
 
       const openBtn = document.getElementById("open-sidebar-btn")
@@ -421,12 +518,17 @@ const nav = [
         link.addEventListener("click", closeDrawer)
       })
 
+      const drawerProgress = document.querySelector("[data-drawer-progress]")
       const syncGlobalProgress = () => {
+        if (!(drawerProgress instanceof HTMLElement)) return
+        const slug = drawerProgress.getAttribute("data-course-slug")
+        const total = Number(drawerProgress.getAttribute("data-total") || 0)
+        if (!slug || !total) return
+
         try {
-          const done = JSON.parse(localStorage.getItem("ncw:progress:arch-linux-facil") || "[]")
+          const done = JSON.parse(localStorage.getItem(`ncw:progress:${slug}`) || "[]")
           const count = Array.isArray(done) ? done.length : 0
-          const total = 8
-          const pct = Math.round((count / total) * 100)
+          const pct = Math.min(100, Math.round((count / total) * 100))
           const label = document.getElementById("mobile-progress-label")
           const fill = document.getElementById("mobile-progress-fill")
           const track = fill?.closest('[role="progressbar"]')
@@ -438,6 +540,29 @@ const nav = [
 
       syncGlobalProgress()
       window.addEventListener("storage", syncGlobalProgress)
+
+      const termsDialog = document.getElementById("terminos-dialog")
+      const termsKey = "ncw:terminos:v1"
+      const closeTerms = () => {
+        if (termsDialog instanceof HTMLDialogElement && termsDialog.open) termsDialog.close()
+      }
+
+      if (termsDialog instanceof HTMLDialogElement) {
+        try {
+          if (!localStorage.getItem(termsKey)) termsDialog.showModal()
+        } catch {}
+
+        document.getElementById("terminos-aceptar")?.addEventListener("click", () => {
+          try {
+            localStorage.setItem(termsKey, new Date().toISOString())
+          } catch {}
+          closeTerms()
+        })
+        document.getElementById("terminos-cerrar")?.addEventListener("click", closeTerms)
+        termsDialog.addEventListener("click", (event) => {
+          if (event.target === termsDialog) closeTerms()
+        })
+      }
     </script>
   </body>
 </html>

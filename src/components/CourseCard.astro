@@ -1,0 +1,370 @@
+---
+import { formatoCurso, type CursoPublicado } from "../lib/catalog"
+import { site } from "../data/site"
+
+interface Props {
+  curso: CursoPublicado
+  variant?: "compact" | "full"
+}
+
+const { curso, variant = "full" } = Astro.props
+const base = site.base
+const cursoUrl = `${base}cursos/${curso.slug}/`
+const primeraLeccion = curso.lecciones[0]
+const empezarUrl = primeraLeccion ? `${cursoUrl}${primeraLeccion.slug}/` : cursoUrl
+const titleId = `${curso.slug}-${variant}-title`
+---
+
+{variant === "compact" ? (
+  <article class="course-card course-card--compact sheet sheet--cut" aria-labelledby={titleId}>
+    <span class="tape course-card__tape" aria-hidden="true" />
+
+    <div class="course-card__top">
+      <span class="docket">Curso publicado</span>
+      <span class="stamp stamp--straight">{curso.nivel}</span>
+    </div>
+
+    <h3 class="course-card__title" id={titleId}>
+      <a href={cursoUrl}>{curso.titulo}</a>
+    </h3>
+    <p class="course-card__desc">{curso.promesa}</p>
+
+    <p class="course-card__meta">
+      {formatoCurso(curso)} · {curso.modulos.length} módulos
+    </p>
+
+    {curso.videos === 0 && (
+      <p class="course-card__note">
+        Video en preparación. La guía escrita completa ya está disponible.
+      </p>
+    )}
+
+    <div class="course-card__actions">
+      <a class="btn btn-primary" href={cursoUrl}>
+        Ver el curso <span aria-hidden="true">→</span>
+      </a>
+      {primeraLeccion && (
+        <a class="btn btn-secondary" href={empezarUrl}>
+          Empezar la primera lección
+        </a>
+      )}
+    </div>
+  </article>
+) : (
+  <article class="course-card course-card--full sheet sheet--cut" aria-labelledby={titleId}>
+    <span class="course-card__spine" aria-hidden="true" />
+
+    <div class="course-card__inner">
+      <div class="course-card__top">
+        <span class="docket">Curso · <strong>{curso.nivel}</strong></span>
+        <span class="chip chip--signal">
+          <span class="status-dot" aria-hidden="true" />
+          {curso.videos > 0 ? "Curso publicado" : "Guía publicada"}
+        </span>
+      </div>
+
+      <h3 class="course-card__title" id={titleId}>
+        <a href={cursoUrl}>{curso.titulo}</a>
+      </h3>
+      <p class="course-card__desc">{curso.descripcion}</p>
+
+      <div class="course-card__grid">
+        <div>
+          <p class="course-card__label">Equipo requerido</p>
+          <ul class="course-card__req">
+            {curso.requisitos.map((requisito) => (
+              <li>
+                <span aria-hidden="true">▹</span>
+                {requisito}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <dl class="course-card__stats">
+          <div>
+            <dt>Lecciones</dt>
+            <dd>{curso.lecciones.length}</dd>
+          </div>
+          <div>
+            <dt>Módulos</dt>
+            <dd>{curso.modulos.length}</dd>
+          </div>
+          <div>
+            <dt>Formato</dt>
+            <dd>{curso.videos > 0 ? `${curso.videos} videos` : "Guía escrita"}</dd>
+          </div>
+          <div>
+            <dt>Duración</dt>
+            <dd>{curso.videos > 0 ? curso.duracion : "Video en preparación"}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div
+        class="course-card__progress"
+        data-course-progress={curso.slug}
+        data-total={curso.lecciones.length}
+      >
+        <div class="course-card__progress-head">
+          <span>Tu avance guardado</span>
+          <strong data-course-progress-label>0 / {curso.lecciones.length} lecciones</strong>
+        </div>
+        <div
+          class="progress-track"
+          role="progressbar"
+          aria-label={`Progreso del curso ${curso.titulo}`}
+          aria-valuemin="0"
+          aria-valuemax={curso.lecciones.length}
+          aria-valuenow="0"
+        >
+          <div class="progress-fill" data-course-progress-fill />
+        </div>
+      </div>
+
+      <div class="course-card__actions">
+        <a class="btn btn-primary" href={cursoUrl}>
+          Ver temario y lecciones <span aria-hidden="true">→</span>
+        </a>
+        {primeraLeccion && (
+          <a class="btn btn-secondary" href={empezarUrl}>
+            Empezar la primera lección
+          </a>
+        )}
+      </div>
+    </div>
+  </article>
+)}
+
+<script>
+  const syncCourseProgress = () => {
+    for (const root of document.querySelectorAll<HTMLElement>("[data-course-progress]")) {
+      const slug = root.getAttribute("data-course-progress")
+      const total = Number(root.getAttribute("data-total") || 0)
+      if (!slug || !total) continue
+
+      let done: unknown = []
+      try {
+        done = JSON.parse(localStorage.getItem(`ncw:progress:${slug}`) || "[]")
+      } catch {
+        done = []
+      }
+
+      const count = Array.isArray(done) ? done.length : 0
+      const pct = Math.min(100, Math.round((count / total) * 100))
+      const label = root.querySelector("[data-course-progress-label]")
+      const fill = root.querySelector<HTMLElement>("[data-course-progress-fill]")
+      const track = root.querySelector('[role="progressbar"]')
+
+      if (label) label.textContent = `${count} / ${total} lecciones (${pct}%)`
+      if (fill) fill.style.width = `${pct}%`
+      track?.setAttribute("aria-valuenow", String(count))
+    }
+  }
+
+  syncCourseProgress()
+  window.addEventListener("storage", syncCourseProgress)
+</script>
+
+<style>
+  .course-card {
+    --sheet-cut: 26px;
+    position: relative;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-paper);
+  }
+
+  .course-card__tape {
+    position: absolute;
+    top: -0.65rem;
+    left: 1.6rem;
+    width: 5.5rem;
+    height: 1.2rem;
+    background: color-mix(in srgb, var(--stamp) 22%, transparent);
+    transform: rotate(-2.5deg);
+  }
+
+  .course-card--compact {
+    padding: clamp(1.25rem, 3vw, 1.75rem);
+  }
+
+  .course-card--full {
+    padding: clamp(1.25rem, 3vw, 2rem);
+  }
+
+  .course-card__spine {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: linear-gradient(var(--accent), color-mix(in srgb, var(--accent) 20%, transparent));
+  }
+
+  .course-card__inner {
+    margin-left: 0.35rem;
+  }
+
+  .course-card__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.65rem 1rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .course-card__title {
+    font-family: var(--font-display);
+    font-size: clamp(1.65rem, 3.2vw, 2.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+    color: var(--ink);
+  }
+
+  .course-card__title a {
+    color: inherit;
+    text-decoration: none;
+    text-underline-offset: 0.18em;
+  }
+
+  .course-card__title a:hover {
+    text-decoration: underline;
+  }
+
+  .course-card__desc {
+    margin-top: 0.9rem;
+    max-width: 70ch;
+    color: var(--ink-dim);
+    line-height: 1.7;
+  }
+
+  .course-card__meta,
+  .course-card__note {
+    margin-top: 0.9rem;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .course-card__note {
+    padding-left: 0.75rem;
+    border-left: 2px solid var(--stamp);
+    line-height: 1.6;
+    text-transform: none;
+    letter-spacing: 0.02em;
+  }
+
+  .course-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 1.3rem;
+  }
+
+  .course-card__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 0.9fr);
+    gap: 1.5rem;
+    margin-top: 1.4rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .course-card__label {
+    margin-bottom: 0.55rem;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .course-card__req {
+    display: grid;
+    gap: 0.35rem;
+    list-style: none;
+    color: var(--ink-dim);
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+
+  .course-card__req li {
+    display: flex;
+    gap: 0.45rem;
+  }
+
+  .course-card__req span {
+    color: var(--accent);
+  }
+
+  .course-card__stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem 1rem;
+  }
+
+  .course-card__stats dt {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .course-card__stats dd {
+    margin-top: 0.18rem;
+    font-size: 0.95rem;
+    color: var(--ink);
+  }
+
+  .course-card__progress {
+    margin-top: 1.4rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .course-card__progress-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.35rem 1rem;
+    margin-bottom: 0.45rem;
+    font-family: var(--font-mono);
+    font-size: 0.63rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .course-card__progress-head strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .course-card__progress .progress-track {
+    height: 0.35rem;
+  }
+
+  @media (max-width: 720px) {
+    .course-card__grid {
+      grid-template-columns: 1fr;
+      gap: 1.1rem;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .course-card__actions .btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .course-card__stats {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

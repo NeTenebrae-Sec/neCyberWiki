@@ -12,9 +12,11 @@
     "check": "astro check",
     "lint": "eslint .",
     "format": "prettier --write .",
+    "import:bandit": "node scripts/import-bandit.mjs",
     "test": "node --experimental-strip-types --test \"tests/**/*.test.mjs\""
   },
   "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.9",
     "@fontsource-variable/fraunces": "^5.3.0",
     "@fontsource-variable/ibm-plex-sans": "^5.3.0",
     "@fontsource/ibm-plex-mono": "^5.2.0",

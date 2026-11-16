@@ -37,4 +37,22 @@ const blog = defineCollection({
   }),
 })
 
-export const collections = { cursos, blog }
+// Notas y writeups. Las notas de Bandit se generan con
+// `scripts/import-bandit.mjs` a partir de `content/_WRITEUPS/`; el original
+// queda intacto y la copia publicada añade `serie`, `orden` y `source`.
+const notas = defineCollection({
+  loader: glob({ pattern: "notas/**/*.md", base: "./content" }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    tags: z.array(z.string()).default([]),
+    module: z.string(),
+    serie: z.string(),
+    orden: z.number().int().min(0),
+    date: z.date(),
+    source: z.string().optional(),
+    draft: z.boolean().default(false),
+  }),
+})
+
+export const collections = { cursos, blog, notas }

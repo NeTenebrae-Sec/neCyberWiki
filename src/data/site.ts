@@ -4,11 +4,10 @@ export const site = {
   nombre: "neCyberWiki",
   tagline: "Informática y ciberseguridad, gratis y sin registros",
   descripcion:
-    "neCyberWiki reúne cursos, writeups y artículos de informática y ciberseguridad en español. Aprendizaje 100% gratuito, sin registro, hecho por alguien que aprende contigo.",
+    "neCyberWiki reúne cursos, notas y artículos de informática y ciberseguridad en español. Aprendizaje 100% gratuito, sin registro, hecho por alguien que aprende contigo.",
   base: "/neCyberWiki/",
   redes: {
-    // Q-1 pendiente de confirmar handle exacto del autor.
-    github: "https://github.com/NeTenebraes/neCyberWiki",
+    github: "https://github.com/NeTenebrae-Sec/neCyberWiki",
     threads: "https://www.threads.com/@netenebrae",
     youtube: "", // pendiente Q-1
   },

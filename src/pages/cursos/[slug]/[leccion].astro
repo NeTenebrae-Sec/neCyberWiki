@@ -4,6 +4,7 @@ import BaseLayout from "../../../layouts/BaseLayout.astro"
 import VideoEmbed from "../../../components/VideoEmbed.astro"
 import Comentarios from "../../../components/Comentarios.astro"
 import CourseModuleList from "../../../components/CourseModuleList.astro"
+import TableOfContents from "../../../components/TableOfContents.astro"
 import { groupSyllabus, normalizeLesson } from "../../../lib/syllabus"
 import { site } from "../../../data/site"
 import { getCurso } from "../../../data/cursos"
@@ -37,7 +38,7 @@ const currentSub = currentModule?.submodulos?.find((s) =>
   s.lecciones.some((x) => x.slug === leccionKey),
 )
 
-const { Content } = await render(entry)
+const { Content, headings } = await render(entry)
 const base = site.base
 const currentLessonNumber = entry.data.orden + 1
 ---
@@ -79,22 +80,24 @@ const currentLessonNumber = entry.data.orden + 1
 
   <div class="container-page player-layout">
     <article class="player-main">
-      <div class="player-frame">
-        <div class="player-frame__bar">
-          <span class="terminal__dots" aria-hidden="true">
-            <span class="terminal__dot terminal__dot--red"></span>
-            <span class="terminal__dot terminal__dot--yellow"></span>
-            <span class="terminal__dot terminal__dot--green"></span>
-          </span>
-          <span class="terminal__title">
-            monitor · clase {String(currentLessonNumber).padStart(2, "0")}
-          </span>
-          <span class="player-frame__state">
-            <span class="status-dot status-dot--cyan" aria-hidden="true"></span> registro de campo
-          </span>
+      {entry.data.video && (
+        <div class="player-frame">
+          <div class="player-frame__bar">
+            <span class="terminal__dots" aria-hidden="true">
+              <span class="terminal__dot terminal__dot--red"></span>
+              <span class="terminal__dot terminal__dot--yellow"></span>
+              <span class="terminal__dot terminal__dot--green"></span>
+            </span>
+            <span class="terminal__title">
+              monitor · clase {String(currentLessonNumber).padStart(2, "0")}
+            </span>
+            <span class="player-frame__state">
+              <span class="status-dot status-dot--cyan" aria-hidden="true"></span> registro de campo
+            </span>
+          </div>
+          <VideoEmbed video={entry.data.video} titulo={entry.data.title} />
         </div>
-        <VideoEmbed video={entry.data.video} titulo={entry.data.title} />
-      </div>
+      )}
 
       <header class="lesson-head sheet">
         <div class="lesson-head__top">
@@ -117,7 +120,7 @@ const currentLessonNumber = entry.data.orden + 1
             <p class="lesson-head__kicker">
               <span class="accent">Clase {String(currentLessonNumber).padStart(2, "0")}</span>
               <span aria-hidden="true">·</span>
-              <span>{entry.data.duracion || "Video + guía"}</span>
+              <span>{entry.data.video ? entry.data.duracion || "Video + guía" : "Guía escrita"}</span>
             </p>
             <h1 class="lesson-head__title">{entry.data.title}</h1>
           </div>
@@ -143,9 +146,9 @@ const currentLessonNumber = entry.data.orden + 1
                 <span aria-hidden="true">→</span>
               </a>
             ) : (
-              <a href={`${base}certificados/verificar/`} class="btn btn-primary btn-sm">
-                <span>Concluir curso</span>
-                <span aria-hidden="true">★</span>
+              <a href={`${base}cursos/${slug}/`} class="btn btn-primary btn-sm">
+                <span>Volver al temario</span>
+                <span aria-hidden="true">→</span>
               </a>
             )}
           </div>
@@ -171,10 +174,12 @@ const currentLessonNumber = entry.data.orden + 1
         </div>
       </header>
 
+      <TableOfContents headings={headings} title="En esta lección" />
+
       <section class="lesson-guide sheet" aria-labelledby="guia-title">
         <div class="lesson-guide__head">
           <span class="status-dot status-dot--cyan" aria-hidden="true"></span>
-          <h2 id="guia-title">Guía escrita del laboratorio</h2>
+          <h2 id="guia-title">Guía escrita de la lección</h2>
           <span class="meta">Comandos y notas</span>
         </div>
         <div class="leccion">
@@ -205,11 +210,11 @@ const currentLessonNumber = entry.data.orden + 1
           </a>
         ) : (
           <a
-            href={`${base}certificados/verificar/`}
+            href={`${base}cursos/${slug}/`}
             class="lesson-nav__card sheet sheet--link lesson-nav__card--next"
           >
-            <span class="lesson-nav__label signal">Has llegado al final</span>
-            <span class="lesson-nav__title">Conoce tu certificado verificable →</span>
+            <span class="lesson-nav__label signal">Fin del curso</span>
+            <span class="lesson-nav__title">Volver al temario y repasar →</span>
           </a>
         )}
       </nav>
@@ -249,8 +254,8 @@ const currentLessonNumber = entry.data.orden + 1
           />
 
           <div class="temario__foot">
-            <span>Certificado digital</span>
-            <a href={`${base}certificados/verificar/`}>Fase 2 · Verificar →</a>
+            <span>Curso completo</span>
+            <a href={`${base}cursos/${slug}/`}>Repasar el temario →</a>
           </div>
         </div>
       </div>

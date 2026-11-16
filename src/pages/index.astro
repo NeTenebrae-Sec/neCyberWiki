@@ -35,7 +35,7 @@ const fecha = (date: Date) =>
 const modulosActivos = CATEGORIAS.filter((categoria) => categoria.estado === "activo").length
 const entradasDisponibles = CATEGORIAS.reduce(
   (total, categoria) =>
-    total + categoria.recursos.filter((recurso) => recurso.estado === "disponible").length,
+    total + (categoria.recursos ?? []).filter((recurso) => recurso.estado === "disponible").length,
   0,
 )
 const tipoLabel: Record<string, string> = {
@@ -226,7 +226,7 @@ const lessonData = lecciones.map((leccion) => ({
                 <div class="module-entry__desc">
                   <p>{categoria.descripcion}</p>
                   <ul class="tags module-entry__tags" aria-label="Temas clave">
-                    {categoria.tags.map((tag) => (
+                    {categoria.temas.map((tag) => (
                       <li class="tag">{tag}</li>
                     ))}
                   </ul>
@@ -235,7 +235,7 @@ const lessonData = lecciones.map((leccion) => ({
                 <div class="module-entry__resources">
                   <p class="module-entry__resources-head">Entradas del módulo</p>
                   <ul>
-                    {categoria.recursos.map((recurso) => {
+                    {(categoria.recursos ?? []).map((recurso) => {
                       const href = recurso.enlace ? `${base}${recurso.enlace}` : null
                       return (
                         <li class="resource-row">

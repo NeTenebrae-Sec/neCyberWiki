@@ -116,7 +116,7 @@ const isSidebar = variant === "sidebar"
                         <span class="sy-lesson__body">
                           <span class="sy-lesson__title">{l.title}</span>
                           <span class="sy-lesson__meta">
-                            {l.duracion || "Video + Guía"}
+                            {l.video ? l.duracion || "Video" : "Guía escrita"}
                             {l.capitulos.length > 0 && (
                               <span> · {l.capitulos.length} capítulos</span>
                             )}

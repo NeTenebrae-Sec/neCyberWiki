@@ -22,7 +22,7 @@ const { categorias } = Astro.props
         <span class="board-node__index">{categoria.indice}</span>
         <span class="board-node__title">{categoria.titulo}</span>
         <span class="board-node__meta">
-          {categoria.nivel} · {categoria.recursos.length} entradas
+          {categoria.nivel} · {(categoria.recursos ?? []).length} entradas
         </span>
       </button>
     ))}

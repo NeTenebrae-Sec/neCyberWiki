@@ -4,6 +4,7 @@ import BaseLayout from "../../../layouts/BaseLayout.astro"
 import CourseModuleList from "../../../components/CourseModuleList.astro"
 import { site } from "../../../data/site"
 import { getCurso, cursos } from "../../../data/cursos"
+import { getCategoria } from "../../../data/categorias"
 import {
   groupSyllabus,
   normalizeLesson,
@@ -18,12 +19,14 @@ export async function getStaticPaths() {
 const { slug } = Astro.params
 const info = getCurso(slug!)
 if (!info) throw new Error(`Curso no definido en src/data/cursos.ts: ${slug}`)
+const categoria = getCategoria(info.categoria)
 
 const lecciones = (
   await getCollection("cursos", ({ data }) => !data.draft && data.curso === slug)
 ).sort((a, b) => a.data.orden - b.data.orden)
 const modules = groupSyllabus(lecciones.map((l) => normalizeLesson(l.id, l.data)))
 const totalVideoMin = totalSyllabusMin(modules)
+const videosPublicados = lecciones.filter((l) => Boolean(l.data.video)).length
 const totalCapitulos = modules.reduce(
   (acc, m) => acc + m.lecciones.reduce((n, l) => n + l.capitulos.length, 0),
   0,
@@ -41,7 +44,13 @@ const totalLessons = lecciones.length
       <nav class="breadcrumb" aria-label="Miga de pan">
         <a href={`${base}cursos/`}>Cursos</a>
         <span aria-hidden="true">/</span>
-        <span aria-current="page">{slug}</span>
+        {categoria && (
+          <>
+            <a href={`${base}cursos/#${categoria.id}`}>{categoria.titulo}</a>
+            <span aria-hidden="true">/</span>
+          </>
+        )}
+        <span aria-current="page">{info.titulo}</span>
       </nav>
 
       <div class="course-hero__grid">
@@ -51,7 +60,8 @@ const totalLessons = lecciones.length
               Expediente de curso · <strong>01</strong>
             </span>
             <span class="chip chip--signal">
-              <span class="status-dot" aria-hidden="true"></span> Publicado
+              <span class="status-dot" aria-hidden="true"></span>
+              {videosPublicados > 0 ? "Curso publicado" : "Guía publicada"}
             </span>
           </div>
 
@@ -62,7 +72,14 @@ const totalLessons = lecciones.length
             <span>{info.nivel}</span>
             <span>{totalLessons} lecciones</span>
             <span>{modules.length} módulos</span>
-            {totalVideoMin > 0 && <span>~{formatTotalMin(totalVideoMin)} de video</span>}
+            {videosPublicados > 0 ? (
+              <span>
+                {videosPublicados} de {totalLessons} videos
+                {totalVideoMin > 0 && <> · ~{formatTotalMin(totalVideoMin)}</>}
+              </span>
+            ) : (
+              <span>Guía escrita · video en preparación</span>
+            )}
           </div>
 
           <div
@@ -124,8 +141,13 @@ const totalLessons = lecciones.length
           <div class="course-aside__block">
             <p class="course-aside__label">Formato</p>
             <p class="course-aside__text">
-              {totalLessons} lecciones en {modules.length} módulos con video, comandos copiables
-              para terminal, advertencias de seguridad y ejercicios prácticos.
+              {totalLessons} lecciones en {modules.length} módulos con guía escrita, comandos
+              copiables para terminal, advertencias de seguridad y ejercicios prácticos.
+              {videosPublicados > 0 ? (
+                <> Incluye {videosPublicados} videos disponibles.</>
+              ) : (
+                <> Los videos están en preparación.</>
+              )}
               {totalCapitulos > 0 && <> Incluye {totalCapitulos} capítulos con timestamp.</>}
             </p>
           </div>
@@ -151,7 +173,9 @@ const totalLessons = lecciones.length
         </div>
         <span class="meta">
           {modules.length} módulos · {totalLessons} clases
-          {totalVideoMin > 0 && ` · ~${formatTotalMin(totalVideoMin)}`}
+          {videosPublicados > 0
+            ? ` · ${videosPublicados} de ${totalLessons} videos`
+            : " · guía escrita"}
         </span>
       </div>
 

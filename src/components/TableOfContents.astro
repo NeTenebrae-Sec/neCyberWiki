@@ -1,0 +1,188 @@
+---
+interface Heading {
+  depth: number
+  slug: string
+  text: string
+}
+
+interface Props {
+  headings: Heading[]
+  title?: string
+}
+
+const { headings, title = "En esta nota" } = Astro.props
+
+const items = headings.filter((heading) => heading.depth === 2 || heading.depth === 3)
+const groups: Array<Heading & { children: Heading[] }> = []
+
+for (const heading of items) {
+  if (heading.depth === 2 || groups.length === 0) {
+    groups.push({ ...heading, children: [] })
+  } else {
+    groups[groups.length - 1].children.push(heading)
+  }
+}
+---
+
+{items.length >= 2 && (
+  <nav class="note-toc sheet sheet--flat" aria-labelledby="note-toc-title" data-toc>
+    <div class="note-toc__head">
+      <span class="docket">Índice</span>
+      <h2 class="note-toc__title" id="note-toc-title">{title}</h2>
+    </div>
+
+    <ol class="note-toc__list">
+      {groups.map((group) => (
+        <li class="note-toc__item">
+          <a class="note-toc__link" href={`#${group.slug}`}>{group.text}</a>
+          {group.children.length > 0 && (
+            <ol class="note-toc__sublist">
+              {group.children.map((child) => (
+                <li>
+                  <a class="note-toc__link note-toc__link--sub" href={`#${child.slug}`}>
+                    {child.text}
+                  </a>
+                </li>
+              ))}
+            </ol>
+          )}
+        </li>
+      ))}
+    </ol>
+  </nav>
+)}
+
+<script>
+  const initToc = (nav: HTMLElement) => {
+    const links = [...nav.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')]
+    const targets = links
+      .map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1))))
+      .filter((target): target is HTMLElement => Boolean(target))
+
+    if (targets.length === 0) return
+
+    const setActive = (id: string) => {
+      for (const link of links) {
+        if (decodeURIComponent(link.hash.slice(1)) === id) {
+          link.setAttribute("aria-current", "true")
+        } else {
+          link.removeAttribute("aria-current")
+        }
+      }
+    }
+
+    setActive(targets[0].id)
+
+    if (!("IntersectionObserver" in window)) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+        if (visible.length > 0) setActive(visible[0].target.id)
+      },
+      { rootMargin: "-6rem 0px -65% 0px", threshold: 0 },
+    )
+
+    for (const target of targets) observer.observe(target)
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-toc]").forEach(initToc)
+</script>
+
+<style>
+  .note-toc {
+    margin-block: 1.5rem 2rem;
+    padding: 1rem 1.15rem 1.1rem;
+    border-left: 3px solid var(--accent);
+    background: var(--bg-sunken);
+  }
+
+  .note-toc__head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.7rem;
+    margin-bottom: 0.7rem;
+  }
+
+  .note-toc__title {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+
+  .note-toc__list,
+  .note-toc__sublist {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .note-toc__list {
+    display: grid;
+    gap: 0.28rem;
+  }
+
+  .note-toc__sublist {
+    margin-top: 0.22rem;
+    padding-left: 0.95rem;
+    border-left: 1px solid var(--line);
+    display: grid;
+    gap: 0.18rem;
+  }
+
+  .note-toc__link {
+    display: inline-block;
+    padding: 0.12rem 0;
+    color: var(--ink-muted);
+    font-size: 0.88rem;
+    line-height: 1.45;
+    text-decoration: none;
+    text-underline-offset: 0.18em;
+  }
+
+  .note-toc__link--sub {
+    font-size: 0.82rem;
+    color: var(--ink-dim);
+  }
+
+  .note-toc__link:hover {
+    color: var(--ink);
+    text-decoration: underline;
+  }
+
+  .note-toc__link[aria-current="true"] {
+    color: var(--accent);
+  }
+
+  .note-toc__link::before {
+    content: "▸";
+    margin-right: 0.3rem;
+    color: var(--accent);
+    opacity: 0;
+  }
+
+  .note-toc__link[aria-current="true"]::before {
+    opacity: 1;
+  }
+
+  .note-toc__link:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 1px;
+  }
+
+  @media (max-width: 480px) {
+    .note-toc {
+      padding: 0.9rem 0.95rem;
+    }
+
+    .note-toc__head {
+      flex-wrap: wrap;
+      gap: 0.35rem 0.6rem;
+    }
+  }
+</style>
