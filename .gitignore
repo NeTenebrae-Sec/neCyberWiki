@@ -21,3 +21,10 @@ private/
 
 # Playwright MCP artifacts
 .playwright-mcp/
+
+# AI / agent artifacts — kept locally, never committed
+.agents/
+EJEMPLOS/
+docs/screenshots/
+skills-lock.json
+specs/
