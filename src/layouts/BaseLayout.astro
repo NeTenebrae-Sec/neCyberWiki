@@ -1,7 +1,7 @@
 ---
 import "../styles/global.css"
 import { site } from "../data/site"
-import { getCursosPublicados } from "../lib/catalog"
+import { cursoUrl, getCursosPublicados } from "../lib/catalog"
 
 interface Props {
   titulo: string
@@ -14,11 +14,7 @@ const year = new Date().getFullYear()
 
 const cursosPublicados = await getCursosPublicados()
 const cursoDestacado = cursosPublicados[0]
-const primeraLeccion = cursoDestacado?.lecciones[0]
-const empezarHref =
-  cursoDestacado && primeraLeccion
-    ? `${base}cursos/${cursoDestacado.slug}/${primeraLeccion.slug}/`
-    : `${base}cursos/`
+const rutaDestacada = cursoDestacado ? cursoUrl(cursoDestacado, base) : `${base}cursos/`
 
 const path = Astro.url.pathname.replace(/\/+$/, "/")
 const isActive = (href: string) => (href === base ? path === base : path.startsWith(href))
@@ -26,7 +22,6 @@ const isActive = (href: string) => (href === base ? path === base : path.startsW
 const nav = [
   { label: "Inicio", href: base },
   { label: "Cursos", href: `${base}cursos/` },
-  { label: "Notas", href: `${base}notas/` },
   { label: "Bitácora", href: `${base}blog/` },
 ]
 ---
@@ -68,7 +63,7 @@ const nav = [
             <span class="brand__name">
               ne<span>Cyber</span>Wiki
             </span>
-            <span class="brand__tag">Archivo de campo · 2026</span>
+            <span class="brand__tag">Archivo personal · 2026</span>
           </span>
         </a>
 
@@ -123,8 +118,8 @@ const nav = [
           <span id="theme-status" class="sr-only" aria-live="polite"></span>
 
           {cursoDestacado && (
-            <a href={empezarHref} class="btn btn-primary btn-sm header-cta">
-              Empezar <span aria-hidden="true">→</span>
+            <a href={`${base}cursos/`} class="btn btn-ghost btn-sm header-cta">
+              Catálogo <span aria-hidden="true">→</span>
             </a>
           )}
 
@@ -205,8 +200,8 @@ const nav = [
           >
             <div id="mobile-progress-fill" class="progress-fill"></div>
           </div>
-          <a href={`${base}cursos/${cursoDestacado.slug}/`} class="drawer__continue">
-            Continuar el curso <span aria-hidden="true">→</span>
+          <a href={rutaDestacada} class="drawer__continue">
+            Abrir el curso <span aria-hidden="true">→</span>
           </a>
         </div>
       )}
@@ -225,42 +220,26 @@ const nav = [
           <span>Cursos</span>
         </a>
         <a
-          href={`${base}notas/`}
-          class="drawer__link"
-          aria-current={isActive(`${base}notas/`) ? "page" : undefined}
-        >
-          <span class="drawer__num">03</span>
-          <span>Notas</span>
-        </a>
-        <a
           href={`${base}blog/`}
           class="drawer__link"
           aria-current={isActive(`${base}blog/`) ? "page" : undefined}
         >
-          <span class="drawer__num">04</span>
+          <span class="drawer__num">03</span>
           <span>Bitácora</span>
-        </a>
-        <a
-          href={`${base}certificados/verificar/`}
-          class="drawer__link"
-          aria-current={isActive(`${base}certificados/`) ? "page" : undefined}
-        >
-          <span class="drawer__num">05</span>
-          <span>Verificar certificados</span>
         </a>
         <a
           href={`${base}terminos/`}
           class="drawer__link"
           aria-current={isActive(`${base}terminos/`) ? "page" : undefined}
         >
-          <span class="drawer__num">06</span>
+          <span class="drawer__num">04</span>
           <span>Términos</span>
         </a>
       </nav>
 
       <div class="drawer__foot">
         <p class="drawer__note">
-          Aprende a atacar para saber defender. Pruebas solo en laboratorios propios o con
+          Un archivo personal de aprendizaje. Todo se practica en laboratorios propios o con
           autorización.
         </p>
         {site.koFi && (
@@ -285,9 +264,6 @@ const nav = [
             Cursos, laboratorios y notas de campo de ciberseguridad en español. Sin registro, sin
             costo y con el progreso guardado en tu navegador.
           </p>
-          <div class="footer-stamp">
-            <span class="stamp">Permiso o nada</span>
-          </div>
         </div>
 
         <div>
@@ -306,23 +282,13 @@ const nav = [
               </a>
             </li>
             <li>
-              <a class="footer-link" href={`${base}notas/`}>
-                Notas
-              </a>
-            </li>
-            <li>
               <a class="footer-link" href={`${base}blog/`}>
                 Bitácora
               </a>
             </li>
             <li>
-              <a class="footer-link" href={`${base}certificados/verificar/`}>
-                Verificar certificados
-              </a>
-            </li>
-            <li>
               <a class="footer-link" href={`${base}terminos/`}>
-                Términos y licencia
+                Términos y uso
               </a>
             </li>
           </ul>
@@ -338,11 +304,6 @@ const nav = [
                 GitHub <span aria-hidden="true">↗</span>
               </a>
             </li>
-            <li>
-              <a class="footer-link" href={site.redes.threads} target="_blank" rel="noopener">
-                Threads <span aria-hidden="true">↗</span>
-              </a>
-            </li>
             {site.redes.youtube && (
               <li>
                 <a class="footer-link" href={site.redes.youtube} target="_blank" rel="noopener">
@@ -350,16 +311,6 @@ const nav = [
                 </a>
               </li>
             )}
-            <li>
-              <a
-                class="footer-link"
-                href="https://github.com/NeTenebrae-Sec/neCyberWiki/blob/main/content/Codigo%20de%20conducta.md"
-                target="_blank"
-                rel="noopener"
-              >
-                Código de conducta <span aria-hidden="true">↗</span>
-              </a>
-            </li>
           </ul>
         </div>
 
@@ -390,12 +341,11 @@ const nav = [
       <div class="footer-bottom">
         <div class="container-page footer-bottom__inner">
           <span>
-            Pruebas solo en laboratorios propios o con autorización. Aprende a atacar para saber
-            defender.
+            Práctica solo en laboratorios propios o con autorización. El resto es estudiar el
+            sistema.
           </span>
           <span>
-            neCyberWiki · {year} ·{" "}
-            <a href={`${base}terminos/`}>Código MIT · Contenido educativo</a>
+            neCyberWiki · {year} · <a href={`${base}terminos/`}>Código MIT · Contenido educativo</a>
           </span>
         </div>
       </div>
@@ -433,7 +383,7 @@ const nav = [
         </div>
 
         <h2 class="terms-dialog__title" id="terminos-title">
-          Gratis para aprender. No para redistribuir.
+          Gratis para aprender. Úsalo con criterio.
         </h2>
         <p class="terms-dialog__lead" id="terminos-desc">
           Este sitio es gratuito y su contenido tiene finalidad exclusivamente educativa. Antes de
@@ -444,15 +394,17 @@ const nav = [
           <li>Puedes leer, estudiar y practicar el contenido sin pagar ni registrarte.</li>
           <li>Practica solo en sistemas propios o en entornos con autorización expresa.</li>
           <li>
-            No está permitido copiar, republicar, vender ni redistribuir el contenido. Sí puedes
-            enlazar a las páginas originales y citar con atribución.
+            Verifica los comandos antes de aplicarlos. El uso que hagas de la información es tu
+            responsabilidad.
           </li>
         </ul>
 
         <div class="terms-dialog__actions">
-          <a class="btn btn-secondary" href={`${base}terminos/`}>Leer términos completos</a>
+          <a class="btn btn-secondary" href={`${base}terminos/`}>
+            Leer términos completos
+          </a>
           <button type="button" class="btn btn-primary" id="terminos-aceptar" autofocus>
-            Entendido
+            Acepto y entro
           </button>
         </div>
       </dialog>
@@ -542,7 +494,7 @@ const nav = [
       window.addEventListener("storage", syncGlobalProgress)
 
       const termsDialog = document.getElementById("terminos-dialog")
-      const termsKey = "ncw:terminos:v1"
+      const termsKey = "ncw:legal:v1"
       const closeTerms = () => {
         if (termsDialog instanceof HTMLDialogElement && termsDialog.open) termsDialog.close()
       }

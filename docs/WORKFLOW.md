@@ -21,15 +21,17 @@ líneas y ejecución.
 
 ```md
 ## Tanda N — Nombre
+
 Objetivo:
+
 - …
-Entregables:
+  Entregables:
 - …
-Fuera de alcance:
+  Fuera de alcance:
 - …
-Tests:
+  Tests:
 - …
-Criterio de aprobación:
+  Criterio de aprobación:
 - …
 ```
 
@@ -46,13 +48,13 @@ Criterio de aprobación:
 
 ## Tandas
 
-| Tanda | Objetivo |
-| --- | --- |
-| 0 | Documentación nueva y limpieza. |
-| 1 | Categorías, cursos y Bandit. |
-| 2 | Shell, candado legal y perfil. |
-| 3 | Páginas, roadmap, comunidad y buscador. |
-| 4 | QA, accesibilidad, rendimiento y release. |
+| Tanda | Objetivo                                  |
+| ----- | ----------------------------------------- |
+| 0     | Documentación nueva y limpieza.           |
+| 1     | Categorías, cursos y Bandit.              |
+| 2     | Shell, candado legal y perfil.            |
+| 3     | Páginas, roadmap, comunidad y buscador.   |
+| 4     | QA, accesibilidad, rendimiento y release. |
 
 Cada tanda se aprueba antes de empezar la siguiente.
 
@@ -81,6 +83,7 @@ Cada tanda se aprueba antes de empezar la siguiente.
 
 ```md
 ## Handoff
+
 - Hecho:
 - Tests:
 - Pendiente:

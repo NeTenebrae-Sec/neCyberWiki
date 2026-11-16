@@ -8,7 +8,12 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
 )
 const base = site.base
 const fmt = (d: Date) =>
-  new Intl.DateTimeFormat("es-MX", { year: "numeric", month: "long", day: "numeric" }).format(d)
+  new Intl.DateTimeFormat("es-MX", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  }).format(d)
 const [featured, ...rest] = posts
 const featuredSlug = featured?.id.split("/").pop()
 ---

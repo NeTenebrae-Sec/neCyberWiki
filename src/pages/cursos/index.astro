@@ -1,14 +1,19 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro"
+import { getCategoriasConContenido } from "../../lib/catalog"
 import { site } from "../../data/site"
-import { cursos } from "../../data/cursos"
 
+const categorias = await getCategoriasConContenido()
+const disponibles = categorias.filter((categoria) => categoria.disponible)
+const preparacion = categorias.filter((categoria) => !categoria.disponible)
+const totalCursos = disponibles.reduce((total, categoria) => total + categoria.cursos.length, 0)
+const totalLecciones = disponibles.reduce((total, categoria) => total + categoria.totalLecciones, 0)
 const base = site.base
 ---
 
 <BaseLayout
-  titulo="Catálogo de Cursos Prácticos"
-  descripcion="Cursos técnicos gratuitos de informática y ciberseguridad en español. Sin registros, con videos concisos, guías paso a paso y laboratorios locales."
+  titulo="Cursos"
+  descripcion="Catálogo de cursos por categorías: Linux, redes, programación, pentesting web y más. Contenido educativo en español, sin cuentas y con progreso local."
 >
   <section class="catalog-hero">
     <div class="container-page">
@@ -19,26 +24,29 @@ const base = site.base
 
       <div class="catalog-hero__grid">
         <div>
-          <h1 class="display catalog-hero__title">Contratos abiertos.</h1>
+          <h1 class="display catalog-hero__title">
+            Ocho rutas.
+            <br />
+            Las que ya respiran.
+          </h1>
           <p class="lead catalog-hero__lead">
-            Formación libre sin ataduras: cada curso incluye video, documentación con comandos
-            exactos y ejercicios para practicar en tu máquina. Sin registro, sin costo, sin
-            ataduras.
+            El catálogo está ordenado por categorías. Solo se encienden las rutas con cursos
+            publicados; las demás quedan visibles, sin disfrazar lo que todavía no existe.
           </p>
         </div>
 
         <dl class="catalog-facts">
           <div>
+            <dt>Rutas</dt>
+            <dd>{String(categorias.length).padStart(2, "0")}</dd>
+          </div>
+          <div>
             <dt>Cursos publicados</dt>
-            <dd>{cursos.length.toString().padStart(2, "0")}</dd>
+            <dd>{String(totalCursos).padStart(2, "0")}</dd>
           </div>
           <div>
-            <dt>Formato</dt>
-            <dd>Video + guía</dd>
-          </div>
-          <div>
-            <dt>Costo</dt>
-            <dd>$0</dd>
+            <dt>Lecciones</dt>
+            <dd>{String(totalLecciones).padStart(2, "0")}</dd>
           </div>
         </dl>
       </div>
@@ -47,114 +55,86 @@ const base = site.base
 
   <section class="catalog-body">
     <div class="container-page">
-      <p class="label-rule">Expedientes disponibles</p>
-
-      <div class="course-list">
-        {cursos.map((c) => (
-          <article class="course-dossier sheet sheet--cut">
-            <span class="course-dossier__spine" aria-hidden="true"></span>
-            <div class="course-dossier__inner">
-              <div class="course-dossier__head">
-                <span class="docket">
-                  Curso 01 · <strong>{c.nivel}</strong>
-                </span>
-                <span class="chip chip--signal">
-                  <span class="status-dot" aria-hidden="true"></span> Publicado
-                </span>
-              </div>
-
-              <h2 class="course-dossier__title">
-                <a href={`${base}cursos/${c.slug}/`}>{c.titulo}</a>
-              </h2>
-
-              <p class="course-dossier__desc">{c.descripcion}</p>
-
-              <div class="course-dossier__grid">
-                <div>
-                  <p class="course-dossier__label">Equipo requerido</p>
-                  <ul class="course-dossier__req">
-                    {c.requisitos.map((r) => (
-                      <li>
-                        <span aria-hidden="true">▹</span>
-                        {r}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <dl class="course-dossier__stats">
-                  <div>
-                    <dt>Lecciones</dt>
-                    <dd>{c.lecciones}</dd>
-                  </div>
-                  <div>
-                    <dt>Duración</dt>
-                    <dd>{c.duracion}</dd>
-                  </div>
-                  <div>
-                    <dt>Nivel</dt>
-                    <dd>{c.nivel}</dd>
-                  </div>
-                </dl>
-              </div>
-
-              <div class="course-dossier__foot">
-                <div
-                  class="course-dossier__progress"
-                  data-course-progress={c.slug}
-                  data-total={c.lecciones}
-                >
-                  <div class="progress-head">
-                    <span>Tu avance guardado</span>
-                    <strong data-course-progress-label>0 / {c.lecciones} lecciones</strong>
-                  </div>
-                  <div class="progress-track">
-                    <div class="progress-fill" data-course-progress-fill></div>
-                  </div>
-                </div>
-
-                <a href={`${base}cursos/${c.slug}/`} class="btn btn-primary">
-                  Ver temario y lecciones <span aria-hidden="true">→</span>
-                </a>
-              </div>
-            </div>
-          </article>
-        ))}
-      </div>
-
-      <div class="catalog-upcoming">
-        <div class="catalog-upcoming__head">
-          <span class="status status--pending">
-            <span class="status-dot status-dot--amber" aria-hidden="true"></span>
-            En preparación
+      <div class="catalog-section">
+        <div class="catalog-section__head">
+          <p class="label-rule">Disponible ahora</p>
+          <span class="meta">
+            {disponibles.length} de {categorias.length} rutas abiertas
           </span>
-          <span class="stamp stamp--faint">Sellado</span>
         </div>
-        <h2>Fundamentos de Redes TCP/IP · Python Ofensivo · Pentesting Web con Burp Suite</h2>
-        <p>
-          Nuevos módulos prácticos en desarrollo. Cada dos semanas se publica contenido nuevo
-          derivado de laboratorios reales. Los avances se anuncian primero en la bitácora.
-        </p>
+
+        <div class="category-grid">
+          {disponibles.map((categoria) => (
+            <article class="category-card category-card--active sheet sheet--cut">
+              <div class="category-card__head">
+                <span class="category-card__index">{categoria.indice}</span>
+                <span class="status">
+                  <span class="status-dot" aria-hidden="true" />
+                  {categoria.cursos.length} {categoria.cursos.length === 1 ? "curso" : "cursos"}
+                </span>
+              </div>
+
+              <h2 class="category-card__title">
+                <a href={`${base}cursos/${categoria.id}/`}>{categoria.titulo}</a>
+              </h2>
+              <p class="category-card__tagline">{categoria.tagline}</p>
+
+              <ul class="category-card__courses">
+                {categoria.cursos.map((curso) => (
+                  <li>
+                    <a href={`${base}cursos/${categoria.id}/${curso.slug}/`}>
+                      <span class="category-card__course-title">{curso.titulo}</span>
+                      <span class="category-card__course-meta">
+                        {curso.lecciones.length}{" "}
+                        {curso.unidad === "nivel" ? "niveles" : "lecciones"} · guía escrita
+                      </span>
+                      <span class="category-card__arrow" aria-hidden="true">
+                        →
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+
+              <a class="category-card__link" href={`${base}cursos/${categoria.id}/`}>
+                Abrir la ruta <span aria-hidden="true">→</span>
+              </a>
+            </article>
+          ))}
+        </div>
       </div>
+
+      {preparacion.length > 0 && (
+        <div class="catalog-section catalog-section--muted">
+          <div class="catalog-section__head">
+            <p class="label-rule">Rutas en preparación</p>
+            <span class="meta">Sin cursos publicados todavía</span>
+          </div>
+
+          <div class="category-grid">
+            {preparacion.map((categoria) => (
+              <article class="category-card category-card--muted">
+                <div class="category-card__head">
+                  <span class="category-card__index">{categoria.indice}</span>
+                  <span class="status status--pending">
+                    <span class="status-dot status-dot--amber" aria-hidden="true" />
+                    En preparación
+                  </span>
+                </div>
+                <h2 class="category-card__title">
+                  <a href={`${base}cursos/${categoria.id}/`}>{categoria.titulo}</a>
+                </h2>
+                <p class="category-card__tagline">{categoria.tagline}</p>
+                <p class="category-card__note">
+                  La ruta está abierta, pero aún no tiene lecciones. No hay fechas prometidas.
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   </section>
-
-  <script is:inline>
-    try {
-      for (const root of document.querySelectorAll("[data-course-progress]")) {
-        const slug = root.getAttribute("data-course-progress")
-        const total = Number(root.getAttribute("data-total") || 8)
-        const done = JSON.parse(localStorage.getItem(`ncw:progress:${slug}`) || "[]")
-        const n = Array.isArray(done) ? done.length : 0
-        const pct = Math.round((n / total) * 100)
-
-        const label = root.querySelector("[data-course-progress-label]")
-        const fill = root.querySelector("[data-course-progress-fill]")
-        if (label) label.textContent = `${n} / ${total} lecciones (${pct}%)`
-        if (fill) fill.style.width = `${pct}%`
-      }
-    } catch {}
-  </script>
 </BaseLayout>
 
 <style>
@@ -197,7 +177,7 @@ const base = site.base
   }
 
   .catalog-hero__title {
-    font-size: clamp(2.4rem, 5.5vw, 4.75rem);
+    font-size: clamp(2.4rem, 5.5vw, 4.5rem);
     line-height: 0.94;
   }
 
@@ -242,201 +222,177 @@ const base = site.base
     padding-block: clamp(2.5rem, 5vw, 4.5rem);
   }
 
-  .course-list {
+  .catalog-section + .catalog-section {
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+    padding-top: clamp(2rem, 4vw, 3rem);
+    border-top: 1px solid var(--line);
+  }
+
+  .catalog-section__head {
     display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+  }
+
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
     margin-top: 1rem;
   }
 
-  .course-dossier {
-    --sheet-cut: 34px;
+  .category-card {
+    --sheet-cut: 24px;
     position: relative;
-    padding-left: 0.55rem;
-    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(1.1rem, 2.4vw, 1.5rem);
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-paper);
   }
 
-  .course-dossier__spine {
+  .category-card--active::before {
+    content: "";
     position: absolute;
     inset: 0 auto 0 0;
-    width: 0.55rem;
-    background: repeating-linear-gradient(0deg, var(--accent) 0 18px, transparent 18px 24px);
-    opacity: 0.55;
+    width: 3px;
+    background: linear-gradient(var(--accent), color-mix(in srgb, var(--accent) 15%, transparent));
   }
 
-  .course-dossier__inner {
-    padding: clamp(1.25rem, 3vw, 2.25rem);
+  .category-card--muted {
+    border-style: dashed;
+    background: var(--bg-sunken);
+    box-shadow: none;
   }
 
-  .course-dossier__head {
+  .category-card__head {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 0.75rem;
+    gap: 0.5rem 1rem;
   }
 
-  .course-dossier__title {
-    margin-top: 0.75rem;
-    max-width: 26ch;
-    font-size: clamp(1.8rem, 3.6vw, 2.75rem);
-    line-height: 1;
-    letter-spacing: -0.035em;
+  .category-card__index {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--accent);
   }
 
-  .course-dossier__title a {
+  .category-card__title {
+    margin-top: 0.7rem;
+    font-size: clamp(1.3rem, 2.2vw, 1.7rem);
+    line-height: 1.1;
+    letter-spacing: -0.028em;
+  }
+
+  .category-card__title a {
     color: var(--ink);
     text-decoration: none;
   }
 
-  .course-dossier__title a:hover {
+  .category-card__title a:hover {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 0.16em;
+  }
+
+  .category-card__tagline {
+    margin-top: 0.45rem;
+    color: var(--ink-dim);
+    font-size: 0.86rem;
+    line-height: 1.6;
+  }
+
+  .category-card__courses {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1rem;
+    border-top: 1px solid var(--line);
+    list-style: none;
+    padding: 0;
+  }
+
+  .category-card__courses li + li {
+    border-top: 1px solid var(--line);
+  }
+
+  .category-card__courses a {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 1rem;
+    gap: 0.15rem 0.75rem;
+    padding-block: 0.7rem;
+    text-decoration: none;
+  }
+
+  .category-card__course-title {
+    color: var(--ink);
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .category-card__course-meta {
+    grid-column: 1;
+    color: var(--ink-muted);
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .category-card__arrow {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+    color: var(--accent);
+    transition: transform var(--dur-ui) var(--ease-out);
+  }
+
+  .category-card__courses a:hover .category-card__course-title {
     color: var(--accent);
   }
 
-  .course-dossier__desc {
-    margin-top: 0.8rem;
-    max-width: 70ch;
-    color: var(--ink-dim);
-    font-size: 0.95rem;
-    line-height: 1.7;
+  .category-card__courses a:hover .category-card__arrow {
+    transform: translateX(3px);
   }
 
-  .course-dossier__grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-    gap: clamp(1.25rem, 3vw, 2.5rem);
-    margin-top: 1.5rem;
-    padding-top: 1.2rem;
-    border-top: 1px solid var(--line);
-  }
-
-  .course-dossier__label {
+  .category-card__link {
+    margin-top: auto;
+    padding-top: 0.9rem;
+    color: var(--accent);
     font-family: var(--font-mono);
-    font-size: 0.6rem;
+    font-size: 0.62rem;
     font-weight: 600;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--ink-muted);
+    text-decoration: none;
   }
 
-  .course-dossier__req {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    margin-top: 0.6rem;
+  .category-card__link:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
 
-  .course-dossier__req li {
-    display: flex;
-    align-items: baseline;
-    gap: 0.45rem;
-    color: var(--ink-dim);
-    font-size: 0.84rem;
-  }
-
-  .course-dossier__req li span {
-    color: var(--signal);
-  }
-
-  .course-dossier__stats {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    border-left: 1px solid var(--line);
-    padding-left: clamp(1rem, 2vw, 1.75rem);
-  }
-
-  .course-dossier__stats > div {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-    padding-bottom: 0.4rem;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .course-dossier__stats dt {
-    font-family: var(--font-mono);
-    font-size: 0.6rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--ink-muted);
-  }
-
-  .course-dossier__stats dd {
-    color: var(--ink);
-    font-size: 0.84rem;
-    font-weight: 600;
-    text-align: right;
-  }
-
-  .course-dossier__foot {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 1.25rem;
-    align-items: end;
-    margin-top: 1.5rem;
-    padding-top: 1.2rem;
-    border-top: 1px solid var(--line);
-  }
-
-  .course-dossier__progress {
-    max-width: 30rem;
-  }
-
-  .catalog-upcoming {
-    position: relative;
-    margin-top: 1.5rem;
-    padding: clamp(1.25rem, 3vw, 2rem);
-    border: 1px dashed var(--line-strong);
-    border-radius: var(--radius);
-    background: var(--bg-sunken);
-  }
-
-  .catalog-upcoming__head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-  }
-
-  .catalog-upcoming h2 {
+  .category-card__note {
     margin-top: 0.8rem;
-    max-width: 44ch;
-    font-size: clamp(1.2rem, 2vw, 1.6rem);
-    line-height: 1.2;
-  }
-
-  .catalog-upcoming p {
-    margin-top: 0.6rem;
-    max-width: 70ch;
-    color: var(--ink-dim);
-    font-size: 0.87rem;
-    line-height: 1.7;
+    padding-left: 0.65rem;
+    border-left: 2px solid var(--warn);
+    color: var(--ink-muted);
+    font-size: 0.76rem;
+    line-height: 1.55;
   }
 
   @media (max-width: 900px) {
     .catalog-hero__grid,
-    .course-dossier__grid,
-    .course-dossier__foot {
+    .category-grid {
       grid-template-columns: minmax(0, 1fr);
-    }
-
-    .course-dossier__stats {
-      border-left: 0;
-      padding-left: 0;
-      border-top: 1px solid var(--line);
-      padding-top: 0.9rem;
-    }
-
-    .course-dossier__stats > div:last-child {
-      border-bottom: 0;
-      padding-bottom: 0;
-    }
-
-    .course-dossier__foot .btn {
-      width: 100%;
     }
   }
 

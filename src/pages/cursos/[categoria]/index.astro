@@ -1,0 +1,261 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro"
+import CourseCard from "../../../components/CourseCard.astro"
+import { getCategoriasConContenido } from "../../../lib/catalog"
+import { site } from "../../../data/site"
+
+export async function getStaticPaths() {
+  const categorias = await getCategoriasConContenido()
+  return categorias.map((categoria) => ({ params: { categoria: categoria.id } }))
+}
+
+const { categoria: id } = Astro.params
+const categorias = await getCategoriasConContenido()
+const categoria = categorias.find((item) => item.id === id)
+if (!categoria) throw new Error(`Categoría no definida: ${id}`)
+
+const base = site.base
+const primeraDisponible = categorias.find((item) => item.disponible)
+const totalLecciones = categoria.cursos.reduce((total, curso) => total + curso.lecciones.length, 0)
+---
+
+<BaseLayout
+  titulo={`${categoria.titulo} · Cursos`}
+  descripcion={`${categoria.tagline} Cursos y laboratorios de ${categoria.titulo.toLowerCase()} en neCyberWiki.`}
+>
+  <section class="category-hero">
+    <div class="container-page">
+      <nav class="breadcrumb" aria-label="Miga de pan">
+        <a href={`${base}cursos/`}>Cursos</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{categoria.titulo}</span>
+      </nav>
+
+      <div class="category-hero__docket">
+        <span class="docket">Ruta {categoria.indice}</span>
+        <span class:list={["status", categoria.disponible ? "status--active" : "status--pending"]}>
+          <span
+            class:list={["status-dot", categoria.disponible ? "" : "status-dot--amber"]}
+            aria-hidden="true"
+          />
+          {categoria.disponible ? "Ruta abierta" : "En preparación"}
+        </span>
+      </div>
+
+      <div class="category-hero__grid">
+        <div>
+          <h1 class="display category-hero__title">{categoria.titulo}</h1>
+          <p class="lead category-hero__lead">{categoria.descripcion}</p>
+          <ul class="tags category-hero__tags" aria-label="Temas de la ruta">
+            {categoria.temas.map((tema) => (
+              <li class="tag">{tema}</li>
+            ))}
+          </ul>
+        </div>
+
+        <dl class="category-facts">
+          <div>
+            <dt>Cursos</dt>
+            <dd>{String(categoria.cursos.length).padStart(2, "0")}</dd>
+          </div>
+          <div>
+            <dt>Lecciones</dt>
+            <dd>{String(totalLecciones).padStart(2, "0")}</dd>
+          </div>
+          <div>
+            <dt>Nivel</dt>
+            <dd>{categoria.nivel}</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="category-body">
+    <div class="container-page">
+      {categoria.cursos.length > 0 ? (
+        <>
+          <div class="category-body__head">
+            <p class="label-rule">Cursos de esta ruta</p>
+            <span class="meta">Guía escrita · progreso local</span>
+          </div>
+          <div class="course-list">
+            {categoria.cursos.map((curso) => (
+              <CourseCard curso={curso} variant="full" />
+            ))}
+          </div>
+        </>
+      ) : (
+        <div class="category-empty sheet sheet--flat">
+          <span class="status status--pending">
+            <span class="status-dot status-dot--amber" aria-hidden="true" />
+            Sin cursos publicados
+          </span>
+          <h2 class="category-empty__title">Esta ruta todavía no tiene lecciones.</h2>
+          <p class="category-empty__text">
+            La categoría existe para ordenar el archivo, no para prometer contenido. Cuando haya un
+            curso completo, aparecerá aquí y en el catálogo.
+          </p>
+          <div class="category-empty__actions">
+            <a class="btn btn-primary" href={`${base}cursos/`}>
+              Volver al catálogo <span aria-hidden="true">→</span>
+            </a>
+            {primeraDisponible && (
+              <a class="btn btn-secondary" href={`${base}cursos/${primeraDisponible.id}/`}>
+                Ver lo que ya está abierto
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .category-hero {
+    position: relative;
+    padding-block: clamp(1.5rem, 3vw, 2.5rem) clamp(2.5rem, 5vw, 4rem);
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+  }
+
+  .category-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle at 1px 1px, var(--line) 0.7px, transparent 0.8px);
+    background-size: 22px 22px;
+    mask-image: linear-gradient(180deg, #000, transparent 82%);
+    opacity: 0.5;
+  }
+
+  .category-hero .container-page {
+    position: relative;
+    z-index: 1;
+  }
+
+  .category-hero__docket {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .category-hero__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(250px, 0.7fr);
+    gap: clamp(1.75rem, 4vw, 3.5rem);
+    align-items: end;
+    margin-top: 1rem;
+  }
+
+  .category-hero__title {
+    font-size: clamp(2.35rem, 5.5vw, 4.5rem);
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+  }
+
+  .category-hero__lead {
+    margin-top: 1.1rem;
+    max-width: 60ch;
+  }
+
+  .category-hero__tags {
+    margin-top: 1.2rem;
+  }
+
+  .category-facts {
+    display: grid;
+    border-top: 1px solid var(--line-strong);
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .category-facts > div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 0.7rem;
+  }
+
+  .category-facts > div + div {
+    border-top: 1px solid var(--line);
+  }
+
+  .category-facts dt {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .category-facts dd {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ink);
+    text-align: right;
+  }
+
+  .category-body {
+    padding-block: clamp(2.5rem, 5vw, 4.5rem);
+  }
+
+  .category-body__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+  }
+
+  .course-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-top: 1rem;
+  }
+
+  .category-empty {
+    max-width: 48rem;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    border-left: 3px solid var(--warn);
+  }
+
+  .category-empty__title {
+    margin-top: 0.9rem;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+
+  .category-empty__text {
+    margin-top: 0.7rem;
+    max-width: 60ch;
+    color: var(--ink-dim);
+    line-height: 1.7;
+  }
+
+  .category-empty__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 1.4rem;
+  }
+
+  @media (max-width: 900px) {
+    .category-hero__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .category-empty__actions .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

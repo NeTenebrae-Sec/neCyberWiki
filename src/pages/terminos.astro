@@ -3,12 +3,12 @@ import BaseLayout from "../layouts/BaseLayout.astro"
 import { site } from "../data/site"
 
 const base = site.base
-const actualizado = "14 de noviembre de 2026"
+const actualizado = "15 de noviembre de 2026"
 ---
 
 <BaseLayout
-  titulo="Términos de uso y licencia de contenido"
-  descripcion="Condiciones de uso de neCyberWiki: contenido gratuito y educativo, prohibición de redistribución y separación entre la licencia MIT del código y la licencia del contenido editorial."
+  titulo="Términos y uso legal"
+  descripcion="Condiciones de uso de neCyberWiki: contenido gratuito y educativo, práctica solo con autorización y ausencia de garantías."
   mostrarAvisoTerminos={false}
 >
   <article class="legal container-page">
@@ -17,28 +17,30 @@ const actualizado = "14 de noviembre de 2026"
       <span class="stamp">Contenido educativo</span>
     </div>
 
-    <h1 class="display legal__title">Términos de uso y licencia de contenido.</h1>
+    <h1 class="display legal__title">Términos y uso legal.</h1>
     <p class="lead legal__lead">
       neCyberWiki es un archivo público de aprendizaje. El acceso es gratuito y no requiere
-      registro, pero eso no significa que el contenido pueda copiarse o redistribuirse sin permiso.
+      registro. Todo el contenido tiene finalidad educativa y debe practicarse únicamente en
+      sistemas propios o con autorización expresa.
     </p>
     <p class="legal__updated">Última actualización: {actualizado}</p>
 
     <section class="legal-summary sheet sheet--cut" aria-labelledby="resumen">
-      <h2 id="resumen" class="legal-summary__title">Resumen en tres reglas</h2>
+      <h2 id="resumen" class="legal-summary__title">
+        Resumen en tres reglas
+      </h2>
       <ol class="legal-summary__list">
         <li>
           <strong>Gratis para aprender.</strong> Puedes leer, estudiar y practicar el contenido sin
           pagar ni registrarte.
         </li>
         <li>
-          <strong>Solo para educación.</strong> Las técnicas deben practicarse en sistemas propios o
-          en entornos con autorización expresa.
+          <strong>Solo para educación y con permiso.</strong> Las técnicas deben practicarse en
+          sistemas propios o en entornos con autorización expresa.
         </li>
         <li>
-          <strong>No para redistribuir.</strong> No se permite copiar, republicar, vender ni
-          redistribuir el contenido. Sí puedes enlazar a las páginas originales y citar fragmentos
-          breves con atribución.
+          <strong>Sin garantías.</strong> Verifica siempre los comandos y las fuentes oficiales
+          antes de aplicarlos. El uso que hagas de la información es tu responsabilidad.
         </li>
       </ol>
     </section>
@@ -54,7 +56,7 @@ const actualizado = "14 de noviembre de 2026"
       </section>
 
       <section aria-labelledby="finalidad-educativa">
-        <h2 id="finalidad-educativa">2. Finalidad educativa</h2>
+        <h2 id="finalidad-educativa">2. Finalidad educativa y uso legal</h2>
         <p>
           El contenido tiene una finalidad exclusivamente educativa y formativa. No constituye
           asesoría profesional, legal o de seguridad, ni autoriza a acceder a sistemas ajenos.
@@ -66,54 +68,8 @@ const actualizado = "14 de noviembre de 2026"
         </p>
       </section>
 
-      <section aria-labelledby="distribucion">
-        <h2 id="distribucion">3. Distribución y reutilización</h2>
-        <p>
-          Los textos, cursos, notas, writeups, imágenes y demás contenido editorial son originales
-          salvo que se indique otra cosa. No se permite su copia, reproducción, republicación,
-          distribución, venta ni explotación comercial, total o parcial, sin autorización escrita.
-        </p>
-        <p>
-          Sí se permite enlazar a las páginas originales de neCyberWiki y citar fragmentos breves
-          con atribución clara y un enlace a la fuente. La atribución no convierte una copia
-          completa en un uso permitido.
-        </p>
-        <p>
-          Las marcas, nombres de plataformas, capturas de terceros y enlaces externos pertenecen a
-          sus respectivos titulares. Su mención no implica patrocinio ni afiliación.
-        </p>
-      </section>
-
-      <section aria-labelledby="licencias">
-        <h2 id="licencias">4. Código y contenido: dos licencias</h2>
-        <p>
-          El código fuente del sitio se distribuye bajo la licencia MIT incluida en{" "}
-          <a
-            href="https://github.com/NeTenebrae-Sec/neCyberWiki/blob/main/LICENSE.txt"
-            target="_blank"
-            rel="noopener"
-          >
-            LICENSE.txt
-          </a>
-          . Esa licencia permite reutilizar el código con atribución y sin garantías.
-        </p>
-        <p>
-          La licencia MIT <strong>no se aplica</strong> a los textos, cursos, notas, writeups,
-          imágenes ni a la marca neCyberWiki. Esos materiales se rigen por la licencia de contenido
-          descrita en{" "}
-          <a
-            href="https://github.com/NeTenebrae-Sec/neCyberWiki/blob/main/LICENSE-CONTENT.md"
-            target="_blank"
-            rel="noopener"
-          >
-            LICENSE-CONTENT.md
-          </a>
-          .
-        </p>
-      </section>
-
       <section aria-labelledby="garantias">
-        <h2 id="garantias">5. Sin garantías y enlaces externos</h2>
+        <h2 id="garantias">3. Sin garantías y enlaces externos</h2>
         <p>
           El contenido se ofrece «tal cual». Aunque se revisa antes de publicarse, puede contener
           errores, quedar desactualizado o no funcionar en tu versión de un sistema. Verifica
@@ -125,26 +81,48 @@ const actualizado = "14 de noviembre de 2026"
         </p>
       </section>
 
+      <section aria-labelledby="codigo">
+        <h2 id="codigo">4. Código fuente</h2>
+        <p>
+          El código fuente del sitio se distribuye bajo la licencia MIT incluida en{" "}
+          <a
+            href="https://github.com/NeTenebrae-Sec/neCyberWiki/blob/main/LICENSE.txt"
+            target="_blank"
+            rel="noopener"
+          >
+            LICENSE.txt
+          </a>
+          . Esa licencia permite reutilizar el código con atribución y sin garantías.
+        </p>
+      </section>
+
+      <section aria-labelledby="apoyo">
+        <h2 id="apoyo">5. Apoyo voluntario</h2>
+        <p>
+          Si el archivo te resulta útil, puedes apoyar el proyecto en{" "}
+          <a href={site.koFi} target="_blank" rel="noopener">
+            Ko-fi
+          </a>
+          . Es una donación voluntaria: no desbloquea contenido, no crea una cuenta y no cambia el
+          acceso a ninguna lección.
+        </p>
+      </section>
+
       <section aria-labelledby="cambios">
         <h2 id="cambios">6. Cambios en estos términos</h2>
         <p>
-          Estos términos pueden actualizarse cuando cambie el contenido, la licencia o el
-          funcionamiento del sitio. La fecha de la parte superior indica la versión vigente. Si el
-          cambio es relevante, el aviso de primera visita volverá a mostrarse.
+          Estos términos pueden actualizarse cuando cambie el contenido o el funcionamiento del
+          sitio. La fecha de la parte superior indica la versión vigente. Si el cambio es relevante,
+          el aviso de primera visita volverá a mostrarse.
         </p>
       </section>
 
       <section aria-labelledby="contacto">
         <h2 id="contacto">7. Contacto</h2>
         <p>
-          Para solicitar permiso de reutilización, reportar un error o plantear una duda sobre estos
-          términos, abre un issue en{" "}
+          Para reportar un error o plantear una duda sobre estos términos, abre un issue en{" "}
           <a href={`${site.redes.github}/issues`} target="_blank" rel="noopener">
             GitHub
-          </a>{" "}
-          o escribe por{" "}
-          <a href={site.redes.threads} target="_blank" rel="noopener">
-            Threads
           </a>
           .
         </p>
@@ -155,7 +133,9 @@ const actualizado = "14 de noviembre de 2026"
       <a class="btn btn-primary" href={`${base}cursos/`}>
         Explorar los cursos <span aria-hidden="true">→</span>
       </a>
-      <a class="btn btn-secondary" href={base}>Volver al inicio</a>
+      <a class="btn btn-secondary" href={base}>
+        Volver al inicio
+      </a>
     </div>
   </article>
 </BaseLayout>

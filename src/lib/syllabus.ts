@@ -31,6 +31,7 @@ export interface ModuleGroup {
   key: string // slug del módulo (frontmatter `modulo`)
   numero: number // 1-based según orden de aparición
   titulo: string // `modulo_titulo` o "Módulo {n}"
+  objetivo?: string // Objetivo declarado en `src/data/cursos.ts`
   lecciones: SyllabusLesson[] // todas las del módulo (ordenadas)
   count: number
   totalMin: number // suma de minutos parseados de `duracion` ("" → 0)

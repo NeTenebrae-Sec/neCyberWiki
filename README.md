@@ -7,7 +7,10 @@ guardado en el navegador.
 - **Sitio:** <https://netenebraes.github.io/neCyberWiki/>
 - **Stack:** Astro 7, Tailwind CSS 4, TypeScript y JavaScript vanilla.
 - **Contenido:** Markdown validado en build con Content Collections.
-- **Buscador:** Pagefind, índice estático generado después del build.
+- **Buscador:** Pagefind (Tanda 3), índice estático generado después del build.
+
+Estado actual: Tanda 1 (categorías, cursos y Bandit) en revisión. El shell, el candado legal
+bloqueante, el perfil, el roadmap y el buscador llegan en las tandas 2 y 3.
 
 ## Arranque
 
@@ -16,7 +19,8 @@ npm install
 npm run dev
 ```
 
-El buscador no existe en `astro dev` porque Pagefind indexa el HTML construido:
+El buscador no existe en `astro dev` porque Pagefind indexa el HTML construido. Cuando se instale
+en la Tanda 3, el flujo será:
 
 ```bash
 npm run build
@@ -25,16 +29,18 @@ npm run preview
 
 ## Scripts
 
-| Script | Qué hace |
-| --- | --- |
-| `npm run dev` | Servidor de desarrollo de Astro. |
-| `npm run build` | Genera el sitio y el índice de búsqueda. |
-| `npm run preview` | Sirve `dist/` para probar el build real. |
-| `npm run check` | Comprueba tipos y contenido de Astro. |
-| `npm run lint` | ESLint sobre Astro, TS y JS. |
-| `npm test` | Tests unitarios con el runner de Node. |
-| `npm run test:e2e` | Tests de navegador con Playwright. |
-| `npm run format` | Prettier sobre todo el proyecto. |
+| Script                  | Qué hace                                          |
+| ----------------------- | ------------------------------------------------- |
+| `npm run dev`           | Servidor de desarrollo de Astro.                  |
+| `npm run build`         | Genera el sitio estático.                         |
+| `npm run preview`       | Sirve `dist/` para probar el build real.          |
+| `npm run check`         | Comprueba tipos y contenido de Astro.             |
+| `npm run lint`          | ESLint sobre Astro, TS y JS.                      |
+| `npm test`              | Tests unitarios con el runner de Node.            |
+| `npm run import:bandit` | Regenera el curso Bandit desde el archivo fuente. |
+| `npm run format`        | Prettier sobre todo el proyecto.                  |
+
+Los tests de navegador con Playwright se añadirán en la Tanda 4.
 
 ## Estructura
 
@@ -46,7 +52,7 @@ public/
   cursos/          Imágenes de los cursos
 src/
   components/      Componentes de interfaz
-  data/            Categorías, cursos y roadmap
+  data/            Categorías y cursos (roadmap en Tanda 3)
   layouts/         Shell del sitio
   lib/             Lógica pura y utilidades de build
   pages/           Rutas de Astro

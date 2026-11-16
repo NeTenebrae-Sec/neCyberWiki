@@ -119,6 +119,13 @@
   font-size: 1.15rem;
 }
 
+.sy-module__objective {
+  max-width: 62ch;
+  color: var(--ink-dim);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
 .sy-module__badge {
   display: flex;
   align-items: center;

@@ -1,6 +1,5 @@
 ---
-import { formatoCurso, type CursoPublicado } from "../lib/catalog"
-import { site } from "../data/site"
+import { formatoCurso, cursoUrl, leccionUrl, type CursoPublicado } from "../lib/catalog"
 
 interface Props {
   curso: CursoPublicado
@@ -8,11 +7,11 @@ interface Props {
 }
 
 const { curso, variant = "full" } = Astro.props
-const base = site.base
-const cursoUrl = `${base}cursos/${curso.slug}/`
+const url = cursoUrl(curso)
 const primeraLeccion = curso.lecciones[0]
-const empezarUrl = primeraLeccion ? `${cursoUrl}${primeraLeccion.slug}/` : cursoUrl
+const empezarUrl = primeraLeccion ? leccionUrl(curso, primeraLeccion) : url
 const titleId = `${curso.slug}-${variant}-title`
+const unidad = curso.unidad === "nivel" ? "niveles" : "lecciones"
 ---
 
 {variant === "compact" ? (
@@ -25,7 +24,7 @@ const titleId = `${curso.slug}-${variant}-title`
     </div>
 
     <h3 class="course-card__title" id={titleId}>
-      <a href={cursoUrl}>{curso.titulo}</a>
+      <a href={url}>{curso.titulo}</a>
     </h3>
     <p class="course-card__desc">{curso.promesa}</p>
 
@@ -33,19 +32,13 @@ const titleId = `${curso.slug}-${variant}-title`
       {formatoCurso(curso)} · {curso.modulos.length} módulos
     </p>
 
-    {curso.videos === 0 && (
-      <p class="course-card__note">
-        Video en preparación. La guía escrita completa ya está disponible.
-      </p>
-    )}
-
     <div class="course-card__actions">
-      <a class="btn btn-primary" href={cursoUrl}>
+      <a class="btn btn-primary" href={url}>
         Ver el curso <span aria-hidden="true">→</span>
       </a>
       {primeraLeccion && (
         <a class="btn btn-secondary" href={empezarUrl}>
-          Empezar la primera lección
+          Empezar el {curso.unidad === "nivel" ? "nivel 0" : "curso"}
         </a>
       )}
     </div>
@@ -56,15 +49,17 @@ const titleId = `${curso.slug}-${variant}-title`
 
     <div class="course-card__inner">
       <div class="course-card__top">
-        <span class="docket">Curso · <strong>{curso.nivel}</strong></span>
+        <span class="docket">
+          Curso · <strong>{curso.nivel}</strong>
+        </span>
         <span class="chip chip--signal">
           <span class="status-dot" aria-hidden="true" />
-          {curso.videos > 0 ? "Curso publicado" : "Guía publicada"}
+          Guía publicada
         </span>
       </div>
 
       <h3 class="course-card__title" id={titleId}>
-        <a href={cursoUrl}>{curso.titulo}</a>
+        <a href={url}>{curso.titulo}</a>
       </h3>
       <p class="course-card__desc">{curso.descripcion}</p>
 
@@ -83,7 +78,7 @@ const titleId = `${curso.slug}-${variant}-title`
 
         <dl class="course-card__stats">
           <div>
-            <dt>Lecciones</dt>
+            <dt>{curso.unidad === "nivel" ? "Niveles" : "Lecciones"}</dt>
             <dd>{curso.lecciones.length}</dd>
           </div>
           <div>
@@ -92,11 +87,11 @@ const titleId = `${curso.slug}-${variant}-title`
           </div>
           <div>
             <dt>Formato</dt>
-            <dd>{curso.videos > 0 ? `${curso.videos} videos` : "Guía escrita"}</dd>
+            <dd>Guía escrita</dd>
           </div>
           <div>
-            <dt>Duración</dt>
-            <dd>{curso.videos > 0 ? curso.duracion : "Video en preparación"}</dd>
+            <dt>Progreso</dt>
+            <dd>Local</dd>
           </div>
         </dl>
       </div>
@@ -105,10 +100,13 @@ const titleId = `${curso.slug}-${variant}-title`
         class="course-card__progress"
         data-course-progress={curso.slug}
         data-total={curso.lecciones.length}
+        data-unidad={unidad}
       >
         <div class="course-card__progress-head">
           <span>Tu avance guardado</span>
-          <strong data-course-progress-label>0 / {curso.lecciones.length} lecciones</strong>
+          <strong data-course-progress-label>
+            0 / {curso.lecciones.length} {unidad}
+          </strong>
         </div>
         <div
           class="progress-track"
@@ -123,12 +121,12 @@ const titleId = `${curso.slug}-${variant}-title`
       </div>
 
       <div class="course-card__actions">
-        <a class="btn btn-primary" href={cursoUrl}>
-          Ver temario y lecciones <span aria-hidden="true">→</span>
+        <a class="btn btn-primary" href={url}>
+          Ver temario y {unidad} <span aria-hidden="true">→</span>
         </a>
         {primeraLeccion && (
           <a class="btn btn-secondary" href={empezarUrl}>
-            Empezar la primera lección
+            Empezar el {curso.unidad === "nivel" ? "nivel 0" : "curso"}
           </a>
         )}
       </div>
@@ -143,7 +141,7 @@ const titleId = `${curso.slug}-${variant}-title`
       const total = Number(root.getAttribute("data-total") || 0)
       if (!slug || !total) continue
 
-      let done: unknown = []
+      let done: unknown
       try {
         done = JSON.parse(localStorage.getItem(`ncw:progress:${slug}`) || "[]")
       } catch {
@@ -156,7 +154,10 @@ const titleId = `${curso.slug}-${variant}-title`
       const fill = root.querySelector<HTMLElement>("[data-course-progress-fill]")
       const track = root.querySelector('[role="progressbar"]')
 
-      if (label) label.textContent = `${count} / ${total} lecciones (${pct}%)`
+      if (label) {
+        const suffix = root.getAttribute("data-unidad") || "lecciones"
+        label.textContent = `${count} / ${total} ${suffix} (${pct}%)`
+      }
       if (fill) fill.style.width = `${pct}%`
       track?.setAttribute("aria-valuenow", String(count))
     }
@@ -239,22 +240,13 @@ const titleId = `${curso.slug}-${variant}-title`
     line-height: 1.7;
   }
 
-  .course-card__meta,
-  .course-card__note {
+  .course-card__meta {
     margin-top: 0.9rem;
     font-family: var(--font-mono);
     font-size: 0.66rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--ink-muted);
-  }
-
-  .course-card__note {
-    padding-left: 0.75rem;
-    border-left: 2px solid var(--stamp);
-    line-height: 1.6;
-    text-transform: none;
-    letter-spacing: 0.02em;
   }
 
   .course-card__actions {

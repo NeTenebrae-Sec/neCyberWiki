@@ -1,113 +1,100 @@
-// Catálogo canónico de categorías de neCyberWiki (specs/03-data-models.md §1.1).
-// Las categorías son la hoja de ruta del sitio: agrupan cursos y notas publicadas,
-// pero no prometen contenido que todavía no existe. Los temas listados son el
-// mapa de lo que se irá trabajando en cada ruta.
+// Taxonomía pública del archivo. Las ocho categorías existen desde el inicio,
+// pero solo se encienden las que tienen cursos publicados. La disponibilidad
+// se deriva de `src/lib/catalog.ts`; no se declara a mano.
 
-export interface CategoriaModulo {
-  id: string // Slug estable usado por cursos y notas (`categoria` / `module`).
+export interface CategoriaInfo {
+  id: string // Slug estable usado por cursos y rutas.
   indice: string // e.g. "01"
   titulo: string
   tagline: string
   descripcion: string
-  nivel:
-    | "Principiante"
-    | "Intermedio"
-    | "Principiante a Intermedio"
-    | "Intermedio a Avanzado"
-    | "Todos los niveles"
-    | "Especializado"
+  nivel: string
   temas: string[]
 }
 
-export const CATEGORIAS: CategoriaModulo[] = [
+export const CATEGORIAS: CategoriaInfo[] = [
   {
     id: "fundamentos-y-etica",
     indice: "01",
     titulo: "Fundamentos y Ética",
-    tagline: "El marco legal, la responsabilidad y los principios del hacker defensivo.",
+    tagline: "El marco legal, la responsabilidad y los principios del trabajo defensivo.",
     descripcion:
-      "La técnica sin ética es peligro ciego. Esta ruta reúne los conceptos de legislación aplicable, código de conducta, divulgación responsable de vulnerabilidades y los principios de confidencialidad, integridad y disponibilidad.",
+      "Antes de ejecutar un comando conviene entender el contexto: permisos, alcance, divulgación responsable y las reglas que separan una auditoría de un delito.",
     nivel: "Todos los niveles",
-    temas: [
-      "Ética Hacker",
-      "Marco Legal",
-      "OpSec Legal",
-      "Divulgación Responsable",
-      "Código de Conducta",
-    ],
+    temas: ["Ética", "Marco legal", "Divulgación responsable", "Código de conducta"],
   },
   {
-    id: "sistemas-y-redes",
+    id: "linux-y-sistemas",
     indice: "02",
-    titulo: "Sistemas y Redes",
-    tagline: "Arquitectura Linux, administración profunda, networking TCP/IP y comandos.",
+    titulo: "Linux y Sistemas",
+    tagline: "Terminal, permisos, servicios y administración de sistemas GNU/Linux.",
     descripcion:
-      "No puedes auditar lo que no comprendes a fondo. La ruta empieza por instalar y asegurar Arch Linux, seguir con la terminal y los permisos, y continuar con redes, SSH y los servicios que sostienen un sistema.",
-    nivel: "Principiante a Intermedio",
-    temas: ["Arch Linux", "GNU/Linux", "Networking", "Bash", "SSH", "Pacman/AUR", "Hardening"],
+      "La base de todo lo demás. Instalar un sistema, moverse por la terminal, entender permisos y servicios, y practicar en laboratorios legales.",
+    nivel: "Principiante a intermedio",
+    temas: ["Arch Linux", "Terminal", "Bash", "SSH", "Permisos", "Pacman"],
+  },
+  {
+    id: "redes-y-servicios",
+    indice: "03",
+    titulo: "Redes y Servicios",
+    tagline: "TCP/IP, resolución de nombres, servicios expuestos y diagnóstico de red.",
+    descripcion:
+      "Cómo viaja una petición, qué hace un puerto y cómo leer el estado de una red sin adivinar. La ruta se irá construyendo con laboratorios propios.",
+    nivel: "Principiante a intermedio",
+    temas: ["TCP/IP", "DNS", "HTTP", "Puertos", "Diagnóstico"],
+  },
+  {
+    id: "programacion-y-automatizacion",
+    indice: "04",
+    titulo: "Programación y Automatización",
+    tagline: "Scripts pequeños para tareas repetitivas, análisis y herramientas propias.",
+    descripcion:
+      "Programar no es un adorno: es la diferencia entre repetir cien comandos y escribir una herramienta que los haga por ti. Enfoque práctico y sin frameworks innecesarios.",
+    nivel: "Principiante a intermedio",
+    temas: ["Bash", "Python", "Automatización", "Sockets", "Herramientas"],
   },
   {
     id: "pentesting-web",
-    indice: "03",
+    indice: "05",
     titulo: "Pentesting Web",
-    tagline: "OWASP Top 10, explotación metodológica y remediación de fallos web.",
+    tagline: "Metodología, OWASP y laboratorios controlados de seguridad web.",
     descripcion:
-      "Análisis de vectores de ataque web con rigor metodológico: Server-Side Request Forgery (SSRF), SQL Injection, Cross-Site Scripting (XSS), autenticación rota y APIs vulnerables en laboratorios controlados.",
+      "Entender la web desde el fallo y desde la defensa: autenticación, inyección, control de acceso y APIs. Siempre sobre entornos propios o autorizados.",
     nivel: "Intermedio",
-    temas: ["SSRF", "OWASP Top 10", "SQLi", "PortSwigger", "Burp Suite", "API Security"],
+    temas: ["OWASP", "SQLi", "XSS", "SSRF", "APIs"],
   },
   {
     id: "maquinas-y-ctfs",
-    indice: "04",
-    titulo: "Máquinas y CTFs",
-    tagline: "Boot2Root, resolución de retos, evasión y escalada de privilegios real.",
-    descripcion:
-      "Entrenamiento práctico contra objetivos emulados: VulnHub, HackTheBox y desafíos de captura la bandera. Reconocimiento, explotación inicial y escalada de privilegios documentada paso a paso.",
-    nivel: "Intermedio a Avanzado",
-    temas: ["VulnHub", "Boot2Root", "CTF", "Buffer Overflow", "Privilege Escalation", "Recon"],
-  },
-  {
-    id: "programacion",
-    indice: "05",
-    titulo: "Programación para Hackers",
-    tagline: "Automatización con Python, Bash scripting y análisis de binarios.",
-    descripcion:
-      "El hacker que sabe programar construye sus propias herramientas. Esta ruta trabaja scripts para automatizar escaneos, generar payloads, analizar respuestas HTTP y entender binarios con Python y Bash.",
-    nivel: "Principiante a Intermedio",
-    temas: ["Python 3", "Bash Scripting", "Automation", "Sockets", "Scapy", "Exploit Dev"],
-  },
-  {
-    id: "inteligencia-artificial",
     indice: "06",
-    titulo: "Inteligencia Artificial y Seguridad",
-    tagline: "Modelos locales, auditoría de agentes, prompt injection y defensa automatizada.",
+    titulo: "Máquinas y CTFs",
+    tagline: "Reconocimiento, explotación y escalada documentados paso a paso.",
     descripcion:
-      "La nueva frontera: ejecución de LLMs privados en hardware local, análisis de vectores de ataque como prompt injection, exfiltración de datos y desarrollo de agentes de auditoría defensiva.",
-    nivel: "Intermedio",
-    temas: ["Local LLMs", "Ollama", "Prompt Injection", "Defensa con IA", "Agentes Autónomos"],
+      "Retos y máquinas de práctica para construir metodología: enumerar, entender, explotar y escribir lo aprendido. Nada fuera de plataformas legales.",
+    nivel: "Intermedio a avanzado",
+    temas: ["Reconocimiento", "Privilege escalation", "Boot2Root", "CTF"],
   },
   {
-    id: "herramientas",
+    id: "ia-y-seguridad",
     indice: "07",
-    titulo: "Herramientas de Auditoría",
-    tagline: "Dominio de utilidades esenciales: Nmap, Burp Suite, Wireshark, Gobuster.",
+    titulo: "IA y Seguridad",
+    tagline: "Modelos locales, agentes y los límites de confiar en una máquina.",
     descripcion:
-      "Manuales operacionales de las herramientas estándar del sector: configuración avanzada, flags críticas, scripts NSE de Nmap, extensiones de Burp Suite y captura de paquetes con Wireshark.",
-    nivel: "Todos los niveles",
-    temas: ["Nmap", "Burp Suite", "Wireshark", "Gobuster", "John the Ripper", "Metasploit"],
+      "Una ruta en preparación sobre ejecución local de modelos, prompt injection, exposición de datos y defensa asistida. Sin humo y sin prometer magia.",
+    nivel: "Intermedio",
+    temas: ["Modelos locales", "Prompt injection", "Agentes", "Privacidad"],
   },
   {
-    id: "privacidad",
+    id: "privacidad-y-opsec",
     indice: "08",
-    titulo: "Privacidad y Seguridad Personal",
-    tagline: "OpSec, anonimato, gestión criptográfica de credenciales y comunicaciones.",
+    titulo: "Privacidad y OpSec",
+    tagline: "Reducir huella, proteger credenciales y ordenar la operación diaria.",
     descripcion:
-      "Protege tu propia huella digital: redes de anonimato, VPNs sin registros, cifrado GPG, gestión segura de contraseñas y mitigación de telemetría y rastreo en tus sistemas.",
+      "Higiene digital aplicada: contraseñas, cifrado, respaldos, telemetría y hábitos. Menos herramientas milagrosas y más decisiones sostenibles.",
     nivel: "Todos los niveles",
-    temas: ["OpSec", "Tor Project", "GPG Cifrado", "VPNs", "Privacidad Digital", "Zero Logs"],
+    temas: ["OpSec", "Cifrado", "Contraseñas", "Respaldos", "Telemetría"],
   },
 ]
 
-export function getCategoria(id: string): CategoriaModulo | undefined {
+export function getCategoria(id: string): CategoriaInfo | undefined {
   return CATEGORIAS.find((categoria) => categoria.id === id)
 }

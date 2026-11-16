@@ -2,9 +2,9 @@ import { defineCollection } from "astro:content"
 import { z } from "astro:schema"
 import { glob } from "astro/loaders"
 
-// Colección del curso piloto «Arch Linux fácil» (DM-03).
-// La fuente de verdad es `content/cursos/`; los schemas fallan el build
-// identificando el archivo si falta title/description (RF-10).
+// Lecciones de curso. La fuente de verdad es `content/cursos/`; los schemas
+// fallan el build identificando el archivo si falta un campo obligatorio.
+// Los metadatos editoriales del curso viven en `src/data/cursos.ts`.
 const cursos = defineCollection({
   loader: glob({ pattern: "cursos/**/*.md", base: "./content" }),
   schema: z.object({
@@ -20,7 +20,8 @@ const cursos = defineCollection({
     orden: z.number().int().min(0),
     duracion: z.string().default(""),
     nivel: z.enum(["principiante", "intermedio", "avanzado"]).default("principiante"),
-    video: z.string().default(""), // ID o URL de YouTube; vacío = "video próximamente"
+    video: z.string().default(""), // ID o URL de YouTube; vacío = guía escrita.
+    source: z.string().optional(), // Procedencia editorial, si existe.
     draft: z.boolean().default(false),
     date: z.date().optional(),
   }),
@@ -37,22 +38,4 @@ const blog = defineCollection({
   }),
 })
 
-// Notas y writeups. Las notas de Bandit se generan con
-// `scripts/import-bandit.mjs` a partir de `content/_WRITEUPS/`; el original
-// queda intacto y la copia publicada añade `serie`, `orden` y `source`.
-const notas = defineCollection({
-  loader: glob({ pattern: "notas/**/*.md", base: "./content" }),
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    tags: z.array(z.string()).default([]),
-    module: z.string(),
-    serie: z.string(),
-    orden: z.number().int().min(0),
-    date: z.date(),
-    source: z.string().optional(),
-    draft: z.boolean().default(false),
-  }),
-})
-
-export const collections = { cursos, blog, notas }
+export const collections = { cursos, blog }

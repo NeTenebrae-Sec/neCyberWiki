@@ -28,13 +28,17 @@ for (const heading of items) {
   <nav class="note-toc sheet sheet--flat" aria-labelledby="note-toc-title" data-toc>
     <div class="note-toc__head">
       <span class="docket">Índice</span>
-      <h2 class="note-toc__title" id="note-toc-title">{title}</h2>
+      <h2 class="note-toc__title" id="note-toc-title">
+        {title}
+      </h2>
     </div>
 
     <ol class="note-toc__list">
       {groups.map((group) => (
         <li class="note-toc__item">
-          <a class="note-toc__link" href={`#${group.slug}`}>{group.text}</a>
+          <a class="note-toc__link" href={`#${group.slug}`}>
+            {group.text}
+          </a>
           {group.children.length > 0 && (
             <ol class="note-toc__sublist">
               {group.children.map((child) => (
@@ -82,7 +86,7 @@ for (const heading of items) {
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
         if (visible.length > 0) setActive(visible[0].target.id)
       },
-      { rootMargin: "-6rem 0px -65% 0px", threshold: 0 },
+      { rootMargin: "-96px 0px -65% 0px", threshold: 0 },
     )
 
     for (const target of targets) observer.observe(target)

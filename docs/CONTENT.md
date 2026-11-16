@@ -10,8 +10,8 @@ categorías, cursos y roadmap. Los componentes no contienen contenido editorial.
 Crea un archivo en `content/cursos/<curso>/` con un nombre ordenable:
 
 ```text
-content/cursos/bandit/00-nivel-0.md
-content/cursos/bandit/01-nivel-1.md
+content/cursos/arch-linux-facil/09-nueva-clase.md
+content/cursos/bandit/19.md
 ```
 
 Frontmatter mínimo del curso:
@@ -31,13 +31,17 @@ duracion: ""
 nivel: "principiante"
 video: ""
 date: 2025-11-07
+source: "content/_WRITEUPS/OverTheWire/bandit/Bandit Level 0.md"
 ---
 ```
 
-- `orden` empieza en 0 y define la secuencia.
-- `modulo` agrupa lecciones en el temario.
-- `video` vacío significa “guía escrita”. Nunca inventes un ID.
+- `orden` empieza en 0 y define la secuencia. El manifiesto decide si la interfaz numera desde 0
+  (`unidad: "nivel"`, Bandit) o desde 1 (`unidad: "clase"`, Arch).
+- `modulo` agrupa lecciones en el temario y debe existir en `src/data/cursos.ts`.
+- `modulo_titulo` se usa como respaldo visible si el manifiesto no define el módulo.
+- `video` vacío significa «guía escrita». Nunca inventes un ID.
 - `duracion` vacía si no hay video. No publiques duraciones falsas.
+- `source` y `date` son opcionales.
 - El cuerpo puede usar Markdown normal. El índice de la lección se genera solo.
 - No incluyas un `# H1`: la página ya aporta el título.
 
@@ -49,23 +53,27 @@ date: 2025-11-07
 ```ts
 {
   slug: "bandit",
-  titulo: "OverTheWire Bandit",
+  titulo: "Bandit: terminal desde cero",
   descripcion: "…",
   promesa: "…",
   nivel: "principiante",
   categoria: "linux-y-sistemas",
+  unidad: "nivel",
   requisitos: ["…"],
   resultados: ["…"],
   modulos: [
     { id: "primeros-pasos", titulo: "Primeros pasos", objetivo: "…" },
   ],
-  youtube: "",
+  fuente: { nombre: "OverTheWire", url: "https://overthewire.org/wargames/bandit/" },
 }
 ```
 
 3. Comprueba que la categoría existe en `src/data/categorias.ts`.
 4. Añade imágenes en `public/cursos/<slug>/`.
 5. Ejecuta `npm run build`.
+
+El curso solo aparece en el catálogo cuando tiene al menos una lección publicada. La categoría se
+enciende sola cuando tiene un curso publicado.
 
 ## Añadir una entrada de bitácora
 
@@ -81,12 +89,13 @@ draft: false
 ---
 ```
 
-La ruta pública es `/bitacora/<slug>/`. La colección interna se llama `blog` para no romper el
-histórico, pero la navegación y la URL usan “bitácora”.
+Mientras la Tanda 3 no esté cerrada, la ruta pública es `/blog/<slug>/`. La ruta definitiva será
+`/bitacora/<slug>/` con una redirección desde `/blog/`. La colección interna se llama `blog` para
+no romper el histórico.
 
 ## Añadir una entrada al roadmap
 
-Edita `src/data/roadmap.ts`:
+La Tanda 3 creará `src/data/roadmap.ts`. El formato previsto es:
 
 ```ts
 {
@@ -102,7 +111,7 @@ Edita `src/data/roadmap.ts`:
 
 - `status`: `hecho`, `en-curso` o `planeado`.
 - Los elementos planeados no llevan fecha ni promesa de entrega.
-- La home muestra los tres más recientes.
+- La home mostrará los tres más recientes.
 - No inventes métricas de donaciones ni progreso económico.
 
 ## Imágenes
@@ -111,17 +120,37 @@ Edita `src/data/roadmap.ts`:
 - Usa la ruta absoluta con el base del sitio:
   `/neCyberWiki/cursos/bandit/imagen.webp`.
 - El plugin `rehype-lazy-images` añade `loading="lazy"` y `decoding="async"`.
-- Escribe un `alt` útil. No uses “captura 1” si puedes describir lo que se ve.
+- Escribe un `alt` útil. No uses «captura 1» si puedes describir lo que se ve.
 
 ## Bandit
 
 `content/_WRITEUPS/OverTheWire/bandit/` es el archivo original de Obsidian. La copia publicada vive
-en `content/cursos/bandit/` y es la fuente canónica del sitio. Si reimportas desde Obsidian, revisa
-el diff antes de publicar y actualiza las rutas de las imágenes.
+en `content/cursos/bandit/` y es la fuente canónica del sitio.
+
+Estructura publicada:
+
+| Módulo               | Niveles |
+| -------------------- | ------- |
+| `primeros-pasos`     | 0–4     |
+| `busqueda-y-filtros` | 5–9     |
+| `texto-y-compresion` | 10–13   |
+| `redes-y-servicios`  | 14–18   |
+
+Los archivos se llaman `0.md` a `18.md`; `orden` usa la misma numeración zero-based. Las imágenes
+viven en `public/cursos/bandit/` y se referencian con `/neCyberWiki/cursos/bandit/`.
+
+Para regenerar desde Obsidian:
+
+```bash
+npm run import:bandit
+```
+
+El script reescribe el frontmatter con el esquema de cursos, elimina los iframes de video, ajusta
+las rutas y copia solo las imágenes usadas. Revisa el diff antes de publicar.
 
 ## Buscador
 
-Pagefind indexa el HTML construido. Para que una página aparezca:
+Pagefind indexará el HTML construido (Tanda 3). Para que una página aparezca:
 
 - Debe tener contenido dentro de `data-pagefind-body` (lo aporta `BaseLayout`).
 - El tipo se declara con `data-pagefind-meta="type"`.

@@ -16,7 +16,12 @@ if (!post) throw new Error(`Artículo no encontrado: ${slug}`)
 const { Content } = await render(post)
 const base = site.base
 const fmt = (d: Date) =>
-  new Intl.DateTimeFormat("es-MX", { year: "numeric", month: "long", day: "numeric" }).format(d)
+  new Intl.DateTimeFormat("es-MX", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  }).format(d)
 ---
 
 <BaseLayout titulo={post.data.title} descripcion={post.data.description}>

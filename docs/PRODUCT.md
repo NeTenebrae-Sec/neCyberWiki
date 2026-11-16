@@ -47,16 +47,16 @@ No entra:
 
 Ocho rutas. Solo se muestran como disponibles las que tienen cursos publicados.
 
-| # | Categoría | Contenido |
-| --- | --- | --- |
-| 01 | Fundamentos y Ética | Hoja de ruta |
-| 02 | Linux y Sistemas | Arch Linux y Bandit |
-| 03 | Redes y Servicios | Hoja de ruta |
-| 04 | Programación y Automatización | Hoja de ruta |
-| 05 | Pentesting Web | Hoja de ruta |
-| 06 | Máquinas y CTFs | Hoja de ruta |
-| 07 | IA y Seguridad | Hoja de ruta |
-| 08 | Privacidad y OpSec | Hoja de ruta |
+| #   | Categoría                     | Contenido           |
+| --- | ----------------------------- | ------------------- |
+| 01  | Fundamentos y Ética           | Hoja de ruta        |
+| 02  | Linux y Sistemas              | Arch Linux y Bandit |
+| 03  | Redes y Servicios             | Hoja de ruta        |
+| 04  | Programación y Automatización | Hoja de ruta        |
+| 05  | Pentesting Web                | Hoja de ruta        |
+| 06  | Máquinas y CTFs               | Hoja de ruta        |
+| 07  | IA y Seguridad                | Hoja de ruta        |
+| 08  | Privacidad y OpSec            | Hoja de ruta        |
 
 “Herramientas de Auditoría” no es una categoría: las herramientas son transversales y aparecen
 dentro de cada curso.

@@ -1,10 +1,10 @@
-// Datos derivados del catálogo. La fuente de verdad son las colecciones de
-// contenido (`cursos`, `notas`) y los manifiestos de `src/data/`.
-// Este módulo se ejecuta en build; no manda JavaScript al navegador.
+// Catálogo derivado del contenido. Se ejecuta en build y no manda JavaScript
+// al navegador. La disponibilidad de una categoría se calcula a partir de sus
+// cursos publicados: nunca se declara a mano.
 import { getCollection } from "astro:content"
-import { CATEGORIAS, type CategoriaModulo } from "../data/categorias"
+import { CATEGORIAS, type CategoriaInfo } from "../data/categorias"
 import { cursos, type CursoInfo } from "../data/cursos"
-import { SERIES, type SerieInfo } from "../data/series"
+import { site } from "../data/site"
 import {
   formatTotalMin,
   groupSyllabus,
@@ -14,7 +14,7 @@ import {
   type SyllabusLesson,
 } from "./syllabus"
 
-export interface CursoPublicado extends CursoInfo {
+export type CursoPublicado = Omit<CursoInfo, "modulos"> & {
   lecciones: SyllabusLesson[]
   modulos: ModuleGroup[]
   totalMin: number
@@ -23,14 +23,10 @@ export interface CursoPublicado extends CursoInfo {
   publicadoEn: Date | null
 }
 
-export interface SerieConNotas extends SerieInfo {
-  notas: number
-}
-
-export interface CategoriaConContenido extends CategoriaModulo {
+export interface CategoriaConContenido extends CategoriaInfo {
   cursos: CursoPublicado[]
-  series: SerieConNotas[]
-  notas: number
+  disponible: boolean
+  totalLecciones: number
 }
 
 export async function getCursosPublicados(): Promise<CursoPublicado[]> {
@@ -42,7 +38,14 @@ export async function getCursosPublicados(): Promise<CursoPublicado[]> {
       const lecciones = propias
         .map((entrada) => normalizeLesson(entrada.id, entrada.data))
         .sort((a, b) => a.orden - b.orden)
-      const modulos = groupSyllabus(lecciones)
+      const modulos = groupSyllabus(lecciones).map((modulo) => {
+        const declarado = info.modulos.find((item) => item.id === modulo.key)
+        return {
+          ...modulo,
+          titulo: declarado?.titulo || modulo.titulo,
+          objetivo: declarado?.objetivo || "",
+        }
+      })
       const totalMin = totalSyllabusMin(modulos)
       const fechas = propias
         .map((entrada) => entrada.data.date)
@@ -73,39 +76,45 @@ export async function getCursosPublicados(): Promise<CursoPublicado[]> {
     .map(({ curso }) => curso)
 }
 
-export async function getSeriesConNotas(): Promise<SerieConNotas[]> {
-  const notas = await getCollection("notas", ({ data }) => !data.draft)
-
-  return SERIES.map((serie) => ({
-    ...serie,
-    notas: notas.filter((nota) => nota.data.serie === serie.slug).length,
-  }))
+export async function getCursoPublicado(slug: string): Promise<CursoPublicado | undefined> {
+  const publicados = await getCursosPublicados()
+  return publicados.find((curso) => curso.slug === slug)
 }
 
 export async function getCategoriasConContenido(): Promise<CategoriaConContenido[]> {
-  const [cursosPublicados, notas] = await Promise.all([
-    getCursosPublicados(),
-    getCollection("notas", ({ data }) => !data.draft),
-  ])
+  const publicados = await getCursosPublicados()
 
-  const series = SERIES.map((serie) => ({
-    ...serie,
-    notas: notas.filter((nota) => nota.data.serie === serie.slug).length,
-  }))
-
-  return CATEGORIAS.map((categoria) => ({
-    ...categoria,
-    cursos: cursosPublicados.filter((curso) => curso.categoria === categoria.id),
-    series: series.filter((serie) => serie.categoria === categoria.id),
-    notas: notas.filter((nota) => nota.data.module === categoria.id).length,
-  }))
+  return CATEGORIAS.map((categoria) => {
+    const propios = publicados.filter((curso) => curso.categoria === categoria.id)
+    return {
+      ...categoria,
+      cursos: propios,
+      disponible: propios.length > 0,
+      totalLecciones: propios.reduce((total, curso) => total + curso.lecciones.length, 0),
+    }
+  })
 }
 
-// Texto de formato para las fichas de curso. No presenta videos que aún no
-// existen: si `videos` es 0, la ficha dice explícitamente "guía escrita".
+export function cursoUrl(
+  curso: Pick<CursoPublicado, "categoria" | "slug">,
+  base = site.base,
+): string {
+  return `${base}cursos/${curso.categoria}/${curso.slug}/`
+}
+
+export function leccionUrl(
+  curso: Pick<CursoPublicado, "categoria" | "slug">,
+  leccion: Pick<SyllabusLesson, "slug">,
+  base = site.base,
+): string {
+  return `${cursoUrl(curso, base)}${leccion.slug}/`
+}
+
+// Texto honesto para las fichas: si no hay videos, lo dice.
 export function formatoCurso(curso: CursoPublicado): string {
+  const unidad = curso.unidad === "nivel" ? "niveles" : "lecciones"
   if (curso.videos > 0) {
-    return `${curso.lecciones.length} lecciones · ${curso.videos} de ${curso.lecciones.length} videos`
+    return `${curso.lecciones.length} ${unidad} · ${curso.videos} de ${curso.lecciones.length} videos`
   }
-  return `${curso.lecciones.length} lecciones · guía escrita`
+  return `${curso.lecciones.length} ${unidad} · guía escrita`
 }
