@@ -8,9 +8,16 @@ interface Heading {
 interface Props {
   headings: Heading[]
   title?: string
+  titleId?: string
+  variant?: "inline" | "rail"
 }
 
-const { headings, title = "En esta nota" } = Astro.props
+const {
+  headings,
+  title = "En esta nota",
+  titleId = "note-toc-title",
+  variant = "inline",
+} = Astro.props
 
 const items = headings.filter((heading) => heading.depth === 2 || heading.depth === 3)
 const groups: Array<Heading & { children: Heading[] }> = []
@@ -25,10 +32,18 @@ for (const heading of items) {
 ---
 
 {items.length >= 2 && (
-  <nav class="note-toc sheet sheet--flat" aria-labelledby="note-toc-title" data-toc>
+  <nav
+    class={
+      variant === "rail"
+        ? "note-toc note-toc--rail sheet sheet--flat"
+        : "note-toc sheet sheet--flat"
+    }
+    aria-labelledby={titleId}
+    data-toc
+  >
     <div class="note-toc__head">
       <span class="docket">Índice</span>
-      <h2 class="note-toc__title" id="note-toc-title">
+      <h2 class="note-toc__title" id={titleId}>
         {title}
       </h2>
     </div>

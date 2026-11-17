@@ -65,7 +65,7 @@ const leccionesJson = JSON.stringify(info.lecciones.map((leccion) => leccion.slu
           <h1 class="course-hero__title">{info.titulo}</h1>
           <p class="lead course-hero__promise">{info.promesa}</p>
 
-          <div class="course-hero__meta">
+          <div class="course-hero__meta" data-pagefind-ignore="all">
             <span>
               {totalLecciones} {unidad}
             </span>
@@ -79,6 +79,7 @@ const leccionesJson = JSON.stringify(info.lecciones.map((leccion) => leccion.slu
             data-progress-course={info.slug}
             data-progress-total={totalLecciones}
             data-unidad={unidad}
+            data-pagefind-ignore="all"
           >
             <div class="mission-meter__head">
               <span class="status">
@@ -102,7 +103,7 @@ const leccionesJson = JSON.stringify(info.lecciones.map((leccion) => leccion.slu
             <p class="mission-meter__note">Guardado solo en este navegador. Sin cuentas.</p>
           </div>
 
-          <div class="course-hero__actions">
+          <div class="course-hero__actions" data-pagefind-ignore="all">
             {primeraLeccion && (
               <a
                 href={primeraUrl}

@@ -62,7 +62,7 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
 ---
 
 <BaseLayout titulo={`${entry.data.title} · ${info.titulo}`} descripcion={entry.data.description}>
-  <div class="player-bar">
+  <div class="player-bar" data-pagefind-ignore="all">
     <div class="container-page player-bar__inner">
       <nav class="breadcrumb player-bar__crumb" aria-label="Miga de pan">
         <a href={`${base}cursos/`}>Cursos</a>
@@ -116,7 +116,7 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
         </div>
       )}
 
-      <header class="lesson-head sheet">
+      <header class="lesson-head sheet" data-pagefind-ignore="all">
         <div class="lesson-head__top">
           <div>
             {currentModule && (
@@ -195,10 +195,15 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
         </div>
       </header>
 
-      <TableOfContents headings={headings} title="En esta lección" />
+      <TableOfContents
+        headings={headings}
+        title="En esta lección"
+        titleId="note-toc-title-inline"
+        variant="inline"
+      />
 
       <section class="lesson-guide sheet" aria-labelledby="guia-title">
-        <div class="lesson-guide__head">
+        <div class="lesson-guide__head" data-pagefind-ignore="all">
           <span class="status-dot status-dot--cyan" aria-hidden="true"></span>
           <h2 id="guia-title">Guía escrita de la lección</h2>
           <span class="meta">Comandos y notas</span>
@@ -208,7 +213,7 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
         </div>
       </section>
 
-      <nav class="lesson-nav" aria-label="Navegación entre lecciones">
+      <nav class="lesson-nav" aria-label="Navegación entre lecciones" data-pagefind-ignore="all">
         {prev ? (
           <a href={leccionUrl(info, prev, base)} class="lesson-nav__card sheet sheet--link">
             <span class="lesson-nav__label">← {etiqueta} anterior</span>
@@ -235,40 +240,50 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
       </nav>
     </article>
 
-    <aside class="player-aside">
-      <div class="temario" id="temario" role="complementary" aria-label="Temario del curso">
-        <div class="temario-sheet">
-          <div class="temario__head">
-            <div>
-              <h2 class="temario__title">
-                <span class="status-dot" aria-hidden="true"></span>
-                Temario
-              </h2>
-              <p class="temario__meta">
-                {info.modulos.length} módulos · {totalLecciones} {esNivel ? "niveles" : "clases"}
-              </p>
-            </div>
-            <button
-              type="button"
-              class="temario__close btn btn-ghost btn-sm"
-              id="temario-close"
-              aria-label="Cerrar temario"
-            >
-              <span aria-hidden="true">✕</span>
-            </button>
-          </div>
-
-          <CourseModuleList
-            modules={info.modulos}
-            cursoBase={url}
-            unidad={info.unidad}
-            current={leccionKey}
-            variant="sidebar"
+    <aside class="player-aside" data-pagefind-ignore="all">
+      <div class="player-aside__inner">
+        <div class="note-toc-rail">
+          <TableOfContents
+            headings={headings}
+            title="En esta lección"
+            titleId="note-toc-title-rail"
+            variant="rail"
           />
+        </div>
+        <div class="temario" id="temario" role="complementary" aria-label="Temario del curso">
+          <div class="temario-sheet">
+            <div class="temario__head">
+              <div>
+                <h2 class="temario__title">
+                  <span class="status-dot" aria-hidden="true"></span>
+                  Temario
+                </h2>
+                <p class="temario__meta">
+                  {info.modulos.length} módulos · {totalLecciones} {esNivel ? "niveles" : "clases"}
+                </p>
+              </div>
+              <button
+                type="button"
+                class="temario__close btn btn-ghost btn-sm"
+                id="temario-close"
+                aria-label="Cerrar temario"
+              >
+                <span aria-hidden="true">✕</span>
+              </button>
+            </div>
 
-          <div class="temario__foot">
-            <span>Curso completo</span>
-            <a href={url}>Repasar el temario →</a>
+            <CourseModuleList
+              modules={info.modulos}
+              cursoBase={url}
+              unidad={info.unidad}
+              current={leccionKey}
+              variant="sidebar"
+            />
+
+            <div class="temario__foot">
+              <span>Curso completo</span>
+              <a href={url}>Repasar el temario →</a>
+            </div>
           </div>
         </div>
       </div>
@@ -717,6 +732,64 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
   .temario__foot a {
     color: var(--accent);
     text-decoration: none;
+  }
+
+  .note-toc-rail {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .player-aside {
+      align-self: stretch;
+    }
+
+    :global(.player-main > .note-toc) {
+      display: none;
+    }
+
+    .player-aside__inner {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: stretch;
+      position: sticky;
+      top: 4.5rem;
+      max-height: calc(100vh - 5rem);
+    }
+
+    .note-toc-rail {
+      display: block;
+      flex: 0 0 auto;
+    }
+
+    .temario {
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    :global(.note-toc--rail) {
+      position: static;
+      margin-block: 0;
+      padding: 0.7rem 0.85rem;
+      background: var(--bg-card);
+      border-left: 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    :global(.note-toc--rail .note-toc__list) {
+      display: grid;
+      gap: 0.18rem;
+    }
+
+    :global(.note-toc--rail .note-toc__link) {
+      font-size: 0.8rem;
+      padding-block: 0.08rem;
+    }
+
+    :global(.note-toc--rail .note-toc__link--sub) {
+      font-size: 0.75rem;
+    }
   }
 
   @media (max-width: 1023.98px) {
