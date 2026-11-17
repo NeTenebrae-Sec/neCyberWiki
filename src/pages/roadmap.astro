@@ -1,0 +1,133 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro"
+import { roadmap, type EstadoRoadmap } from "../data/roadmap"
+import { site } from "../data/site"
+
+const base = site.base
+const grupos: { estado: EstadoRoadmap; titulo: string; items: typeof roadmap }[] = (
+  ["hecho", "en-curso", "planeado"] as const
+).map((estado) => ({
+  estado,
+  titulo: estado === "hecho" ? "Hecho" : estado === "en-curso" ? "En curso" : "Planeado",
+  items: roadmap
+    .filter((item) => item.estado === estado)
+    .sort((a, b) => (b.fecha ?? "").localeCompare(a.fecha ?? "")),
+}))
+---
+
+<BaseLayout
+  titulo="Roadmap"
+  descripcion="Cambios hechos, en curso y planes futuros de neCyberWiki. Sin promesas de fechas."
+>
+  <article class="roadmap container-page">
+    <header class="roadmap__head">
+      <div class="roadmap__docket">
+        <span class="docket">Bitácora de cambios</span>
+        <span class="stamp">Sin promesas</span>
+      </div>
+
+      <h1 class="display roadmap__title">El proyecto crece, una entrada a la vez.</h1>
+      <p class="lead roadmap__lead">
+        Lo que ya está publicado, lo que está en marcha y lo que está pendiente. El roadmap no
+        promete fechas: solo estados honestos.
+      </p>
+    </header>
+
+    {grupos.map((grupo) => (
+      <section class="roadmap__grupo" aria-labelledby={`roadmap-${grupo.estado}`}>
+        <h2 class="label-rule" id={`roadmap-${grupo.estado}`}>
+          {grupo.titulo}
+        </h2>
+
+        <ul class="roadmap__lista">
+          {grupo.items.map((item) => (
+            <li class="roadmap__item sheet sheet--flat">
+              <div class="roadmap__item-head">
+                <span class="chip">{item.area}</span>
+                {item.fecha && <time class="meta">{item.fecha}</time>}
+              </div>
+              <h3 class="roadmap__item-titulo">{item.titulo}</h3>
+              <p class="roadmap__item-resumen">{item.resumen}</p>
+              {item.enlace && (
+                <a class="arrow-link" href={`${base}${item.enlace.replace(/^\//, "")}`}>
+                  Abrir <span aria-hidden="true">→</span>
+                </a>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </article>
+</BaseLayout>
+
+<style>
+  .roadmap {
+    padding-block: clamp(2.5rem, 6vw, 5rem) 0;
+    max-width: 1080px;
+  }
+
+  .roadmap__head {
+    max-width: 72ch;
+    margin-bottom: clamp(2rem, 4vw, 3rem);
+  }
+
+  .roadmap__docket {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .roadmap__title {
+    font-size: clamp(2.4rem, 5.5vw, 4.5rem);
+    line-height: 0.95;
+  }
+
+  .roadmap__lead {
+    margin-top: 1.1rem;
+  }
+
+  .roadmap__grupo {
+    margin-top: 2.5rem;
+  }
+
+  .roadmap__lista {
+    display: grid;
+    gap: 1rem;
+    list-style: none;
+    margin-top: 1rem;
+  }
+
+  .roadmap__item {
+    padding: 1.15rem 1.35rem;
+  }
+
+  .roadmap__item-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+  }
+
+  .roadmap__item-titulo {
+    margin-top: 0.7rem;
+    font-family: var(--font-display);
+    font-size: 1.45rem;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+  }
+
+  .roadmap__item-resumen {
+    margin-top: 0.5rem;
+    color: var(--ink-dim);
+    line-height: 1.65;
+  }
+
+  .roadmap__item .arrow-link {
+    display: inline-block;
+    margin-top: 0.8rem;
+  }
+</style>

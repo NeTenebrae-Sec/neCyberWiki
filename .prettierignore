@@ -2,3 +2,11 @@ node_modules
 dist
 .astro
 package-lock.json
+.agents
+.atl
+.opencode
+odd
+.playwright-mcp
+content
+EJEMPLOS
+specs
