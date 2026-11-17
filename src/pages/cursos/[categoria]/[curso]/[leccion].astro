@@ -242,14 +242,6 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
 
     <aside class="player-aside" data-pagefind-ignore="all">
       <div class="player-aside__inner">
-        <div class="note-toc-rail">
-          <TableOfContents
-            headings={headings}
-            title="En esta lección"
-            titleId="note-toc-title-rail"
-            variant="rail"
-          />
-        </div>
         <div class="temario" id="temario" role="complementary" aria-label="Temario del curso">
           <div class="temario-sheet">
             <div class="temario__head">
@@ -285,6 +277,14 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
               <a href={url}>Repasar el temario →</a>
             </div>
           </div>
+        </div>
+        <div class="note-toc-rail">
+          <TableOfContents
+            headings={headings}
+            title="En esta lección"
+            titleId="note-toc-title-rail"
+            variant="rail"
+          />
         </div>
       </div>
     </aside>
@@ -752,19 +752,22 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
       flex-direction: column;
       gap: 1rem;
       align-items: stretch;
-      position: sticky;
-      top: 4.5rem;
-      max-height: calc(100vh - 5rem);
+      height: 100%;
     }
 
     .note-toc-rail {
       display: block;
       flex: 0 0 auto;
+      position: sticky;
+      top: 4.5rem;
     }
 
     .temario {
-      flex: 1 1 auto;
-      min-height: 0;
+      flex: 0 0 auto;
+      position: static;
+      height: clamp(12rem, 30vh, 20rem);
+      max-height: none;
+      overflow-y: auto;
     }
 
     :global(.note-toc--rail) {
