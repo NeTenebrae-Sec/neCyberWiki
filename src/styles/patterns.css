@@ -52,11 +52,14 @@
 .btn-secondary {
   border-color: var(--line-strong);
   color: var(--ink);
+  font-weight: 600;
+  background: var(--bg-sunken);
 }
 
 .btn-ghost {
-  border-color: var(--line);
+  border-color: var(--line-strong);
   color: var(--ink-dim);
+  font-weight: 500;
 }
 
 .btn-danger {
@@ -547,21 +550,23 @@
   position: relative;
   height: 6px;
   overflow: hidden;
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   border-radius: 0;
-  background: var(--bg-deep);
+  background: var(--bg-sunken);
 }
 
 .progress-fill {
   height: 100%;
   width: 0%;
   background: var(--signal);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--signal) 20%, transparent);
   transition: width 0.45s var(--ease-out);
 }
 
 .progress--accent .progress-fill,
 .progress-fill--accent {
   background: var(--accent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
 .progress-head {

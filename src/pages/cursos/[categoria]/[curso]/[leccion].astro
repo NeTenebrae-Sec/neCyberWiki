@@ -97,24 +97,23 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
 
   <div class="container-page player-layout">
     <article class="player-main">
-      {entry.data.video && (
-        <div class="player-frame">
-          <div class="player-frame__bar">
-            <span class="terminal__dots" aria-hidden="true">
-              <span class="terminal__dot terminal__dot--red"></span>
-              <span class="terminal__dot terminal__dot--yellow"></span>
-              <span class="terminal__dot terminal__dot--green"></span>
-            </span>
-            <span class="terminal__title">
-              monitor · {etiqueta.toLowerCase()} {numero}
-            </span>
-            <span class="player-frame__state">
-              <span class="status-dot status-dot--cyan" aria-hidden="true"></span> registro de campo
-            </span>
-          </div>
-          <VideoEmbed video={entry.data.video} titulo={entry.data.title} />
+      <div class="player-frame">
+        <div class="player-frame__bar">
+          <span class="terminal__dots" aria-hidden="true">
+            <span class="terminal__dot terminal__dot--red"></span>
+            <span class="terminal__dot terminal__dot--yellow"></span>
+            <span class="terminal__dot terminal__dot--green"></span>
+          </span>
+          <span class="terminal__title">
+            monitor · {etiqueta.toLowerCase()} {numero}
+          </span>
+          <span class="player-frame__state">
+            <span class="status-dot status-dot--cyan" aria-hidden="true"></span>
+            {entry.data.video ? "registro de campo" : "video pendiente"}
+          </span>
         </div>
-      )}
+        <VideoEmbed video={entry.data.video} titulo={entry.data.title} />
+      </div>
 
       <header class="lesson-head sheet" data-pagefind-ignore="all">
         <div class="lesson-head__top">
@@ -150,11 +149,12 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
             {prev && (
               <a
                 href={leccionUrl(info, prev, base)}
-                class="btn btn-secondary btn-sm"
+                class="btn btn-ghost btn-sm"
                 title={`Anterior: ${prev.title}`}
                 aria-label="Lección anterior"
               >
                 <span aria-hidden="true">←</span>
+                <span>Anterior</span>
               </a>
             )}
             {next ? (
@@ -162,6 +162,7 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
                 href={leccionUrl(info, next, base)}
                 class="btn btn-primary btn-sm"
                 title={`Siguiente: ${next.title}`}
+                aria-label="Lección siguiente"
               >
                 <span>Siguiente</span>
                 <span aria-hidden="true">→</span>
@@ -278,19 +279,36 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
             </div>
           </div>
         </div>
-        <div class="note-toc-rail">
-          <TableOfContents
-            headings={headings}
-            title="En esta lección"
-            titleId="note-toc-title-rail"
-            variant="rail"
-          />
-        </div>
       </div>
     </aside>
   </div>
 
   <div class="temario-overlay" id="temario-overlay" aria-hidden="true"></div>
+  <button
+    type="button"
+    class="note-toc-trigger"
+    id="note-toc-open"
+    aria-controls="note-toc-dialog"
+    aria-expanded="false"
+  >
+    <span class="note-toc-trigger__icon" aria-hidden="true">
+      ☷
+    </span>
+    <span>Índice</span>
+  </button>
+  <dialog class="note-toc-dialog" id="note-toc-dialog" aria-labelledby="note-toc-title-rail">
+    <div class="note-toc-dialog__head">
+      <button type="button" class="btn btn-ghost btn-sm" id="note-toc-close">
+        Cerrar
+      </button>
+    </div>
+    <TableOfContents
+      headings={headings}
+      title="En esta lección"
+      titleId="note-toc-title-rail"
+      variant="rail"
+    />
+  </dialog>
   <button type="button" class="fab-temario" id="fab-temario" aria-controls="temario">
     <svg
       width="15"
@@ -379,6 +397,21 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
 
     syncUI()
 
+    // Auto-complete: mark current lesson as done when clicking "Siguiente" in header
+    const nextBtn = document.querySelector('.lesson-head__arrows a[aria-label="Lección siguiente"]')
+    if (nextBtn) {
+      nextBtn.addEventListener("click", () => {
+        const done = new Set(read())
+        if (!done.has(leccionKey)) {
+          done.add(leccionKey)
+          try {
+            localStorage.setItem(key, JSON.stringify([...done]))
+          } catch {}
+          syncUI()
+        }
+      })
+    }
+
     const temario = document.getElementById("temario")
     const overlay = document.getElementById("temario-overlay")
     const setDrawer = (open) => {
@@ -396,6 +429,47 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
     temario
       ?.querySelectorAll("a[href]")
       .forEach((link) => link.addEventListener("click", () => setDrawer(false)))
+
+    const tocDialog = document.getElementById("note-toc-dialog")
+    const tocOpen = document.getElementById("note-toc-open")
+    const tocClose = document.getElementById("note-toc-close")
+    let tocReturnFocus = null
+    const setToc = (open) => {
+      if (!(tocDialog instanceof HTMLDialogElement)) return
+      if (open) {
+        tocReturnFocus = document.activeElement
+        tocDialog.showModal()
+        requestAnimationFrame(() => tocDialog.classList.add("is-open"))
+        tocOpen?.setAttribute("aria-expanded", "true")
+        document.body.style.overflow = "hidden"
+        tocClose?.focus()
+      } else if (tocDialog.open) {
+        tocDialog.classList.remove("is-open")
+        tocDialog.addEventListener(
+          "transitionend",
+          () => {
+            tocDialog.close()
+            document.body.style.overflow = ""
+            tocOpen?.setAttribute("aria-expanded", "false")
+            if (tocReturnFocus instanceof HTMLElement) tocReturnFocus.focus()
+          },
+          { once: true },
+        )
+      }
+    }
+    tocOpen?.addEventListener("click", () => setToc(true))
+    tocClose?.addEventListener("click", () => setToc(false))
+    tocDialog?.addEventListener("click", (event) => {
+      if (event.target === tocDialog) setToc(false)
+    })
+    tocDialog?.addEventListener("cancel", () => {
+      tocDialog.classList.remove("is-open")
+      document.body.style.overflow = ""
+      tocOpen?.setAttribute("aria-expanded", "false")
+    })
+    tocDialog?.querySelectorAll("a[href]").forEach((link) => {
+      link.addEventListener("click", () => setToc(false))
+    })
 
     const modulesKey = `ncw:modules:${slug}`
     const readOpen = () => {
@@ -552,11 +626,20 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
   }
 
   .lesson-head__top {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
     gap: 1rem;
+  }
+
+  @media (max-width: 480px) {
+    .lesson-head__top {
+      grid-template-columns: 1fr;
+    }
+
+    .lesson-head__arrows {
+      justify-content: flex-end;
+    }
   }
 
   .lesson-head__module {
@@ -734,64 +817,118 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
     text-decoration: none;
   }
 
-  .note-toc-rail {
+  .note-toc-trigger {
     display: none;
   }
 
-  @media (min-width: 1024px) {
-    .player-aside {
-      align-self: stretch;
-    }
+  .note-toc-dialog {
+    inset: calc(50% + 2rem) auto auto 0;
+    width: min(360px, calc(100vw - 2rem));
+    max-width: none;
+    max-height: calc(100dvh - 6rem);
+    margin: 0;
+    padding: 0.9rem;
+    overflow-y: auto;
+    border: 1px solid var(--line-strong);
+    border-left: 0;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    background: var(--bg-card);
+    color: var(--ink);
+    box-shadow: var(--shadow-lift);
+    transform: translateY(-50%) translateX(-105%);
+    opacity: 0;
+    transition:
+      transform 180ms var(--ease-out),
+      opacity 180ms ease-out;
+  }
 
+  .note-toc-dialog.is-open {
+    transform: translateY(-50%) translateX(0);
+    opacity: 1;
+  }
+
+  .note-toc-dialog::backdrop {
+    background: rgba(2, 4, 3, 0.62);
+  }
+
+  .note-toc-dialog__head {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-bottom: 0.45rem;
+  }
+
+  .note-toc-dialog .note-toc--rail {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: 0;
+  }
+
+  .note-toc-dialog .note-toc--rail .note-toc__head {
+    margin-bottom: 0.7rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .note-toc-dialog .note-toc--rail .note-toc__list {
+    display: grid;
+    gap: 0.24rem;
+  }
+
+  .note-toc-dialog .note-toc--rail .note-toc__link {
+    padding-block: 0.12rem;
+    font-size: 0.86rem;
+  }
+
+  .note-toc-dialog .note-toc--rail .note-toc__link--sub {
+    font-size: 0.8rem;
+  }
+
+  @media (min-width: 1024px) {
     :global(.player-main > .note-toc) {
       display: none;
     }
 
     .player-aside__inner {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      align-items: stretch;
-      height: 100%;
-    }
-
-    .note-toc-rail {
       display: block;
-      flex: 0 0 auto;
-      position: sticky;
-      top: 4.5rem;
     }
 
-    .temario {
-      flex: 0 0 auto;
-      position: static;
-      height: clamp(12rem, 30vh, 20rem);
-      max-height: none;
-      overflow-y: auto;
-    }
-
-    :global(.note-toc--rail) {
-      position: static;
-      margin-block: 0;
-      padding: 0.7rem 0.85rem;
-      background: var(--bg-card);
+    .note-toc-trigger {
+      position: fixed;
+      top: 50%;
+      left: 0;
+      z-index: var(--z-drawer);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.7rem 0.55rem 0.7rem 0.45rem;
+      border: 1px solid var(--line-strong);
       border-left: 0;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      background: var(--bg-raised);
+      color: var(--accent);
+      box-shadow: var(--shadow-paper);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      writing-mode: vertical-rl;
+      transform: translateY(-50%);
+      cursor: pointer;
     }
 
-    :global(.note-toc--rail .note-toc__list) {
-      display: grid;
-      gap: 0.18rem;
+    .note-toc-trigger:hover {
+      color: var(--ink);
     }
 
-    :global(.note-toc--rail .note-toc__link) {
-      font-size: 0.8rem;
-      padding-block: 0.08rem;
+    .note-toc-trigger:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
     }
 
-    :global(.note-toc--rail .note-toc__link--sub) {
-      font-size: 0.75rem;
+    .note-toc-trigger__icon {
+      font-size: 1rem;
     }
   }
 
@@ -808,6 +945,11 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
     .player-aside {
       height: 0;
       overflow: visible;
+    }
+
+    .note-toc-dialog,
+    .note-toc-trigger {
+      display: none;
     }
 
     .temario-sheet {
