@@ -47,9 +47,8 @@ specs/
 # Test screenshots
 review_test_01/
 
-# AI integration docs (local setup, not project content)
-docs/GENTLE-AI.md
-docs/SETUP-AGENTE.md
+# All docs are AI/agent-related (local setup, not project content)
+docs/
 
 # agent-toolkit:ai-block
 
