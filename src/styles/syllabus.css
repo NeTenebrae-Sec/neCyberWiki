@@ -465,7 +465,6 @@
   background: var(--bg-card);
   box-shadow: var(--shadow-lift);
   overflow-y: auto;
-  overscroll-behavior: contain;
   transform: translateX(105%);
   transition: transform var(--dur-panel) var(--ease-out);
 }
@@ -554,7 +553,6 @@
     top: 6.25rem;
     z-index: auto;
     width: auto;
-    max-height: calc(100vh - 7.5rem);
     padding: 0;
     border-left: 0;
     background: transparent;

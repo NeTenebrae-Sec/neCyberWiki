@@ -36,7 +36,21 @@ public/pagefind/
 
 # AI / agent artifacts — kept locally, never committed
 .agents/
+agents/
 EJEMPLOS/
 docs/screenshots/
 skills-lock.json
 specs/
+
+# Junie CLI config and session artifacts
+.junie/
+
+# Cline CLI config and session artifacts
+.cline/
+
+# Test screenshots
+review_test_01/
+
+# AI integration docs (local setup, not project content)
+docs/GENTLE-AI.md
+docs/SETUP-AGENTE.md

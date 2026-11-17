@@ -111,6 +111,33 @@ test("los enlaces del inicio no duplican la barra de la base", { skip }, async (
   assert.doesNotMatch(html, new RegExp(`${baseSinBarra}//`), "enlace con barra doble en el inicio")
 })
 
+test("la portada usa el CTA de perfil y el acordeón de rutas", { skip }, async () => {
+  const html = await read("index.html")
+  assert.match(
+    html,
+    new RegExp(`href="${site.base}perfil/"[^>]*class="[^"]*header-cta[^"]*"[^>]*>`),
+  )
+  assert.match(html, /class="[^"]*header-cta[^"]*"[^>]*>[\s\S]*?Mi perfil/)
+  assert.match(html, /Cuatro mapas para orientarte/)
+  assert.match(html, /Mis últimas notas/)
+  assert.equal((html.match(/class="route-group__trigger"/g) ?? []).length, 4)
+  assert.equal(
+    (html.match(/<button class="route-group__trigger"[^>]*aria-expanded="false"/g) ?? []).length,
+    4,
+  )
+  assert.match(html, /aria-controls="foundations-systems-panel"/)
+  assert.match(html, /Volver a los mapas/)
+  assert.match(html, /Roadmap y notas de desarrollo/)
+})
+
+test("las lecciones sin video reservan el bloque multimedia", { skip }, async () => {
+  const html = await read("cursos/linux-y-sistemas/arch-linux-facil/02-usb-y-arranque/index.html")
+  assert.match(html, /class="player-frame"/)
+  assert.match(html, /class="video-embed video-embed--empty"/)
+  assert.match(html, /Video en preparación/)
+  assert.match(html, /video pendiente/)
+})
+
 test("el índice no se versiona y no hay script e2e inventado", { skip }, async () => {
   await assert.rejects(access(path.join(root, "public", "pagefind")))
   const pkg = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"))
