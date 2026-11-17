@@ -8,12 +8,14 @@ interface Props {
   descripcion?: string
   mostrarAvisoTerminos?: boolean
   noindex?: boolean
+  buscadorHeader?: boolean
 }
 const {
   titulo,
   descripcion = site.descripcion,
   mostrarAvisoTerminos = true,
   noindex = false,
+  buscadorHeader = true,
 } = Astro.props
 const base = site.base
 const year = new Date().getFullYear()
@@ -44,6 +46,9 @@ const nav = [
     <meta name="description" content={descripcion} />
     {noindex && <meta name="robots" content="noindex" />}
     <meta name="generator" content={Astro.generator} />
+    <slot name="head" />
+    <link href={`${base}pagefind/pagefind-component-ui.css`} rel="stylesheet" />
+    <script src={`${base}pagefind/pagefind-component-ui.js`} type="module"></script>
     <meta name="theme-color" content="#070a08" />
     <meta name="color-scheme" content="dark light" />
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
@@ -59,6 +64,9 @@ const nav = [
     </script>
   </head>
   <body class="antialiased">
+    {buscadorHeader && (
+      <pagefind-config instance="header" bundle-path={`${base}pagefind/`}></pagefind-config>
+    )}
     <a href="#contenido" class="skip-link">
       Saltar al contenido
     </a>
@@ -90,11 +98,21 @@ const nav = [
         </nav>
 
         <div class="site-actions">
+          {buscadorHeader && (
+            <search class="header-search" aria-label="Buscar en el archivo">
+              <pagefind-searchbox
+                instance="header"
+                placeholder="Buscar en el archivo"
+                max-results="6"
+              ></pagefind-searchbox>
+            </search>
+          )}
           <a
             href={`${base}buscar/`}
             class="icon-btn"
-            aria-label="Buscar en el archivo"
-            title="Buscar en el archivo"
+            id="buscar-completa"
+            aria-label="Ver todos los resultados"
+            title="Ver todos los resultados"
             aria-current={isActive(`${base}buscar/`) ? "page" : undefined}
           >
             <svg
@@ -318,8 +336,8 @@ const nav = [
     <main
       id="contenido"
       class="site-main"
-      data-pagefind-body
-      data-pagefind-ignore={noindex ? "true" : undefined}
+      data-pagefind-body={noindex ? undefined : ""}
+      data-pagefind-ignore={noindex ? "all" : undefined}
     >
       <slot />
     </main>
@@ -577,6 +595,39 @@ const nav = [
           window.dispatchEvent(new CustomEvent("ncw:legal-accepted"))
         })
       }
+    </script>
+    <script is:inline define:vars={{ base }}>
+      customElements.whenDefined("pagefind-searchbox").then(() => {
+        const searchbox = document.querySelector('pagefind-searchbox[instance="header"]')
+        const fullSearch = document.getElementById("buscar-completa")
+        if (!searchbox || !fullSearch) return
+
+        const syncHref = (value) => {
+          const query = value.trim()
+          fullSearch.href = query
+            ? `${base}buscar/?q=${encodeURIComponent(query)}`
+            : `${base}buscar/`
+        }
+
+        // `<pagefind-searchbox>` no etiqueta su input; el placeholder no es un nombre accesible.
+        const labelInput = () => {
+          const input = searchbox.querySelector("input")
+          if (input) input.setAttribute("aria-label", "Buscar en el archivo")
+        }
+
+        labelInput()
+        new MutationObserver(labelInput).observe(searchbox, { childList: true, subtree: true })
+
+        searchbox.addEventListener("input", (event) => {
+          if (event.target instanceof HTMLInputElement) {
+            event.target.setAttribute("aria-label", "Buscar en el archivo")
+            syncHref(event.target.value)
+          }
+        })
+
+        const input = searchbox.querySelector("input")
+        if (input) syncHref(input.value)
+      })
     </script>
   </body>
 </html>

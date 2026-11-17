@@ -7,7 +7,8 @@ guardado en el navegador.
 - **Sitio:** <https://netenebraes.github.io/neCyberWiki/>
 - **Stack:** Astro 7, Tailwind CSS 4, TypeScript y JavaScript vanilla.
 - **Contenido:** Markdown validado en build con Content Collections.
-- **Buscador:** Pagefind (Tanda 3), índice estático generado después del build.
+- **Buscador:** Pagefind con componentes oficiales en el header y en `/buscar/`; el índice se genera
+  en el `postbuild`.
 - **Perfil:** Almacén local con exportar, importar y borrar.
 
 Estado actual: Tanda 3 (bitácora definitiva, roadmap, buscador Pagefind) en revisión. La
@@ -20,20 +21,22 @@ npm install
 npm run dev
 ```
 
-El buscador no existe en `astro dev` porque Pagefind indexa el HTML construido. Cuando se instale
-en la Tanda 3, el flujo será:
+El buscador no existe en `astro dev` porque Pagefind indexa el HTML construido. Para probarlo:
 
 ```bash
 npm run build
 npm run preview
 ```
 
+`npm run build` ejecuta `astro build` y después el `postbuild` con Pagefind. No hay que lanzar
+`pagefind` a mano ni versionar `public/pagefind/`.
+
 ## Scripts
 
 | Script                  | Qué hace                                          |
 | ----------------------- | ------------------------------------------------- |
 | `npm run dev`           | Servidor de desarrollo de Astro.                  |
-| `npm run build`         | Genera el sitio estático.                         |
+| `npm run build`         | Genera el sitio estático y el índice Pagefind.    |
 | `npm run preview`       | Sirve `dist/` para probar el build real.          |
 | `npm run check`         | Comprueba tipos y contenido de Astro.             |
 | `npm run lint`          | ESLint sobre Astro, TS y JS.                      |
@@ -41,7 +44,8 @@ npm run preview
 | `npm run import:bandit` | Regenera el curso Bandit desde el archivo fuente. |
 | `npm run format`        | Prettier sobre todo el proyecto.                  |
 
-Los tests de navegador con Playwright se añadirán en la Tanda 4.
+Los tests de navegador con Playwright se añadirán en la Tanda 4. La verificación manual con
+Playwright MCP usa una configuración local ignorada por git.
 
 ## Estructura
 

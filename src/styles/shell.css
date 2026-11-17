@@ -165,6 +165,56 @@
   display: none;
 }
 
+/* --- Pagefind Component UI theme bridge ---------------------------------- */
+
+/* `:root[data-theme]` gana al `:root` del CSS prebuilt de Pagefind. */
+:root[data-theme] {
+  --pf-font: var(--font-body);
+  --pf-text: var(--ink);
+  --pf-text-secondary: var(--ink-dim);
+  --pf-text-muted: var(--ink-muted);
+  --pf-background: var(--bg-card);
+  --pf-border: var(--line);
+  --pf-border-focus: var(--accent);
+  --pf-hover: var(--bg-raised);
+  --pf-mark: var(--accent);
+  --pf-outline-focus: var(--accent);
+  --pf-border-radius: var(--radius-sm);
+  --pf-shadow-sm: var(--shadow-paper);
+  --pf-shadow-md: var(--shadow-paper);
+  --pf-shadow-lg: var(--shadow-lift);
+  --pf-modal-backdrop: rgba(2, 4, 3, 0.72);
+  --pf-skeleton: var(--bg-raised);
+  --pf-skeleton-shine: var(--bg-card);
+}
+
+/* --- Header search (Pagefind Component UI) -------------------------------- */
+
+.header-search {
+  display: none;
+  width: min(280px, 24vw);
+}
+
+.header-search pagefind-searchbox {
+  display: block;
+  width: 100%;
+  --pf-searchbox-max-width: 100%;
+  --pf-searchbox-dropdown-max-height: 420px;
+  --pf-input-height: 34px;
+  --pf-input-font-size: 14px;
+}
+
+/* Sin índice de Pagefind (astro dev) el componente no se define: no reservar espacio. */
+.header-search pagefind-searchbox:not(:defined) {
+  display: none;
+}
+
+@media (min-width: 1100px) {
+  .header-search {
+    display: block;
+  }
+}
+
 /* --- Theme switch -------------------------------------------------------- */
 
 .theme-switch {

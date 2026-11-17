@@ -6,7 +6,7 @@
 - Tailwind CSS 4 mediante el plugin de Vite.
 - TypeScript y JavaScript vanilla. Sin React, Vue ni Svelte.
 - Content Collections con `glob` y schemas Zod.
-- Pagefind para búsqueda estática. Se ejecuta tras cada build (`npx pagefind --site dist`).
+- Pagefind para búsqueda estática. El `postbuild` de `npm run build` genera el índice automáticamente.
 - GitHub Pages bajo `/neCyberWiki/`.
 
 ## Estado por tanda
@@ -96,19 +96,28 @@ No existe una colección `notas`. Bandit vive en `content/cursos/bandit/` y se p
 
 ## Búsqueda
 
-Pagefind está instalado (`npm i -D pagefind`) y se ejecuta tras cada build:
+El sitio usa los componentes oficiales de Pagefind (`pagefind-component-ui`), no la API antigua
+`PagefindUI`. Hay dos instancias nombradas y cada una declara su propio `bundle-path`:
 
-```bash
-npm run build
-npx pagefind --site dist
-```
+| Instancia | Dónde                       | Componentes                                                                 |
+| --------- | --------------------------- | --------------------------------------------------------------------------- |
+| `header`  | Header del sitio (≥1100 px) | `pagefind-config`, `pagefind-searchbox`                                     |
+| `page`    | `/buscar/`                  | `pagefind-config`, `pagefind-input`, `pagefind-summary`, `pagefind-results` |
 
-- `BaseLayout` pone `data-pagefind-body` en el contenido principal; las páginas con `noindex`
-  (perfil, búsqueda, 404 y gate legal) añaden `data-pagefind-ignore`.
-- `src/pages/buscar.astro` carga el UI prebuilt de Pagefind (`pagefind-component-ui`) y el trigger
-  abre el modal de búsqueda.
-- El índice se genera en `dist/pagefind/`; el bundle se sirve bajo la base (`/neCyberWiki/pagefind/`).
-- En desarrollo no habrá índice; hay que usar `npm run build && npm run preview`.
+- `BaseLayout` carga `pagefind-component-ui.css` y `pagefind-component-ui.js` desde
+  `${base}pagefind/`, y monta la instancia `header` salvo que la página pase `buscadorHeader={false}`.
+- El icono de lupa del header enlaza siempre a `/buscar/`; el script del layout sincroniza
+  `?q=<consulta>` mientras se escribe en el buscador del header.
+- `/buscar/` oculta el buscador del header, monta la instancia `page` inline y rellena el campo desde
+  `?q=`. Tras aceptar el aviso legal, el foco vuelve al input.
+- Las páginas con `noindex` (`/buscar/`, `/perfil/`, `/terminos/` y `/404`) no llevan
+  `data-pagefind-body`; además añaden `data-pagefind-ignore="all"`. Sin esa omisión, Pagefind las
+  indexa igualmente.
+- `shell.css` mapea las variables `--pf-*` a los tokens del sitio (texto, bordes, foco, sombras y
+  marcas de acento) para que el dropdown y los resultados funcionen en ambos temas.
+- El índice se genera en `dist/pagefind/` mediante `postbuild` (`pagefind --site dist`).
+  `public/pagefind/` no se versiona: era un índice viejo que ocultaba errores.
+- En `astro dev` no hay índice ni bundle; el buscador solo se prueba con `npm run build && npm run preview`.
 
 ## Almacenamiento local
 
