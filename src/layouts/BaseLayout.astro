@@ -99,10 +99,10 @@ const nav = [
 
         <div class="site-actions">
           {buscadorHeader && (
-            <search class="header-search" aria-label="Buscar en el archivo">
+            <search class="header-search" aria-label="Buscar en neCyberWiki">
               <pagefind-searchbox
                 instance="header"
-                placeholder="Buscar en el archivo"
+                placeholder="Buscar en neCyberWiki"
                 max-results="6"
                 show-sub-results="false"
               ></pagefind-searchbox>
@@ -129,29 +129,6 @@ const nav = [
             >
               <circle cx="11" cy="11" r="7" />
               <line x1="21" y1="21" x2="16.5" y2="16.5" />
-            </svg>
-          </a>
-
-          <a
-            href={`${base}perfil/`}
-            class="icon-btn"
-            aria-label="Perfil local"
-            title="Perfil local"
-            aria-current={isActive(`${base}perfil/`) ? "page" : undefined}
-          >
-            <svg
-              width="17"
-              height="17"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <circle cx="12" cy="8" r="4" />
-              <path d="M4.5 21a7.5 7.5 0 0 1 15 0" />
             </svg>
           </a>
 
@@ -193,8 +170,22 @@ const nav = [
           <span id="theme-status" class="sr-only" aria-live="polite"></span>
 
           {cursoDestacado && (
-            <a href={`${base}cursos/`} class="btn btn-ghost btn-sm header-cta">
-              Catálogo <span aria-hidden="true">→</span>
+            <a href={`${base}perfil/`} class="btn btn-ghost btn-sm header-cta">
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4.5 21a7.5 7.5 0 0 1 15 0" />
+              </svg>
+              Mi perfil <span aria-hidden="true">→</span>
             </a>
           )}
 
@@ -613,7 +604,7 @@ const nav = [
         // `<pagefind-searchbox>` no etiqueta su input; el placeholder no es un nombre accesible.
         const labelInput = () => {
           const input = searchbox.querySelector("input")
-          if (input) input.setAttribute("aria-label", "Buscar en el archivo")
+          if (input) input.setAttribute("aria-label", "Buscar en neCyberWiki")
         }
 
         labelInput()
@@ -621,7 +612,7 @@ const nav = [
 
         searchbox.addEventListener("input", (event) => {
           if (event.target instanceof HTMLInputElement) {
-            event.target.setAttribute("aria-label", "Buscar en el archivo")
+            event.target.setAttribute("aria-label", "Buscar en neCyberWiki")
             syncHref(event.target.value)
           }
         })
