@@ -7,7 +7,7 @@ const base = site.base
 
 <BaseLayout
   titulo="Buscar"
-  descripcion="Búsqueda estática en el archivo: cursos, lecciones, bitácora y roadmap."
+  descripcion="Búsqueda estática en neCyberWiki: cursos, lecciones, bitácora y roadmap."
   noindex
   buscadorHeader={false}
 >
@@ -17,16 +17,19 @@ const base = site.base
       <span class="chip">Página estática</span>
     </div>
 
-    <h1 class="display buscar__title">Buscar en el archivo.</h1>
+    <h1 class="display buscar__title">Buscar en neCyberWiki.</h1>
     <p class="lead buscar__lead">
-      El archivo se busca en lo que ya está publicado: cursos, lecciones, bitácora y roadmap. Sin
-      backend, sin rastreo.
+      Busca en lo que ya está publicado: cursos, lecciones, bitácora y roadmap. Sin backend, sin
+      rastreo.
     </p>
 
     <pagefind-config instance="page" bundle-path={`${base}pagefind/`}></pagefind-config>
 
     <div class="buscar__ui">
-      <pagefind-input instance="page" placeholder="Buscar en el archivo…"></pagefind-input>
+      <pagefind-input
+        instance="page"
+        placeholder="Buscar en cursos, notas y roadmap…"
+      ></pagefind-input>
       <pagefind-summary
         instance="page"
         default-message="Escribe para buscar en cursos, lecciones y bitácora."

@@ -7,7 +7,7 @@ Rama: `feat/mvp-v2`
 
 - **Tanda 3** (entregada y commiteada): bitácora definitiva en `/bitacora/` con redirects desde
   `/blog/`; roadmap público en `/roadmap/` con estados hecho / en curso / planeado; buscador
-  estático con Pagefind en `/buscar/`; botón «Buscar en el archivo» en el header.
+  estático con Pagefind en `/buscar/`; botón «Buscar en neCyberWiki» en el header.
 - **Fix del buscador** (2026-11-16): componentes oficiales de Pagefind, instancias `header` y
   `page`, dropdown en el header con atajo `Ctrl+K`, icono que abre `/buscar/?q=`, búsqueda inline
   con prefill `?q=`, `postbuild` que genera el índice, `noindex` fuera del índice y puente de tema.
