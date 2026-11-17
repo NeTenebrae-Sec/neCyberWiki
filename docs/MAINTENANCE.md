@@ -15,6 +15,10 @@ npx prettier --check .
 El build debe generar `dist/pagefind/pagefind.js` y terminar con `Indexed 42 pages` (el número crece
 con el contenido). Si no existe, el buscador no funcionará.
 
+`tests/buscador-build.test.mjs` valida el HTML construido: bundle e índice de Pagefind, instancias
+`header`/`page`, páginas `noindex` fuera del índice y enlaces sin barra doble. Necesita `dist/`; si
+no existe, esos casos se omiten y el resto de `npm test` sigue corriendo.
+
 ## QA manual
 
 Probar en 360, 768 y 1440, en tema Noche y Archivo:

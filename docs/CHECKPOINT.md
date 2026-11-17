@@ -12,6 +12,9 @@ Rama: `feat/mvp-v2`
   `page`, dropdown en el header con atajo `Ctrl+K`, icono que abre `/buscar/?q=`, búsqueda inline
   con prefill `?q=`, `postbuild` que genera el índice, `noindex` fuera del índice y puente de tema.
   Verificado en navegador real con Playwright MCP.
+- **Cierre del fix** (2026-11-16): `tests/buscador-build.test.mjs` fija el HTML construido (índice,
+  instancias, `noindex`, enlaces), `/buscar/` deja de emitir el script del header y el inicio pierde
+  los enlaces con barra doble que quedaban en «Cambios».
 - **Fix** (commiteado): enlaces del roadmap sin barra doble (`/neCyberWiki//bitacora/` →
   `/neCyberWiki/bitacora/`).
 - **Cleanup** (commiteado): artefactos de IA, agentes, specs y capturas añadidos a `.gitignore`.
@@ -29,7 +32,7 @@ Rama: `feat/mvp-v2`
 - `npm run build` ✓ — 46 páginas construidas; Pagefind indexa 42.
 - `npm run check` ✓ — 0 errores.
 - `npm run lint` ✓ — sin errores.
-- `npm test` ✓ — 23 tests.
+- `npm test` ✓ — 30 tests (23 de lógica + 7 sobre el build).
 - `npx prettier --check .` ✓.
 - `npm run test:e2e` — pendiente de la Tanda 4; el script todavía no existe.
 

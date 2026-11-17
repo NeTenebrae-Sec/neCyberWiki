@@ -596,7 +596,7 @@ const nav = [
         })
       }
     </script>
-    <script is:inline define:vars={{ base }}>
+    {buscadorHeader && <script is:inline define:vars={{ base }}>
       customElements.whenDefined("pagefind-searchbox").then(() => {
         const searchbox = document.querySelector('pagefind-searchbox[instance="header"]')
         const fullSearch = document.getElementById("buscar-completa")
@@ -628,6 +628,6 @@ const nav = [
         const input = searchbox.querySelector("input")
         if (input) syncHref(input.value)
       })
-    </script>
+    </script>}
   </body>
 </html>

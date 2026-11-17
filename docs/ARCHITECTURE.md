@@ -99,13 +99,15 @@ No existe una colección `notas`. Bandit vive en `content/cursos/bandit/` y se p
 El sitio usa los componentes oficiales de Pagefind (`pagefind-component-ui`), no la API antigua
 `PagefindUI`. Hay dos instancias nombradas y cada una declara su propio `bundle-path`:
 
-| Instancia | Dónde                       | Componentes                                                                 |
-| --------- | --------------------------- | --------------------------------------------------------------------------- |
-| `header`  | Header del sitio (≥1100 px) | `pagefind-config`, `pagefind-searchbox`                                     |
-| `page`    | `/buscar/`                  | `pagefind-config`, `pagefind-input`, `pagefind-summary`, `pagefind-results` |
+| Instancia | Dónde                       | Componentes                                                                                            |
+| --------- | --------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `header`  | Header del sitio (≥1100 px) | `pagefind-config`, `pagefind-searchbox`                                                                |
+| `page`    | `/buscar/`                  | `pagefind-config`, `pagefind-input`, `pagefind-summary`, `pagefind-results`, `pagefind-keyboard-hints` |
 
 - `BaseLayout` carga `pagefind-component-ui.css` y `pagefind-component-ui.js` desde
   `${base}pagefind/`, y monta la instancia `header` salvo que la página pase `buscadorHeader={false}`.
+  En ese caso tampoco emite el script de sincronización del icono, así que `/buscar/` no repite
+  ninguna referencia al buscador del header.
 - El icono de lupa del header enlaza siempre a `/buscar/`; el script del layout sincroniza
   `?q=<consulta>` mientras se escribe en el buscador del header.
 - `/buscar/` oculta el buscador del header, monta la instancia `page` inline y rellena el campo desde

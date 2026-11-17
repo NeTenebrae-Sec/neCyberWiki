@@ -265,7 +265,10 @@ const fecha = (date: Date) =>
       <ul class="post-list">
         {entradasRoadmap.map((item) => (
           <li>
-            <a class="post-row" href={item.enlace ? `${base}${item.enlace}` : `${base}roadmap/`}>
+            <a
+              class="post-row"
+              href={item.enlace ? `${base}${item.enlace.replace(/^\//, "")}` : `${base}roadmap/`}
+            >
               <time class="post-row__date" datetime={item.fecha ?? ""}>
                 {item.fecha}
               </time>
