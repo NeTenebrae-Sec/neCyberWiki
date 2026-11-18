@@ -42,7 +42,7 @@ const blogRedirects = Object.fromEntries([
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://netenebraes.github.io",
+  site: "https://netenebrae-sec.github.io",
   base,
   redirects: {
     ...archRedirects,

@@ -4,7 +4,7 @@ Archivo personal de aprendizaje sobre Linux, redes y ciberseguridad, en español
 notas de laboratorio, bitácora y un roadmap público. Sin cuentas, sin backend y con el progreso
 guardado en el navegador.
 
-- **Sitio:** <https://netenebraes.github.io/neCyberWiki/>
+- **Sitio:** <https://netenebrae-sec.github.io/neCyberWiki/>
 - **Stack:** Astro 7, Tailwind CSS 4, TypeScript y JavaScript vanilla.
 - **Contenido:** Markdown validado en build con Content Collections.
 - **Buscador:** Pagefind con el componente oficial en la barra del header; el índice se genera al
