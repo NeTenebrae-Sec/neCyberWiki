@@ -18,20 +18,20 @@ const base = site.base
   <section class="catalog-hero">
     <div class="container-page">
       <div class="catalog-hero__docket">
-        <span class="docket">Archivo de cursos</span>
+        <span class="docket">Catálogo de cursos</span>
         <span class="stamp">Acceso libre</span>
       </div>
 
       <div class="catalog-hero__grid">
         <div>
           <h1 class="display catalog-hero__title">
-            Ocho rutas.
+            Cursos abiertos.
             <br />
-            Las que ya respiran.
+            Aprende sin ataduras.
           </h1>
           <p class="lead catalog-hero__lead">
-            El catálogo está ordenado por categorías. Solo se encienden las rutas con cursos
-            publicados; las demás quedan visibles, sin disfrazar lo que todavía no existe.
+            Formación práctica en español: cada curso incluye video, documentación con comandos
+            exactos y ejercicios para practicar en tu máquina. Sin registro, sin costo.
           </p>
         </div>
 
@@ -107,28 +107,22 @@ const base = site.base
       {preparacion.length > 0 && (
         <div class="catalog-section catalog-section--muted">
           <div class="catalog-section__head">
-            <p class="label-rule">Rutas en preparación</p>
-            <span class="meta">Sin cursos publicados todavía</span>
+            <p class="label-rule">En preparación</p>
+            <span class="meta">{preparacion.length} rutas sin cursos publicados</span>
           </div>
 
-          <div class="category-grid">
+          <div class="upcoming-list">
             {preparacion.map((categoria) => (
-              <article class="category-card category-card--muted">
-                <div class="category-card__head">
-                  <span class="category-card__index">{categoria.indice}</span>
-                  <span class="status status--pending">
-                    <span class="status-dot status-dot--amber" aria-hidden="true" />
-                    En preparación
-                  </span>
-                </div>
-                <h2 class="category-card__title">
-                  <a href={`${base}cursos/${categoria.id}/`}>{categoria.titulo}</a>
-                </h2>
-                <p class="category-card__tagline">{categoria.tagline}</p>
-                <p class="category-card__note">
-                  La ruta está abierta, pero aún no tiene lecciones. No hay fechas prometidas.
-                </p>
-              </article>
+              <div class="upcoming-list__item">
+                <span class="upcoming-list__index">{categoria.indice}</span>
+                <a href={`${base}cursos/${categoria.id}/`} class="upcoming-list__link">
+                  {categoria.titulo}
+                </a>
+                <span class="status status--pending">
+                  <span class="status-dot status-dot--amber" aria-hidden="true" />
+                  Próximamente
+                </span>
+              </div>
             ))}
           </div>
         </div>
@@ -387,6 +381,51 @@ const base = site.base
     color: var(--ink-muted);
     font-size: 0.76rem;
     line-height: 1.55;
+  }
+
+  .upcoming-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: var(--bg-sunken);
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--radius);
+  }
+
+  .upcoming-list__item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.65rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .upcoming-list__item:last-child {
+    border-bottom: none;
+  }
+
+  .upcoming-list__index {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--ink-muted);
+  }
+
+  .upcoming-list__link {
+    color: var(--ink-dim);
+    font-size: 0.88rem;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .upcoming-list__link:hover {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 0.16em;
   }
 
   @media (max-width: 900px) {

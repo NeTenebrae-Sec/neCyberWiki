@@ -135,7 +135,7 @@ test("las lecciones sin video reservan el bloque multimedia", { skip }, async ()
   assert.match(html, /class="player-frame"/)
   assert.match(html, /class="video-embed video-embed--empty"/)
   assert.match(html, /Video en preparación/)
-  assert.match(html, /video pendiente/)
+  assert.match(html, /video se publicará/)
 })
 
 test("el índice no se versiona y no hay script e2e inventado", { skip }, async () => {

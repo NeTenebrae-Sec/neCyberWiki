@@ -8,7 +8,7 @@ export const site = {
   base: "/neCyberWiki/",
   redes: {
     github: "https://github.com/NeTenebrae-Sec/neCyberWiki",
-    youtube: "", // Pendiente: URL del canal. El bloque se oculta si está vacío.
+    youtube: "https://www.youtube.com/@netenebrae",
   },
   koFi: "https://ko-fi.com/netenebrae",
 }
