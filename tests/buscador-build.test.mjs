@@ -3,6 +3,7 @@
 // se marcan como omitidos si `dist/` no existe para no romper `npm test` en frío.
 import test from "node:test"
 import assert from "node:assert/strict"
+import { execFileSync } from "node:child_process"
 import { access, readFile, readdir } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
@@ -58,46 +59,34 @@ test("el índice solo contiene páginas con data-pagefind-body", { skip }, async
   assert.equal(language.page_count, indexable.length)
 })
 
-test("el header monta la instancia header y /buscar/ no la duplica", { skip }, async () => {
+test("el header monta una única instancia y el buscador móvil", { skip }, async () => {
   const home = await read("index.html")
   assert.match(home, /<pagefind-searchbox[^>]*instance="header"/)
   assert.match(home, /<pagefind-config[^>]*instance="header"/)
   assert.ok(home.includes(`bundle-path="${bundlePath}"`))
   assert.match(home, /data-pagefind-body/)
+  assert.doesNotMatch(home, /<pagefind-config[^>]*instance="page"/)
 
-  const icon = home.match(/<a[^>]*id="buscar-completa"[^>]*>/)?.[0]
-  assert.ok(icon, "falta el icono #buscar-completa")
-  assert.ok(icon.includes(`href="${site.base}buscar/"`), "el icono no apunta a /buscar/")
-  assert.ok(icon.includes('aria-label="Ver todos los resultados"'))
-
-  const buscar = await read("buscar/index.html")
-  assert.match(buscar, /<pagefind-config[^>]*instance="page"/)
-  assert.ok(buscar.includes(`bundle-path="${bundlePath}"`))
-  assert.doesNotMatch(buscar, /<pagefind-config[^>]*instance="header"/)
-  assert.doesNotMatch(buscar, /<pagefind-searchbox[\s>]/)
-  assert.doesNotMatch(buscar, /data-pagefind-body/)
+  assert.match(home, /<search[^>]*id="header-search"/)
+  assert.match(
+    home,
+    /<button[^>]*id="open-search-btn"[^>]*aria-expanded="false"[^>]*aria-controls="header-search"/,
+  )
+  assert.doesNotMatch(home, /id="buscar-completa"/)
+  assert.ok(!home.includes(`href="${site.base}buscar/"`), "enlace al buscador eliminado")
 })
 
-test("/buscar/ monta la búsqueda inline y su mensaje inicial", { skip }, async () => {
-  const buscar = await read("buscar/index.html")
-  for (const component of [
-    "pagefind-input",
-    "pagefind-summary",
-    "pagefind-results",
-    "pagefind-keyboard-hints",
-  ]) {
-    assert.match(buscar, new RegExp(`<${component}[^>]*instance="page"`))
-  }
-  assert.match(buscar, /Escribe para buscar en cursos, lecciones y bitácora\./)
+test("/buscar/ ya no se emite", { skip }, async () => {
+  await assert.rejects(
+    access(path.join(dist, "buscar")),
+    "dist/buscar/ sigue existiendo tras el build",
+  )
+  const home = await read("index.html")
+  assert.doesNotMatch(home, new RegExp(`${site.base}buscar/`))
 })
 
 test("las páginas noindex no llevan data-pagefind-body", { skip }, async () => {
-  for (const file of [
-    "buscar/index.html",
-    "perfil/index.html",
-    "terminos/index.html",
-    "404.html",
-  ]) {
+  for (const file of ["perfil/index.html", "terminos/index.html", "404.html"]) {
     const html = await read(file)
     assert.match(html, /<meta name="robots" content="noindex"/, `${file} sin noindex`)
     assert.doesNotMatch(html, /data-pagefind-body/, `${file} con data-pagefind-body`)
@@ -138,11 +127,29 @@ test("las lecciones sin video reservan el bloque multimedia", { skip }, async ()
   assert.match(html, /video se publicará/)
 })
 
-test("el índice no se versiona y no hay script e2e inventado", { skip }, async () => {
-  await assert.rejects(access(path.join(root, "public", "pagefind")))
+// Este caso no depende de `dist/`: comprueba el contrato de scripts y git.
+test("la búsqueda de dev se genera con predev y el índice no se versiona", async () => {
   const pkg = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"))
+  assert.equal(
+    pkg.scripts.predev,
+    "astro build && pagefind --site dist --output-path public/pagefind",
+  )
   assert.equal(pkg.scripts.postbuild, "pagefind --site dist")
   assert.equal(pkg.scripts["test:e2e"], undefined)
   assert.equal(pkg.devDependencies?.playwright, undefined)
   assert.equal(pkg.dependencies?.playwright, undefined)
+
+  const gitignore = await readFile(path.join(root, ".gitignore"), "utf8")
+  assert.match(gitignore, /^public\/pagefind\/$/m)
+
+  let tracked
+  try {
+    tracked = execFileSync("git", ["ls-files", "public/pagefind"], {
+      cwd: root,
+      encoding: "utf8",
+    })
+  } catch {
+    tracked = ""
+  }
+  assert.equal(tracked.trim(), "", "el índice de dev no debe estar versionado")
 })

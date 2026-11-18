@@ -99,38 +99,39 @@ const nav = [
 
         <div class="site-actions">
           {buscadorHeader && (
-            <search class="header-search" aria-label="Buscar en neCyberWiki">
+            <search class="header-search" id="header-search" aria-label="Buscar en neCyberWiki">
               <pagefind-searchbox
                 instance="header"
                 placeholder="Buscar en neCyberWiki"
                 max-results="6"
-                show-sub-results="false"
               ></pagefind-searchbox>
             </search>
           )}
-          <a
-            href={`${base}buscar/`}
-            class="icon-btn"
-            id="buscar-completa"
-            aria-label="Ver todos los resultados"
-            title="Ver todos los resultados"
-            aria-current={isActive(`${base}buscar/`) ? "page" : undefined}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
+          {buscadorHeader && (
+            <button
+              id="open-search-btn"
+              class="icon-btn search-toggle"
+              type="button"
+              aria-label="Abrir buscador"
+              aria-expanded="false"
+              aria-controls="header-search"
             >
-              <circle cx="11" cy="11" r="7" />
-              <line x1="21" y1="21" x2="16.5" y2="16.5" />
-            </svg>
-          </a>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="11" cy="11" r="7" />
+                <line x1="21" y1="21" x2="16.5" y2="16.5" />
+              </svg>
+            </button>
+          )}
 
           <button
             id="theme-toggle"
@@ -587,38 +588,66 @@ const nav = [
         })
       }
     </script>
-    {buscadorHeader && <script is:inline define:vars={{ base }}>
-      customElements.whenDefined("pagefind-searchbox").then(() => {
-        const searchbox = document.querySelector('pagefind-searchbox[instance="header"]')
-        const fullSearch = document.getElementById("buscar-completa")
-        if (!searchbox || !fullSearch) return
+    {buscadorHeader && <script is:inline>
+      const searchHeader = document.querySelector(".site-header")
+      const searchToggle = document.getElementById("open-search-btn")
+      const searchbox = document.querySelector('pagefind-searchbox[instance="header"]')
+      const mobileSearch = window.matchMedia("(max-width: 1099.98px)")
 
-        const syncHref = (value) => {
-          const query = value.trim()
-          fullSearch.href = query
-            ? `${base}buscar/?q=${encodeURIComponent(query)}`
-            : `${base}buscar/`
-        }
+      const searchInput = () => searchbox?.querySelector("input") ?? null
 
-        // `<pagefind-searchbox>` no etiqueta su input; el placeholder no es un nombre accesible.
-        const labelInput = () => {
-          const input = searchbox.querySelector("input")
-          if (input) input.setAttribute("aria-label", "Buscar en neCyberWiki")
-        }
+      // `<pagefind-searchbox>` no etiqueta su input; el placeholder no es un nombre accesible.
+      const labelInput = () => {
+        const input = searchInput()
+        if (input) input.setAttribute("aria-label", "Buscar en neCyberWiki")
+      }
 
+      function setSearchOpen(open) {
+        const next = Boolean(open) && mobileSearch.matches
+        searchHeader?.classList.toggle("is-search-open", next)
+        searchToggle?.setAttribute("aria-expanded", String(next))
+      }
+
+      const focusSearch = () => {
+        customElements.whenDefined("pagefind-searchbox").then(() => {
+          requestAnimationFrame(() => searchInput()?.focus({ preventScroll: true }))
+        })
+      }
+
+      if (searchbox) {
         labelInput()
         new MutationObserver(labelInput).observe(searchbox, { childList: true, subtree: true })
-
-        searchbox.addEventListener("input", (event) => {
-          if (event.target instanceof HTMLInputElement) {
-            event.target.setAttribute("aria-label", "Buscar en neCyberWiki")
-            syncHref(event.target.value)
-          }
+        // Al elegir un resultado se navega: cerrar el panel móvil antes de salir.
+        searchbox.addEventListener("click", (event) => {
+          if (event.target instanceof Element && event.target.closest("a")) setSearchOpen(false)
         })
+      }
 
-        const input = searchbox.querySelector("input")
-        if (input) syncHref(input.value)
+      searchToggle?.addEventListener("click", () => {
+        const open = !searchHeader?.classList.contains("is-search-open")
+        setSearchOpen(open)
+        if (open) focusSearch()
+        else searchInput()?.blur()
       })
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape" || !searchHeader?.classList.contains("is-search-open")) return
+        setSearchOpen(false)
+        searchToggle?.focus({ preventScroll: true })
+      })
+
+      document.addEventListener(
+        "keydown",
+        (event) => {
+          if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "k") return
+          if (!mobileSearch.matches) return
+          setSearchOpen(true)
+          focusSearch()
+        },
+        true,
+      )
+
+      mobileSearch.addEventListener("change", () => setSearchOpen(false))
     </script>}
   </body>
 </html>

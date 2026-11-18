@@ -49,7 +49,6 @@ export const roadmap: EntradaRoadmap[] = [
     resumen: "Índice del build para cursos, lecciones, bitácora y roadmap.",
     estado: "en-curso",
     area: "Producto",
-    enlace: "/buscar/",
   },
   {
     id: "roadmap-publico",

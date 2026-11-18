@@ -7,8 +7,8 @@ guardado en el navegador.
 - **Sitio:** <https://netenebraes.github.io/neCyberWiki/>
 - **Stack:** Astro 7, Tailwind CSS 4, TypeScript y JavaScript vanilla.
 - **Contenido:** Markdown validado en build con Content Collections.
-- **Buscador:** Pagefind con componentes oficiales en el header y en `/buscar/`; el índice se genera
-  en el `postbuild`.
+- **Buscador:** Pagefind con el componente oficial en la barra del header; el índice se genera al
+  arrancar el desarrollo y en el `postbuild`.
 - **Perfil:** Almacén local con exportar, importar y borrar.
 
 Estado actual: Tanda 3 (bitácora definitiva, roadmap, buscador Pagefind) en revisión. La
@@ -21,28 +21,26 @@ npm install
 npm run dev
 ```
 
-El buscador no existe en `astro dev` porque Pagefind indexa el HTML construido. Para probarlo:
+El buscador funciona también en `npm run dev`: el `predev` construye el sitio y regenera el índice
+en `public/pagefind/` (ignorado por git) antes de arrancar Astro. El índice refleja el último
+arranque del servidor; si añades contenido, reinicia `npm run dev`. `Ctrl/Cmd+K` enfoca la barra
+del header.
 
-```bash
-npm run build
-npm run preview
-```
-
-`npm run build` ejecuta `astro build` y después el `postbuild` con Pagefind. No hay que lanzar
-`pagefind` a mano ni versionar `public/pagefind/`.
+`npm run build` ejecuta `astro build` y después el `postbuild` con Pagefind sobre `dist/pagefind/`.
+No hay que lanzar `pagefind` a mano ni versionar el índice.
 
 ## Scripts
 
-| Script                  | Qué hace                                          |
-| ----------------------- | ------------------------------------------------- |
-| `npm run dev`           | Servidor de desarrollo de Astro.                  |
-| `npm run build`         | Genera el sitio estático y el índice Pagefind.    |
-| `npm run preview`       | Sirve `dist/` para probar el build real.          |
-| `npm run check`         | Comprueba tipos y contenido de Astro.             |
-| `npm run lint`          | ESLint sobre Astro, TS y JS.                      |
-| `npm test`              | Tests unitarios con el runner de Node.            |
-| `npm run import:bandit` | Regenera el curso Bandit desde el archivo fuente. |
-| `npm run format`        | Prettier sobre todo el proyecto.                  |
+| Script                  | Qué hace                                                 |
+| ----------------------- | -------------------------------------------------------- |
+| `npm run dev`           | Construye el índice y arranca el servidor de desarrollo. |
+| `npm run build`         | Genera el sitio estático y el índice Pagefind.           |
+| `npm run preview`       | Sirve `dist/` para probar el build real.                 |
+| `npm run check`         | Comprueba tipos y contenido de Astro.                    |
+| `npm run lint`          | ESLint sobre Astro, TS y JS.                             |
+| `npm test`              | Tests unitarios con el runner de Node.                   |
+| `npm run import:bandit` | Regenera el curso Bandit desde el archivo fuente.        |
+| `npm run format`        | Prettier sobre todo el proyecto.                         |
 
 Los tests de navegador con Playwright se añadirán en la Tanda 4. La verificación manual con
 Playwright MCP usa una configuración local ignorada por git.

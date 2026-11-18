@@ -110,6 +110,8 @@
   text-transform: uppercase;
   color: var(--ink-muted);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .site-nav {
@@ -193,25 +195,83 @@
 .header-search {
   display: none;
   width: min(280px, 24vw);
+  min-height: 34px;
 }
 
 .header-search pagefind-searchbox {
   display: block;
   width: 100%;
   --pf-searchbox-max-width: 100%;
-  --pf-searchbox-dropdown-max-height: 420px;
+  --pf-searchbox-dropdown-max-height: min(60vh, 420px);
   --pf-input-height: 34px;
   --pf-input-font-size: 14px;
+  --pf-border: var(--line-strong);
+  --pf-shadow-md: inset 0 1px 0 var(--accent), var(--shadow-lift);
 }
 
-/* Sin índice de Pagefind (astro dev) el componente no se define: no reservar espacio. */
+/* Mientras el componente se define no se muestra, pero el hueco queda reservado. */
 .header-search pagefind-searchbox:not(:defined) {
   display: none;
+}
+
+.search-toggle {
+  display: inline-flex;
 }
 
 @media (min-width: 1100px) {
   .header-search {
     display: block;
+  }
+
+  .search-toggle {
+    display: none;
+  }
+}
+
+/* --- Mobile search row (<1100px) ----------------------------------------- */
+
+@media (max-width: 1099.98px) {
+  .header-search {
+    position: absolute;
+    inset: 100% 0 auto;
+    display: block;
+    width: 100%;
+    min-height: 0;
+    padding: 0.6rem var(--gutter) 0.85rem;
+    border-bottom: 1px solid var(--line-strong);
+    background: color-mix(in srgb, var(--bg) 97%, transparent);
+    box-shadow: var(--shadow-paper);
+    backdrop-filter: blur(12px) saturate(115%);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-0.35rem);
+    transition:
+      opacity var(--dur-ui) var(--ease-out),
+      transform var(--dur-ui) var(--ease-out),
+      visibility var(--dur-ui) var(--ease-out);
+  }
+
+  .site-header.is-search-open .header-search {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none;
+  }
+
+  .header-search pagefind-searchbox {
+    --pf-input-height: 44px;
+    --pf-input-font-size: 16px;
+    --pf-searchbox-dropdown-max-height: min(55vh, 380px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header-search {
+    transform: none;
+    transition:
+      opacity var(--dur-ui) linear,
+      visibility var(--dur-ui) linear;
   }
 }
 

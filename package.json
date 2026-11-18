@@ -6,6 +6,7 @@
     "node": ">=22.16.0"
   },
   "scripts": {
+    "predev": "astro build && pagefind --site dist --output-path public/pagefind",
     "dev": "astro dev",
     "build": "astro build",
     "postbuild": "pagefind --site dist",
