@@ -11,8 +11,14 @@ guardado en el navegador.
   arrancar el desarrollo y en el `postbuild`.
 - **Perfil:** Almacén local con exportar, importar y borrar.
 
-Estado actual: Tanda 3 (bitácora definitiva, roadmap, buscador Pagefind) en revisión. La
-comunidad de YouTube, el release y la QA final llegan en la Tanda 4.
+## Aviso legal
+
+Todo el contenido de este repositorio tiene fines **educativos y formativos**. Las técnicas,
+conceptos y ejemplos descritos deben practicarse **únicamente** en entornos controlados,
+laboratorios personales o escenarios autorizados o diseñados para este propósito. El uso indebido
+de la información contenida fuera de un contexto ético o legal es responsabilidad exclusiva del
+usuario; los autores y contribuidores no se hacen responsables de daños, sanciones o consecuencias
+derivadas de ese uso.
 
 ## Arranque
 
@@ -42,8 +48,8 @@ No hay que lanzar `pagefind` a mano ni versionar el índice.
 | `npm run import:bandit` | Regenera el curso Bandit desde el archivo fuente.        |
 | `npm run format`        | Prettier sobre todo el proyecto.                         |
 
-Los tests de navegador con Playwright se añadirán en la Tanda 4. La verificación manual con
-Playwright MCP usa una configuración local ignorada por git.
+Los tests de navegador automatizados aún no están integrados; la verificación manual con Playwright
+es parte del flujo local.
 
 ## Estructura
 
@@ -55,22 +61,30 @@ public/
   cursos/          Imágenes de los cursos
 src/
   components/      Componentes de interfaz
-  data/            Categorías y cursos (roadmap en Tanda 3)
+  data/            Categorías, cursos y roadmap
   layouts/         Shell del sitio
   lib/             Lógica pura y utilidades de build
   pages/           Rutas de Astro
   styles/          Tokens, base, patrones y shell
-docs/              Documentación del proyecto
 ```
 
-## Documentación
+## Contribuciones
 
-- [Producto](docs/PRODUCT.md): qué es, para quién y qué entra en el MVP.
-- [Contenido](docs/CONTENT.md): cómo añadir cursos, lecciones, entradas y roadmap.
-- [Arquitectura](docs/ARCHITECTURE.md): rutas, datos, búsqueda y almacenamiento local.
-- [Flujo de trabajo](docs/WORKFLOW.md): tandas, preguntas y definition of done.
-- [Decisiones](docs/DECISIONS.md): registro corto de acuerdos.
-- [Mantenimiento](docs/MAINTENANCE.md): QA, accesibilidad, rendimiento y release.
+Las contribuciones son bienvenidas: corrigiendo errores, mejorando redacción, añadiendo contenido
+relevante, proponiendo mejoras en estructura y navegación o reportando problemas en la pestaña
+*Issues*.
+
+Para contribuir:
+
+```bash
+git clone https://github.com/NeTenebrae-Sec/neCyberWiki.git
+cd neCyberWiki
+git checkout -b mejora-o-nueva-guia
+```
+
+Después, abre un [Pull Request](https://github.com/NeTenebrae-Sec/neCyberWiki/pulls) con la
+descripción de tu aporte. Ten en cuenta el aviso legal:
+todo el contenido es educativo y la práctica debe ocurrir en entornos propios o autorizados.
 
 ## Licencia
 
