@@ -70,24 +70,37 @@ src/
 
 ## Contribuciones
 
-Las contribuciones son bienvenidas: corrigiendo errores, mejorando redacción, añadiendo contenido
-relevante, proponiendo mejoras en estructura y navegación o reportando problemas en la pestaña
-_Issues_.
+Las contribuciones son bienvenidas: corrigiendo errores, mejorando redacción, añadiendo
+contenido relevante, proponiendo mejoras en estructura y navegación o reportando
+problemas en la pestaña _Issues_.
 
-Para contribuir:
+- **Reglas, instalación, gates y cláusula inbound**: [`CONTRIBUTING.md`](CONTRIBUTING.md).
+- **Cambios**: un solo tipo de contribución por PR (código / contenido / corrección),
+  revisión e integración a cargo únicamente del mantenedor.
+- **Empezar**: [Discussions](https://github.com/NeTenebrae-Sec/neCyberWiki/discussions)
+  para propuestas; Issues para tareas concretas;
+  [CONTRIBUTING.md](CONTRIBUTING.md) para el flujo completo.
+- **Seguridad**: [`SECURITY.md`](SECURITY.md), por canal privado.
 
-```bash
-git clone https://github.com/NeTenebrae-Sec/neCyberWiki.git
-cd neCyberWiki
-git checkout -b mejora-o-nueva-guia
-```
-
-Después, abre un [Pull Request](https://github.com/NeTenebrae-Sec/neCyberWiki/pulls) con la
-descripción de tu aporte. Ten en cuenta el aviso legal:
-todo el contenido es educativo y la práctica debe ocurrir en entornos propios o autorizados.
+Antes de abrir un PR, ejecuta los gates: `npm run build`, `npm run check`,
+`npm run lint`, `npm test` y `npx prettier --check .`.
 
 ## Licencia
 
-El código se distribuye bajo la licencia MIT incluida en `LICENSE.txt`. El contenido editorial es
-gratuito para estudio y práctica educativa. Si el proyecto te sirve, puedes apoyarlo en
+Copyright (c) 2026 NeTenebrae.
+
+| Material                                            | Régimen                                                                    |
+| --------------------------------------------------- | -------------------------------------------------------------------------- |
+| Código                                              | **AGPL-3.0-or-later** — ver [`LICENSE.txt`](LICENSE.txt)                   |
+| Contenido propio (cursos, blog, bitácora, imágenes) | **CC BY-NC-SA 4.0** — <https://creativecommons.org/licenses/by-nc-sa/4.0/> |
+| Marca y logo («neCyberWiki», «NeTenebrae»)          | Reservados; no los concede ninguna licencia                                |
+| Dependencias y material de terceros                 | Sus propias licencias; ver [`NOTICE.md`](NOTICE.md)                        |
+
+El **contenido** puede reutilizarse de forma no comercial con atribución (enlace a la
+web y licencia) y obligación de compartir igual en las adaptaciones. El **código** sigue
+AGPL-3.0: libre uso, modificación y redistribución siempre que se respete el copyleft.
+El contenido y el código obtenidos antes de 2026-11-18 bajo MIT conservan esos derechos
+para quien los recibió.
+
+Si el proyecto te sirve, apoyarlo es una cortesía (no una obligación):
 [Ko-fi](https://ko-fi.com/netenebrae).
