@@ -1,40 +1,32 @@
 ---
 name: Bug report
-about: Something about Quartz isn't working the way you expect
+about: Algo en neCyberWiki no funciona como esperas
 title: ""
 labels: bug
 assignees: ""
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**Describe el bug**
 
-**To Reproduce**
-Steps to reproduce the behavior:
+Qué esperabas y qué pasó en su lugar.
 
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+**Dónde**
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+- URL del sitio (página concreta) o `npm run dev` local
+- Navegador y versión
+- Sistema operativo
 
-**Screenshots and Source**
-If applicable, add screenshots to help explain your problem.
+**Pasos para reproducir**
 
-You can help speed up fixing the problem by either
+1. …
+2. …
+3.
 
-1. providing a simple reproduction
-2. linking to your Quartz repository where the problem can be observed
+**Comportamiento esperado**
 
-**Desktop (please complete the following information):**
+**Comportamiento actual**
 
-- Quartz Version: [e.g. v4.1.2]
-- `node` Version: [e.g. v18.16]
-- `npm` version: [e.g. v10.1.0]
-- OS: [e.g. iOS]
-- Browser [e.g. chrome, safari]
+**Capturas o contexto adicional**
 
-**Additional context**
-Add any other context about the problem here.
+<!-- Si hay un error en consola, incluye el mensaje. Si es de seguridad,
+no lo publiques aquí: usa SECURITY.md. -->

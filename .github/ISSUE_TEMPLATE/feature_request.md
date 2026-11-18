@@ -1,19 +1,25 @@
 ---
 name: Feature request
-about: Suggest an idea or improvement for Quartz
+about: Sugiere una mejora o una idea para neCyberWiki
 title: ""
 labels: enhancement
 assignees: ""
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+**¿Qué problema resuelve?**
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+Como …, quiero …, para … (o describe la situación actual y el dolor).
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+**Solución propuesta**
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+**Alternativas consideradas**
+
+**Área**
+
+- [ ] Sitio (navegación, buscador, perfil, tema)
+- [ ] Contenido (cursos, bitácora, roadmap)
+- [ ] Comunidad / contribución
+- [ ] Otro
+
+<!-- Las preguntas generales y el debate van en Discussions; los issues son para
+tareas concretas. Si tu idea es sobre una pieza grande, proponla primero ahí. -->
