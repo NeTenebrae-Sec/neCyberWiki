@@ -1,7 +1,10 @@
 ---
+module: pentesting-web
 title: Server-side Request Forgery
 cover:
-description: https://portswigger.net/web-security/learning-paths/ssrf-attacks/ssrf-attacks-what-is-ssrf/ssrf/what-is-ssrf
+description: Introducción al Server-Side Request Forgery (SSRF) explicada con la analogía del mensajero de confianza: cómo engañar al servidor para que haga peticiones a la red interna por ti.
+references:
+  - https://portswigger.net/web-security/learning-paths/ssrf-attacks/ssrf-attacks-what-is-ssrf/ssrf/what-is-ssrf
 tags:
   - PortSwigger
   - Vulnerabilidad
@@ -9,7 +12,7 @@ tags:
   - CTF
   - SSRF
 difficulty: ★★☆☆☆
-publishDate: 2026-02-11
+date: 2026-02-11
 ---
 ![[Cover SSRF.webp]]
 

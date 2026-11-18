@@ -1,4 +1,5 @@
 ---
+module: sistemas-y-redes
 title: "OTW Bandit: 12"
 description: "Explicación detallada paso a paso de cómo resolver el nivel 12 de OverTheWire: Bandit. Abordando hexdump y extracción de archivos con herramientas gzip, bzip2 y tar."
 tags:
@@ -11,7 +12,7 @@ tags:
   - tar
 difficulty:
   - ★★☆☆☆
-publishDate: 2025-11-11
+date: 2025-11-11
 ---
 ## Introducción
 [Este nivel](https://overthewire.org/wargames/bandit/bandit13.html) consiste en revertir un [hexdump](https://es.wikipedia.org/wiki/Volcado_hexadecimal) contenido en el archivo `data.txt`. Esto con el fin de obtener un archivo binario que está comprimido **múltiples veces** por herramientas como **`tar`, `bzip2` y `gzip`**. El objetivo es extraer la contraseña del siguiente nivel deshaciendo todas las capas de compresión.

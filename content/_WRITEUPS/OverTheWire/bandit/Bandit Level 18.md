@@ -1,13 +1,14 @@
 ---
+module: sistemas-y-redes
 title: "OTW Bandit: 18"
-description:
+description: Cómo leer el archivo readme cuando el .bashrc de bandit18 cierra la sesión SSH al hacer login: ejecutar comandos en el servidor sin abrir un shell interactivo.
 tags:
   - linux
   - bash
   - bandit
 Dificultad:
   - ★☆☆☆☆
-publishDate: 2025-12-31
+date: 2025-12-31
 ---
 ## Introducción y Desafío
 

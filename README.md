@@ -1,92 +1,93 @@
-```
-             ____      _             __        ___ _    _ 
- _ __   ___ / ___|   _| |__   ___ _ _\ \      / (_) | _(_)
-| '_ \ / _ \ |  | | | | '_ \ / _ \ '__\ \ /\ / /| | |/ / |
-| | | |  __/ |__| |_| | |_) |  __/ |   \ V  V / | |   <| |
-|_| |_|\___|\____\__, |_.__/ \___|_|    \_/\_/  |_|_|\_\_|
-                 |___/                                    
-        biblioteca colaborativa · ciberseguridad · hacking
-```
+# neCyberWiki
 
-La neCyberWiki es un proyecto tipo "Biblioteca Colaborativa" orientada a la ciberseguridad, el hacking ético, la informática y la privacidad digital. Su propósito es **centralizar conocimientos técnicos y prácticos, presentados de forma clara, libre y accesible**. 
+Archivo personal de aprendizaje sobre Linux, redes y ciberseguridad, en español. Cursos guiados,
+notas de laboratorio, bitácora y un roadmap público. Sin cuentas, sin backend y con el progreso
+guardado en el navegador.
 
-**No es una academia**: es mi bitácora de aprendizaje, donde practico, documento y comparto para que cualquiera pueda aprender y aportar.
+- **Sitio:** <https://netenebrae-sec.github.io/neCyberWiki/>
+- **Stack:** Astro 7, Tailwind CSS 4, TypeScript y JavaScript vanilla.
+- **Contenido:** Markdown validado en build con Content Collections.
+- **Buscador:** Pagefind con el componente oficial en la barra del header; el índice se genera al
+  arrancar el desarrollo y en el `postbuild`.
+- **Perfil:** Almacén local con exportar, importar y borrar.
 
----
 ## Aviso legal
 
-Todo el contenido de este repositorio tiene fines **educativos y formativos**. Las técnicas, conceptos y ejemplos descritos aquí deben practicarse **únicamente en entornos controlados, laboratorios personales, escenarios autorizados o sistemas de prueba diseñados para este propósito**.
+Todo el contenido de este repositorio tiene fines **educativos y formativos**. Las técnicas,
+conceptos y ejemplos descritos deben practicarse **únicamente** en entornos controlados,
+laboratorios personales o escenarios autorizados o diseñados para este propósito. El uso indebido
+de la información contenida fuera de un contexto ético o legal es responsabilidad exclusiva del
+usuario; los autores y contribuidores no se hacen responsables de daños, sanciones o consecuencias
+derivadas de ese uso.
 
-El uso indebido de la información contenida en necyberwiki fuera de un contexto ético o legal es responsabilidad exclusiva del usuario. Los autores y contribuidores no se hacen responsables de posibles daños, sanciones o consecuencias derivadas del mal uso del material.
+## Arranque
 
----
-## Objetivo
+```bash
+npm install
+npm run dev
+```
 
-Crear una wiki de referencia para profesionales, estudiantes y entusiastas de la ciberseguridad, ofreciendo contenido técnico, guías prácticas, referencias, herramientas y metodologías de ataque y defensa, todo en un mismo lugar de fácil acceso y mantenimiento.
+El buscador funciona también en `npm run dev`: el `predev` construye el sitio y regenera el índice
+en `public/pagefind/` (ignorado por git) antes de arrancar Astro. El índice refleja el último
+arranque del servidor; si añades contenido, reinicia `npm run dev`. `Ctrl/Cmd+K` enfoca la barra
+del header.
 
----
-## Contenido
+`npm run build` ejecuta `astro build` y después el `postbuild` con Pagefind sobre `dist/pagefind/`.
+No hay que lanzar `pagefind` a mano ni versionar el índice.
 
-El repositorio incluye:
+## Scripts
 
-- Conceptos fundamentales de ciberseguridad y hacking ético  
-- Guías prácticas de pentesting (web, redes, sistemas)  
-- Cheatsheets rápidas y resúmenes para uso en campo  
-- Listados de herramientas comunes y sus usos  
-- Recursos educativos gratuitos  
+| Script                  | Qué hace                                                 |
+| ----------------------- | -------------------------------------------------------- |
+| `npm run dev`           | Construye el índice y arranca el servidor de desarrollo. |
+| `npm run build`         | Genera el sitio estático y el índice Pagefind.           |
+| `npm run preview`       | Sirve `dist/` para probar el build real.                 |
+| `npm run check`         | Comprueba tipos y contenido de Astro.                    |
+| `npm run lint`          | ESLint sobre Astro, TS y JS.                             |
+| `npm test`              | Tests unitarios con el runner de Node.                   |
+| `npm run import:bandit` | Regenera el curso Bandit desde el archivo fuente.        |
+| `npm run format`        | Prettier sobre todo el proyecto.                         |
 
----
-## Tecnologías y dependencias
+Los tests de navegador automatizados aún no están integrados; la verificación manual con Playwright
+es parte del flujo local.
 
-El proyecto está realizado con [Obsidian](https://obsidian.md/) y [Quartz](https://github.com/jackyzha0/quartz) pero puede adaptarse fácilmente al motor de documentación de tu preferencia, como:
+## Estructura
 
-- Markdown simple.
-- MkDocs con el tema Material for MkDocs.
-- Docusaurus o similar para una interfaz más visual.
+```text
+content/
+  cursos/          Cursos y lecciones en Markdown
+  blog/            Entradas de la bitácora
+public/
+  cursos/          Imágenes de los cursos
+src/
+  components/      Componentes de interfaz
+  data/            Categorías, cursos y roadmap
+  layouts/         Shell del sitio
+  lib/             Lógica pura y utilidades de build
+  pages/           Rutas de Astro
+  styles/          Tokens, base, patrones y shell
+```
 
-El proceso de documentación está siendo realizado de forma pública en [threads](https://www.threads.com/@netenebrae).
-
----
 ## Contribuciones
 
-Las contribuciones son bienvenidas. Puedes ayudar de las siguientes formas:
-
-1. Corrigiendo errores o mejorando redacción técnica  
-2. Añadiendo contenido nuevo y relevante  
-3. Proponiendo mejoras en la estructura o navegación  
-4. Reportando problemas o abriendo discusiones en la pestaña *Issues*  
+Las contribuciones son bienvenidas: corrigiendo errores, mejorando redacción, añadiendo contenido
+relevante, proponiendo mejoras en estructura y navegación o reportando problemas en la pestaña
+_Issues_.
 
 Para contribuir:
-```
-git clone https://github.com/NeTenebrae-Sec/neCyberWiki.git  
-cd neCyberWiki  
+
+```bash
+git clone https://github.com/NeTenebrae-Sec/neCyberWiki.git
+cd neCyberWiki
 git checkout -b mejora-o-nueva-guia
 ```
 
-Realiza tus cambios  
-```
-git add .  
-git commit -m "Agrega nueva guía de pentesting web"  
-git push origin mejora-o-nueva-guia
-```
+Después, abre un [Pull Request](https://github.com/NeTenebrae-Sec/neCyberWiki/pulls) con la
+descripción de tu aporte. Ten en cuenta el aviso legal:
+todo el contenido es educativo y la práctica debe ocurrir en entornos propios o autorizados.
 
-Después, abre un [Pull Request](https://github.com/NeTenebrae-Sec/neCyberWiki/pulls) con la descripción de tu aporte.
-
-### Estilo y pautas de redacción
-
-- Prioriza la claridad técnica sobre la extensión  
-- Usa formato Markdown limpio y sin exceso de formato  
-- Cita las fuentes cuando sea necesario  
-- Evita incluir material con derechos de autor no libres  
-- Respeta la ética hacker: el conocimiento es libre, hacer daño es imperdonable.  
-
----
 ## Licencia
 
-Este proyecto está distribuido bajo la licencia MIT. Consulta el archivo LICENSE para más detalles.
-
----
-## Agradecimientos
-
-A toda la comunidad hacker y de ciberseguridad que comparte su conocimiento abiertamente.
-Especialmente a quienes dedican su tiempo a enseñar, investigar y mantener viva la cultura del hacking ético.
+El código se distribuye bajo la licencia MIT incluida en `LICENSE.txt`. El contenido editorial es
+gratuito para estudio y práctica educativa. Si el proyecto te sirve, puedes apoyarlo en
+[Ko-fi](https://ko-fi.com/netenebrae).

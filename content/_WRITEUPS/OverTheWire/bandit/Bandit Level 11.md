@@ -1,4 +1,5 @@
 ---
+module: sistemas-y-redes
 level: Bandit 11 → Bandit 12
 cover:
 title: "OTW Bandit: 11"
@@ -11,7 +12,7 @@ tags:
   - cifrado
 difficulty:
   - ★★☆☆☆
-publishDate: 2025-11-07
+date: 2025-11-07
 ---
 ### Resumen
 [El reto de este nivel ](https://overthewire.org/wargames/bandit/bandit12.html)es encontrar la contraseña del usuario siguiente dentro del archivo `data.txt`. El archivo contiene un texto cifrado usando [ROT13](https://es.wikipedia.org/wiki/ROT13), un cifrado que rota cada letra del alfabeto 13 posiciones. **El objetivo es revertir ese cifrado para revelar la contraseña**.

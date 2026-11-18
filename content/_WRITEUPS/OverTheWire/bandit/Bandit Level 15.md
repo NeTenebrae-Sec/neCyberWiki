@@ -1,13 +1,14 @@
 ---
+module: sistemas-y-redes
 title: "OTW Bandit: 15"
-description:
+description: Primer contacto con servicios cifrados SSL/TLS desde la terminal: conectarse con openssl s_client a un servicio en localhost y enviarle la contraseña para recibir la del siguiente nivel.
 tags:
   - linux
   - bash
   - bandit
 difficulty:
   - ★☆☆☆☆
-publishDate: 2025-11-18
+date: 2025-11-18
 ---
 ## Introducción
 En este nivel damos nuestro **primer contacto** con servicios cifrados usando **SSL/TLS**, pasando de hablar con puertos “en crudo” a comunicarnos a través de un **canal seguro**. El objetivo es similar al nivel anterior, pero esta vez debemos conectarnos a un servicio que escucha en `localhost` sobre el puerto 30001 por medio de SSL/TLS y enviarle la contraseña del nivel actual para que nos devuelva la contraseña del siguiente nivel.​

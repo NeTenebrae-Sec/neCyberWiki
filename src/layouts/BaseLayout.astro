@@ -1,0 +1,653 @@
+---
+import "../styles/global.css"
+import { site } from "../data/site"
+import { cursoUrl, getCursosPublicados } from "../lib/catalog"
+
+interface Props {
+  titulo: string
+  descripcion?: string
+  mostrarAvisoTerminos?: boolean
+  noindex?: boolean
+  buscadorHeader?: boolean
+}
+const {
+  titulo,
+  descripcion = site.descripcion,
+  mostrarAvisoTerminos = true,
+  noindex = false,
+  buscadorHeader = true,
+} = Astro.props
+const base = site.base
+const year = new Date().getFullYear()
+
+const path = Astro.url.pathname.replace(/\/+$/, "/")
+const isActive = (href: string) => (href === base ? path === base : path.startsWith(href))
+
+const cursosPublicados = await getCursosPublicados()
+const cursoActual = cursosPublicados.find((curso) =>
+  path.startsWith(`${base}cursos/${curso.categoria}/${curso.slug}/`),
+)
+const cursoDestacado = cursoActual ?? cursosPublicados[0]
+const rutaDestacada = cursoDestacado ? cursoUrl(cursoDestacado, base) : `${base}cursos/`
+
+const nav = [
+  { label: "Inicio", href: base },
+  { label: "Cursos", href: `${base}cursos/` },
+  { label: "Bitácora", href: `${base}bitacora/` },
+]
+---
+
+<!doctype html>
+<html lang="es" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{titulo} · {site.nombre}</title>
+    <meta name="description" content={descripcion} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta name="generator" content={Astro.generator} />
+    <slot name="head" />
+    <link href={`${base}pagefind/pagefind-component-ui.css`} rel="stylesheet" />
+    <script src={`${base}pagefind/pagefind-component-ui.js`} type="module"></script>
+    <meta name="theme-color" content="#070a08" />
+    <meta name="color-scheme" content="dark light" />
+    <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <script is:inline>
+      try {
+        const stored = localStorage.getItem("ncw-theme")
+        const theme = stored === "light" ? "light" : "dark"
+        document.documentElement.dataset.theme = theme
+        document
+          .querySelector('meta[name="theme-color"]')
+          ?.setAttribute("content", theme === "light" ? "#e9e1cf" : "#070a08")
+      } catch {}
+    </script>
+  </head>
+  <body class="antialiased">
+    {buscadorHeader && (
+      <pagefind-config instance="header" bundle-path={`${base}pagefind/`}></pagefind-config>
+    )}
+    <a href="#contenido" class="skip-link">
+      Saltar al contenido
+    </a>
+
+    <header class="site-header">
+      <div class="container-page site-header__inner">
+        <a href={base} class="brand" aria-label="neCyberWiki — inicio">
+          <span class="brand__mark" aria-hidden="true">
+            N
+          </span>
+          <span class="brand__text">
+            <span class="brand__name">
+              ne<span>Cyber</span>Wiki
+            </span>
+            <span class="brand__tag">Bitácora de ciberseguridad</span>
+          </span>
+        </a>
+
+        <nav class="site-nav" aria-label="Navegación principal">
+          {nav.map((item) => (
+            <a
+              href={item.href}
+              class="site-nav__link"
+              aria-current={isActive(item.href) ? "page" : undefined}
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
+
+        <div class="site-actions">
+          {buscadorHeader && (
+            <search class="header-search" id="header-search" aria-label="Buscar en neCyberWiki">
+              <pagefind-searchbox
+                instance="header"
+                placeholder="Buscar en neCyberWiki"
+                max-results="6"
+              ></pagefind-searchbox>
+            </search>
+          )}
+          {buscadorHeader && (
+            <button
+              id="open-search-btn"
+              class="icon-btn search-toggle"
+              type="button"
+              aria-label="Abrir buscador"
+              aria-expanded="false"
+              aria-controls="header-search"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="11" cy="11" r="7" />
+                <line x1="21" y1="21" x2="16.5" y2="16.5" />
+              </svg>
+            </button>
+          )}
+
+          <button
+            id="theme-toggle"
+            class="theme-switch"
+            type="button"
+            aria-label="Cambiar tema: Noche o Archivo"
+            title="Cambiar tema"
+          >
+            <span class="theme-switch__opt theme-switch__opt--dark">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true"
+              >
+                <path
+                  d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+            <span class="theme-switch__opt theme-switch__opt--light">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" />
+              </svg>
+            </span>
+          </button>
+          <span id="theme-status" class="sr-only" aria-live="polite"></span>
+
+          {cursoDestacado && (
+            <a href={`${base}perfil/`} class="btn btn-ghost btn-sm header-cta">
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4.5 21a7.5 7.5 0 0 1 15 0" />
+              </svg>
+              Mi perfil <span aria-hidden="true">→</span>
+            </a>
+          )}
+
+          <button
+            id="open-sidebar-btn"
+            class="icon-btn"
+            type="button"
+            aria-label="Abrir menú de navegación"
+            aria-expanded="false"
+            aria-controls="lateral-sidebar"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <dialog id="lateral-sidebar" class="drawer" aria-label="Menú de navegación">
+      <div class="drawer__head">
+        <a href={base} class="brand" aria-label="neCyberWiki — inicio">
+          <span class="brand__mark" aria-hidden="true">
+            N
+          </span>
+          <span class="brand__text">
+            <span class="brand__name">
+              ne<span>Cyber</span>Wiki
+            </span>
+          </span>
+        </a>
+        <button id="close-sidebar-btn" class="icon-btn" type="button" aria-label="Cerrar menú">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      {cursoDestacado && (
+        <div
+          class="drawer__progress"
+          data-drawer-progress
+          data-course-slug={cursoDestacado.slug}
+          data-total={cursoDestacado.lecciones.length}
+        >
+          <div class="drawer__progress-head">
+            <span>{cursoDestacado.titulo.split("(")[0].trim()}</span>
+            <strong id="mobile-progress-label">0 / {cursoDestacado.lecciones.length}</strong>
+          </div>
+          <div
+            class="progress-track"
+            role="progressbar"
+            aria-label={`Progreso del curso ${cursoDestacado.titulo}`}
+            aria-valuemin="0"
+            aria-valuemax={cursoDestacado.lecciones.length}
+            aria-valuenow="0"
+          >
+            <div id="mobile-progress-fill" class="progress-fill"></div>
+          </div>
+          <a href={rutaDestacada} class="drawer__continue">
+            {cursoActual ? "Continuar el curso" : "Abrir el curso"}{" "}
+            <span aria-hidden="true">→</span>
+          </a>
+        </div>
+      )}
+
+      <nav class="drawer__nav" aria-label="Secciones del sitio">
+        <a href={base} class="drawer__link" aria-current={isActive(base) ? "page" : undefined}>
+          <span class="drawer__num">01</span>
+          <span>Inicio</span>
+        </a>
+        <a
+          href={`${base}cursos/`}
+          class="drawer__link"
+          aria-current={isActive(`${base}cursos/`) ? "page" : undefined}
+        >
+          <span class="drawer__num">02</span>
+          <span>Cursos</span>
+        </a>
+        <a
+          href={`${base}bitacora/`}
+          class="drawer__link"
+          aria-current={isActive(`${base}bitacora/`) ? "page" : undefined}
+        >
+          <span class="drawer__num">03</span>
+          <span>Bitácora</span>
+        </a>
+        <a
+          href={`${base}perfil/`}
+          class="drawer__link"
+          aria-current={isActive(`${base}perfil/`) ? "page" : undefined}
+        >
+          <span class="drawer__num">04</span>
+          <span>Perfil</span>
+        </a>
+        <a
+          href={`${base}terminos/`}
+          class="drawer__link"
+          aria-current={isActive(`${base}terminos/`) ? "page" : undefined}
+        >
+          <span class="drawer__num">05</span>
+          <span>Términos</span>
+        </a>
+      </nav>
+
+      <div class="drawer__foot">
+        <p class="drawer__note">
+          Un archivo de ciberseguridad. Todo se practica en laboratorios propios o con autorización.
+        </p>
+        {site.koFi && (
+          <a href={site.koFi} class="btn btn-primary btn-sm btn-block">
+            Apoyar en Ko-fi
+          </a>
+        )}
+      </div>
+    </dialog>
+
+    <main
+      id="contenido"
+      class="site-main"
+      data-pagefind-body={noindex ? undefined : ""}
+      data-pagefind-ignore={noindex ? "all" : undefined}
+    >
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="container-page footer-grid">
+        <div class="footer-brand">
+          <a href={base} class="footer-brand__name" aria-label="neCyberWiki — inicio">
+            ne<span>Cyber</span>Wiki
+          </a>
+          <p>
+            Cursos, laboratorios y notas de campo de ciberseguridad en español. Sin registro, sin
+            costo y con el progreso guardado en tu navegador.
+          </p>
+        </div>
+
+        <div>
+          <p class="footer-heading" data-index="01">
+            Navegación
+          </p>
+          <ul class="footer-list">
+            <li>
+              <a class="footer-link" href={base}>
+                Inicio
+              </a>
+            </li>
+            <li>
+              <a class="footer-link" href={`${base}cursos/`}>
+                Cursos
+              </a>
+            </li>
+            <li>
+              <a class="footer-link" href={`${base}bitacora/`}>
+                Bitácora
+              </a>
+            </li>
+            <li>
+              <a class="footer-link" href={`${base}perfil/`}>
+                Perfil local
+              </a>
+            </li>
+            <li>
+              <a class="footer-link" href={`${base}terminos/`}>
+                Términos y uso
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <p class="footer-heading" data-index="02">
+            Comunidad
+          </p>
+          <ul class="footer-list">
+            <li>
+              <a class="footer-link" href={site.redes.github} target="_blank" rel="noopener">
+                GitHub <span aria-hidden="true">↗</span>
+              </a>
+            </li>
+            {site.redes.youtube && (
+              <li>
+                <a class="footer-link" href={site.redes.youtube} target="_blank" rel="noopener">
+                  YouTube <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+            )}
+          </ul>
+        </div>
+
+        <div>
+          <p class="footer-heading" data-index="03">
+            Proyecto libre
+          </p>
+          <p class="dim" style="font-size: 0.85rem; line-height: 1.65; margin-bottom: 1rem">
+            Si un tutorial o writeup te ahorró una tarde, puedes apoyar el proyecto.
+          </p>
+          {site.koFi ? (
+            <a
+              class="btn btn-primary btn-sm btn-block"
+              href={site.koFi}
+              target="_blank"
+              rel="noopener"
+            >
+              Invítame un Ko-fi
+            </a>
+          ) : (
+            <span class="btn btn-ghost btn-sm btn-block" aria-disabled="true">
+              Ko-fi — próximamente
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div class="container-page footer-bottom__inner">
+          <span>
+            Práctica solo en laboratorios propios o con autorización. El resto es estudiar el
+            sistema.
+          </span>
+          <span>
+            neCyberWiki · {year} · <a href={`${base}terminos/`}>Código MIT · Contenido educativo</a>
+          </span>
+        </div>
+      </div>
+    </footer>
+
+    {mostrarAvisoTerminos && (
+      <dialog
+        id="terminos-dialog"
+        class="terms-dialog"
+        aria-labelledby="terminos-title"
+        aria-describedby="terminos-desc"
+      >
+        <div class="terms-dialog__head">
+          <span class="docket">Aviso de uso</span>
+          <span class="terms-dialog__required">Obligatorio para continuar</span>
+        </div>
+
+        <h2 class="terms-dialog__title" id="terminos-title">
+          Gratis para aprender. Úsalo con criterio.
+        </h2>
+        <p class="terms-dialog__lead" id="terminos-desc">
+          Este sitio es gratuito y su contenido tiene finalidad exclusivamente educativa. Para
+          entrar, ten en cuenta estas tres reglas:
+        </p>
+
+        <ul class="terms-dialog__list">
+          <li>Puedes leer, estudiar y practicar el contenido sin pagar ni registrarte.</li>
+          <li>Practica solo en sistemas propios o en entornos con autorización expresa.</li>
+          <li>
+            Verifica los comandos antes de aplicarlos. El uso que hagas de la información es tu
+            responsabilidad.
+          </li>
+        </ul>
+
+        <div class="terms-dialog__actions">
+          <a class="btn btn-secondary" href={`${base}terminos/`}>
+            Leer términos completos
+          </a>
+          <button type="button" class="btn btn-primary" id="terminos-aceptar" autofocus>
+            Acepto y entro
+          </button>
+        </div>
+      </dialog>
+    )}
+
+    <script is:inline>
+      const root = document.documentElement
+      const themeToggle = document.getElementById("theme-toggle")
+      const themeStatus = document.getElementById("theme-status")
+      const themeMeta = document.querySelector('meta[name="theme-color"]')
+
+      const themeLabel = () =>
+        root.dataset.theme === "light"
+          ? "Tema Archivo activo. Cambiar a Noche"
+          : "Tema Noche activo. Cambiar a Archivo"
+
+      const syncTheme = () => {
+        if (themeToggle) themeToggle.setAttribute("aria-label", themeLabel())
+        if (themeMeta)
+          themeMeta.setAttribute("content", root.dataset.theme === "light" ? "#e9e1cf" : "#070a08")
+      }
+
+      syncTheme()
+
+      themeToggle?.addEventListener("click", () => {
+        const next = root.dataset.theme === "dark" ? "light" : "dark"
+        root.dataset.theme = next
+        try {
+          localStorage.setItem("ncw-theme", next)
+        } catch {}
+        syncTheme()
+        if (themeStatus) {
+          themeStatus.textContent =
+            next === "light" ? "Tema Archivo activado" : "Tema Noche activado"
+        }
+      })
+
+      const openBtn = document.getElementById("open-sidebar-btn")
+      const closeBtn = document.getElementById("close-sidebar-btn")
+      const drawer = document.getElementById("lateral-sidebar")
+
+      const openDrawer = () => {
+        if (!(drawer instanceof HTMLDialogElement) || drawer.open) return
+        drawer.showModal()
+        openBtn?.setAttribute("aria-expanded", "true")
+      }
+
+      const closeDrawer = () => {
+        if (!(drawer instanceof HTMLDialogElement) || !drawer.open) return
+        drawer.close()
+      }
+
+      openBtn?.addEventListener("click", openDrawer)
+      closeBtn?.addEventListener("click", closeDrawer)
+      drawer?.addEventListener("click", (event) => {
+        if (event.target === drawer) closeDrawer()
+      })
+      drawer?.addEventListener("close", () => {
+        openBtn?.setAttribute("aria-expanded", "false")
+        openBtn?.focus({ preventScroll: true })
+      })
+      drawer?.querySelectorAll("a[href]").forEach((link) => {
+        link.addEventListener("click", closeDrawer)
+      })
+
+      const drawerProgress = document.querySelector("[data-drawer-progress]")
+      const syncGlobalProgress = () => {
+        if (!(drawerProgress instanceof HTMLElement)) return
+        const slug = drawerProgress.getAttribute("data-course-slug")
+        const total = Number(drawerProgress.getAttribute("data-total") || 0)
+        if (!slug || !total) return
+
+        try {
+          const done = JSON.parse(localStorage.getItem(`ncw:progress:${slug}`) || "[]")
+          const count = Array.isArray(done) ? done.length : 0
+          const pct = Math.min(100, Math.round((count / total) * 100))
+          const label = document.getElementById("mobile-progress-label")
+          const fill = document.getElementById("mobile-progress-fill")
+          const track = fill?.closest('[role="progressbar"]')
+          if (label) label.textContent = `${count} / ${total}`
+          if (fill) fill.style.width = `${pct}%`
+          track?.setAttribute("aria-valuenow", String(count))
+        } catch {}
+      }
+
+      syncGlobalProgress()
+      window.addEventListener("storage", syncGlobalProgress)
+
+      const termsDialog = document.getElementById("terminos-dialog")
+      const termsKey = "ncw:legal:v1"
+      const closeTerms = () => {
+        if (termsDialog instanceof HTMLDialogElement && termsDialog.open) termsDialog.close()
+      }
+
+      if (termsDialog instanceof HTMLDialogElement) {
+        // El aviso es bloqueante: ni Escape ni el clic fuera lo cierran.
+        termsDialog.addEventListener("cancel", (event) => event.preventDefault())
+
+        let accepted = false
+        try {
+          accepted = Boolean(localStorage.getItem(termsKey))
+        } catch {}
+
+        if (!accepted) {
+          if (typeof termsDialog.showModal === "function") termsDialog.showModal()
+          else termsDialog.setAttribute("open", "")
+        }
+
+        document.getElementById("terminos-aceptar")?.addEventListener("click", () => {
+          try {
+            localStorage.setItem(termsKey, new Date().toISOString())
+          } catch {}
+          closeTerms()
+          window.dispatchEvent(new CustomEvent("ncw:legal-accepted"))
+        })
+      }
+    </script>
+    {buscadorHeader && <script is:inline>
+      const searchHeader = document.querySelector(".site-header")
+      const searchToggle = document.getElementById("open-search-btn")
+      const searchbox = document.querySelector('pagefind-searchbox[instance="header"]')
+      const mobileSearch = window.matchMedia("(max-width: 1099.98px)")
+
+      const searchInput = () => searchbox?.querySelector("input") ?? null
+
+      // `<pagefind-searchbox>` no etiqueta su input; el placeholder no es un nombre accesible.
+      const labelInput = () => {
+        const input = searchInput()
+        if (input) input.setAttribute("aria-label", "Buscar en neCyberWiki")
+      }
+
+      function setSearchOpen(open) {
+        const next = Boolean(open) && mobileSearch.matches
+        searchHeader?.classList.toggle("is-search-open", next)
+        searchToggle?.setAttribute("aria-expanded", String(next))
+      }
+
+      const focusSearch = () => {
+        customElements.whenDefined("pagefind-searchbox").then(() => {
+          requestAnimationFrame(() => searchInput()?.focus({ preventScroll: true }))
+        })
+      }
+
+      if (searchbox) {
+        labelInput()
+        new MutationObserver(labelInput).observe(searchbox, { childList: true, subtree: true })
+        // Al elegir un resultado se navega: cerrar el panel móvil antes de salir.
+        searchbox.addEventListener("click", (event) => {
+          if (event.target instanceof Element && event.target.closest("a")) setSearchOpen(false)
+        })
+      }
+
+      searchToggle?.addEventListener("click", () => {
+        const open = !searchHeader?.classList.contains("is-search-open")
+        setSearchOpen(open)
+        if (open) focusSearch()
+        else searchInput()?.blur()
+      })
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape" || !searchHeader?.classList.contains("is-search-open")) return
+        setSearchOpen(false)
+        searchToggle?.focus({ preventScroll: true })
+      })
+
+      document.addEventListener(
+        "keydown",
+        (event) => {
+          if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "k") return
+          if (!mobileSearch.matches) return
+          setSearchOpen(true)
+          focusSearch()
+        },
+        true,
+      )
+
+      mobileSearch.addEventListener("change", () => setSearchOpen(false))
+    </script>}
+  </body>
+</html>
