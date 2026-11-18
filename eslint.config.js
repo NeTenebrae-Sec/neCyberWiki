@@ -6,6 +6,7 @@ export default tseslint.config(
   {
     ignores: [
       "dist/",
+      "public/pagefind/",
       "node_modules/",
       ".astro/",
       ".agents/",
