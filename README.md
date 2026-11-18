@@ -72,7 +72,7 @@ src/
 
 Las contribuciones son bienvenidas: corrigiendo errores, mejorando redacción, añadiendo contenido
 relevante, proponiendo mejoras en estructura y navegación o reportando problemas en la pestaña
-*Issues*.
+_Issues_.
 
 Para contribuir:
 
