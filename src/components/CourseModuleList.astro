@@ -88,7 +88,7 @@ const lessonNumber = (orden: number) =>
             <ol class="sy-lessons">
               {sub.lecciones.map((l) => {
                 const isCurrent = current === l.slug
-                const num = lessonNumber(l.orden)
+                const num = l.numero || lessonNumber(l.orden)
                 return (
                   <li class={`sy-item${isCurrent ? " is-current" : ""}`} data-lesson-item={l.slug}>
                     <a

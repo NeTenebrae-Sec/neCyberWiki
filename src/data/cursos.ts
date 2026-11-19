@@ -2,6 +2,7 @@
 // los conteos se derivan en `src/lib/catalog.ts`. Aquí solo se declara lo que
 // el curso promete, a quién sirve y qué necesita el lector.
 
+import type { CursoRuta } from "../lib/tracks"
 import type { CategoriaInfo } from "./categorias"
 
 export interface CursoModulo {
@@ -15,6 +16,13 @@ export interface CursoFuente {
   url: string
 }
 
+// Banner común de un curso adaptable: copy editorial y CTA/video opcionales.
+export interface CursoHero {
+  copy: string[]
+  cta?: string
+  video?: string
+}
+
 export interface CursoInfo {
   slug: string
   titulo: string
@@ -26,6 +34,9 @@ export interface CursoInfo {
   requisitos: string[]
   resultados: string[]
   modulos: CursoModulo[]
+  rutas?: CursoRuta[] // Rutas adaptables; su orden manda sobre `orden`.
+  hero?: CursoHero // Banner común del curso adaptable.
+  videoPendiente?: boolean // true = videos aún sin publicar; no inventar IDs.
   fuente?: CursoFuente
 }
 
