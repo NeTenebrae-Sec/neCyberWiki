@@ -19,6 +19,24 @@ export interface CursoRuta extends CursoConfig {
   lecciones: string[] // IDs de lección ("1.1") en el orden de la ruta.
 }
 
+// Fusiona capas de configuración: las posteriores ganan por clave; las capas
+// `undefined` y las claves ausentes se ignoran. No valida valores (eso es
+// trabajo de `normalizarConfig`): una capa puede pisar con strings crudos
+// provenientes de la query o de localStorage.
+export function combinarConfig(
+  ...capas: Array<Partial<CursoConfig> | undefined>
+): Partial<CursoConfig> {
+  const resultado: Record<string, string | undefined> = {}
+  for (const capa of capas) {
+    if (!capa) continue
+    for (const clave of ["dificultad", "entorno", "arranque"] as const) {
+      const valor = capa[clave]
+      if (valor !== undefined) resultado[clave] = valor
+    }
+  }
+  return resultado as Partial<CursoConfig>
+}
+
 export const CONFIG_POR_DEFECTO: CursoConfig = {
   dificultad: "facil",
   entorno: "hardware",

@@ -6,6 +6,7 @@ import {
   DIFICULTADES,
   ENTORNOS,
   buscarRuta,
+  combinarConfig,
   leccionEnRuta,
   normalizarConfig,
   ordenarPorRuta,
@@ -147,4 +148,27 @@ test("progresoKey separa la dificultad y conserva la clave base", () => {
   assert.equal(progresoKey("arch-linux"), "ncw:progress:arch-linux")
   assert.equal(progresoKey("arch-linux", "facil"), "ncw:progress:arch-linux:facil")
   assert.equal(progresoKey("arch-linux", "avanzada"), "ncw:progress:arch-linux:avanzada")
+})
+
+test("combinarConfig: la query gana a storage; storage gana al default", () => {
+  const base = { dificultad: "facil", entorno: "hardware", arranque: "solo" }
+  const storage = { dificultad: "avanzada", arranque: "dualboot" }
+  const query = { dificultad: "facil" }
+
+  assert.deepEqual(combinarConfig(base, storage, query), {
+    dificultad: "facil",
+    entorno: "hardware",
+    arranque: "dualboot",
+  })
+  assert.deepEqual(combinarConfig(base, storage), {
+    dificultad: "avanzada",
+    entorno: "hardware",
+    arranque: "dualboot",
+  })
+})
+
+test("combinarConfig ignora capas undefined y claves ausentes", () => {
+  assert.deepEqual(combinarConfig(undefined, { entorno: "vm" }, undefined), { entorno: "vm" })
+  assert.deepEqual(combinarConfig(undefined), {})
+  assert.deepEqual(combinarConfig({}, { dificultad: undefined }), {})
 })

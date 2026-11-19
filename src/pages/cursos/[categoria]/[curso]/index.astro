@@ -1,12 +1,15 @@
 ---
 import BaseLayout from "../../../../layouts/BaseLayout.astro"
 import CourseModuleList from "../../../../components/CourseModuleList.astro"
+import CourseConfig from "../../../../components/CourseConfig.astro"
 import {
   cursoUrl,
   getCursoPublicado,
   getCursosPublicados,
   leccionUrl,
+  leccionesDeRuta,
 } from "../../../../lib/catalog"
+import { CONFIG_POR_DEFECTO } from "../../../../lib/tracks"
 import { getCategoria } from "../../../../data/categorias"
 import { site } from "../../../../data/site"
 
@@ -27,12 +30,16 @@ if (info.categoria !== categoriaId) {
 const categoria = getCategoria(info.categoria)
 const base = site.base
 const url = cursoUrl(info, base)
-const totalLecciones = info.lecciones.length
-const primeraLeccion = info.lecciones[0]
-const primeraUrl = primeraLeccion ? leccionUrl(info, primeraLeccion, base) : url
+const videosEnPreparacion = info.videoPendiente === true
+// Render inicial (sin JS): ruta por defecto Fácil · Hardware · Solo.
+const leccionesDefecto = leccionesDeRuta(info, CONFIG_POR_DEFECTO)
+const totalDefecto = leccionesDefecto.length
+const modulosDefecto = new Set(leccionesDefecto.map((leccion) => leccion.modulo)).size
+const primeraDefecto = leccionesDefecto[0]
+const primeraUrl = primeraDefecto ? leccionUrl(info, primeraDefecto, base) : url
 const unidad = info.unidad === "nivel" ? "niveles" : "lecciones"
 const etiquetaUnidad = info.unidad === "nivel" ? "nivel" : "clase"
-const leccionesJson = JSON.stringify(info.lecciones.map((leccion) => leccion.slug))
+const leccionesJson = JSON.stringify(leccionesDefecto.map((leccion) => leccion.slug))
 ---
 
 <BaseLayout titulo={info.titulo} descripcion={info.descripcion}>
@@ -63,21 +70,47 @@ const leccionesJson = JSON.stringify(info.lecciones.map((leccion) => leccion.slu
           </div>
 
           <h1 class="course-hero__title">{info.titulo}</h1>
-          <p class="lead course-hero__promise">{info.promesa}</p>
+          {info.hero ? (
+            <div class="course-hero__editorial">
+              {info.hero.copy.map((parrafo) => (
+                <p class="course-hero__intro">{parrafo}</p>
+              ))}
+            </div>
+          ) : (
+            <p class="lead course-hero__promise">{info.promesa}</p>
+          )}
 
           <div class="course-hero__meta" data-pagefind-ignore="all">
-            <span>
-              {totalLecciones} {unidad}
+            <span data-course-total data-unidad={unidad}>
+              {totalDefecto} {unidad}
             </span>
-            <span>{info.modulos.length} módulos</span>
-            <span>Guía escrita</span>
+            <span data-course-modules data-unidad="módulos">
+              {modulosDefecto} módulos
+            </span>
+            <span>
+              {videosEnPreparacion ? "Guía escrita · videos en preparación" : "Guía escrita"}
+            </span>
             <span>Progreso local</span>
           </div>
+
+          <CourseConfig curso={info} variant="hero" />
+          {info.rutas && (
+            <p class="course-route" data-course-route>
+              Ruta: Fácil · Hardware · Solo Linux
+            </p>
+          )}
+          {info.rutas && (
+            <noscript>
+              <p class="course-noscript">
+                Activa JavaScript para adaptar el temario; abajo están todas las lecciones.
+              </p>
+            </noscript>
+          )}
 
           <div
             class="mission-meter sheet sheet--flat"
             data-progress-course={info.slug}
-            data-progress-total={totalLecciones}
+            data-progress-total={totalDefecto}
             data-unidad={unidad}
             data-pagefind-ignore="all"
           >
@@ -87,7 +120,7 @@ const leccionesJson = JSON.stringify(info.lecciones.map((leccion) => leccion.slu
                 Tu avance en el curso
               </span>
               <strong data-progress-label>
-                0 / {totalLecciones} {unidad}
+                0 / {totalDefecto} {unidad}
               </strong>
             </div>
             <div
@@ -95,7 +128,7 @@ const leccionesJson = JSON.stringify(info.lecciones.map((leccion) => leccion.slu
               role="progressbar"
               aria-label="Progreso del curso"
               aria-valuemin="0"
-              aria-valuemax={totalLecciones}
+              aria-valuemax={totalDefecto}
               aria-valuenow="0"
             >
               <div class="progress-fill" data-progress-fill></div>
@@ -103,8 +136,10 @@ const leccionesJson = JSON.stringify(info.lecciones.map((leccion) => leccion.slu
             <p class="mission-meter__note">Guardado solo en este navegador. Sin cuentas.</p>
           </div>
 
+          {info.hero?.cta && <p class="course-hero__cta-note">{info.hero.cta}</p>}
+
           <div class="course-hero__actions" data-pagefind-ignore="all">
-            {primeraLeccion && (
+            {primeraDefecto && (
               <a
                 href={primeraUrl}
                 id="cta-continue"
@@ -129,6 +164,18 @@ const leccionesJson = JSON.stringify(info.lecciones.map((leccion) => leccion.slu
           <h2 id="course-aside-title" class="course-aside__title">
             Ficha del curso
           </h2>
+
+          {videosEnPreparacion && (
+            <div class="course-aside__video" data-pagefind-ignore="all">
+              <span class="course-aside__video-icon" aria-hidden="true">
+                ▶
+              </span>
+              <span class="course-aside__video-body">
+                <span class="course-aside__video-title">Video de introducción en preparación</span>
+                <span class="course-aside__video-note">La guía escrita ya está disponible</span>
+              </span>
+            </div>
+          )}
 
           <div class="course-aside__block">
             <p class="course-aside__label">Qué necesitas</p>
@@ -157,8 +204,19 @@ const leccionesJson = JSON.stringify(info.lecciones.map((leccion) => leccion.slu
           <div class="course-aside__block">
             <p class="course-aside__label">Formato</p>
             <p class="course-aside__text">
-              {totalLecciones} {unidad} en {info.modulos.length} módulos, con guía escrita, comandos
-              y explicación del razonamiento. Sin videos prometidos.
+              {videosEnPreparacion ? (
+                <>
+                  <span data-course-aside-total data-unidad={unidad}>
+                    {totalDefecto} {unidad} en tu ruta
+                  </span>
+                  {` · ${info.lecciones.length} lecciones únicas · videos en preparación`}
+                </>
+              ) : (
+                <>
+                  {totalDefecto} {unidad} en {info.modulos.length} módulos, con guía escrita,
+                  comandos y explicación del razonamiento. Sin videos prometidos.
+                </>
+              )}
             </p>
           </div>
 
@@ -193,7 +251,14 @@ const leccionesJson = JSON.stringify(info.lecciones.map((leccion) => leccion.slu
           <h2 class="course-syllabus__title">Módulos y {unidad}.</h2>
         </div>
         <span class="meta">
-          {info.modulos.length} módulos · {totalLecciones} {unidad} · guía escrita
+          <span data-course-modules data-unidad="módulos">
+            {modulosDefecto} módulos
+          </span>
+          {` · `}
+          <span data-course-total data-unidad={unidad}>
+            {totalDefecto} {unidad}
+          </span>
+          {videosEnPreparacion ? " · videos en preparación" : " · guía escrita"}
         </span>
       </div>
 
@@ -206,7 +271,42 @@ const leccionesJson = JSON.stringify(info.lecciones.map((leccion) => leccion.slu
     </div>
   </section>
 
-  <script is:inline define:vars={{ slug: info.slug, total: totalLecciones, unidad }}>
+  <script>
+    import { initCourseConfig } from "../../../../lib/course-config.client"
+
+    initCourseConfig((state) => {
+      const cta = document.getElementById("cta-continue")
+      if (!cta) return
+
+      const base = cta.getAttribute("data-base") || ""
+      const etiqueta = cta.getAttribute("data-unidad") || "clase"
+      let done = []
+      try {
+        done = JSON.parse(localStorage.getItem(`ncw:progress:${state.slug}`) || "[]")
+      } catch {}
+      if (!Array.isArray(done)) done = []
+
+      const visibles = state.visibles
+      cta.setAttribute("data-lessons", JSON.stringify(visibles))
+
+      const ctaLabel = cta.querySelector("span:first-child")
+      const siguiente = visibles.find((slug) => !done.includes(slug))
+      const etiquetaInicio = etiqueta === "nivel" ? "Empezar por el nivel 0" : "Empezar la clase 1"
+      if (siguiente) {
+        const idx = visibles.indexOf(siguiente)
+        cta.setAttribute("href", `${base}${siguiente}/`)
+        if (ctaLabel) {
+          ctaLabel.textContent =
+            done.length === 0 ? etiquetaInicio : `Continuar · ${etiqueta} ${idx + 1}`
+        }
+      } else if (visibles.length) {
+        cta.setAttribute("href", `${base}${visibles[0]}/`)
+        if (ctaLabel) ctaLabel.textContent = "Curso completado · Repasar desde el inicio"
+      }
+    })
+  </script>
+
+  <script is:inline define:vars={{ slug: info.slug, total: totalDefecto, unidad }}>
     try {
       const done = JSON.parse(localStorage.getItem(`ncw:progress:${slug}`) || "[]")
       const key = Array.isArray(done) ? done : []
@@ -315,6 +415,44 @@ const leccionesJson = JSON.stringify(info.lecciones.map((leccion) => leccion.slu
     max-width: 54ch;
   }
 
+  .course-hero__editorial {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    max-width: 56ch;
+  }
+
+  .course-hero__intro {
+    font-size: 1.02rem;
+    line-height: 1.6;
+    color: var(--ink-dim);
+  }
+
+  .course-hero__cta-note {
+    margin-top: 0.9rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    color: var(--ink-muted);
+  }
+
+  .course-route {
+    margin-top: 0.55rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    color: var(--ink-dim);
+  }
+
+  .course-noscript {
+    margin-top: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px dashed var(--line-strong);
+    color: var(--ink-muted);
+    font-size: 0.78rem;
+  }
+
   .course-hero__meta {
     display: flex;
     flex-wrap: wrap;
@@ -377,6 +515,47 @@ const leccionesJson = JSON.stringify(info.lecciones.map((leccion) => leccion.slu
     right: 1.75rem;
     width: 4.5rem;
     transform: rotate(4deg);
+  }
+
+  .course-aside__video {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-top: 0.85rem;
+    padding: 0.6rem 0.7rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm, 4px);
+    background: var(--bg-card);
+  }
+
+  .course-aside__video-icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    color: var(--signal);
+    font-size: 0.7rem;
+  }
+
+  .course-aside__video-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  .course-aside__video-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .course-aside__video-note {
+    font-size: 0.7rem;
+    color: var(--ink-muted);
   }
 
   .course-aside__title {
