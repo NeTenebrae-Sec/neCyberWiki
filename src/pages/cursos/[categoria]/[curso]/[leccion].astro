@@ -515,15 +515,31 @@ const numeroVisible = esNivel
     })
   </script>
 
-  <script is:inline define:vars={{ slug: info.slug, leccionKey, totalDefecto }}>
-    const key = `ncw:progress:${slug}`
+  <script
+    is:inline
+    define:vars={{ slug: info.slug, leccionKey, totalDefecto, tieneRutas: Boolean(rutas) }}
+  >
+    // Dificultad activa (persiste T3): localStorage saneado, default facil.
+    const sanitizeDificultad = (value) => (value === "avanzada" ? "avanzada" : "facil")
+    let dificultad = "facil"
+    try {
+      dificultad = sanitizeDificultad(localStorage.getItem(`ncw:difficulty:${slug}`))
+    } catch {}
+    // Denominador de la barra: total de la ruta activa; fallback al render SSR.
+    const totalLecciones = totalDefecto
+    let visiblesRuta = null
+
+    const keyFor = () =>
+      tieneRutas ? `ncw:progress:${slug}:${dificultad}` : `ncw:progress:${slug}`
+    const routeTotal = () =>
+      Array.isArray(visiblesRuta) && visiblesRuta.length ? visiblesRuta.length : totalLecciones
     const btn = document.getElementById("marcar-completada")
     const label = btn?.querySelector(".btn-label")
     const icon = btn?.querySelector(".btn-icon")
 
     const read = () => {
       try {
-        return JSON.parse(localStorage.getItem(key) || "[]")
+        return JSON.parse(localStorage.getItem(keyFor()) || "[]")
       } catch {
         return []
       }
@@ -533,7 +549,7 @@ const numeroVisible = esNivel
       const doneList = read()
       const isDone = doneList.includes(leccionKey)
       const count = doneList.length
-      const pct = Math.round((count / totalDefecto) * 100)
+      const pct = Math.min(100, Math.round((count / routeTotal()) * 100))
 
       if (btn) {
         btn.setAttribute("aria-pressed", String(isDone))
@@ -579,7 +595,7 @@ const numeroVisible = esNivel
         done.add(leccionKey)
       }
       try {
-        localStorage.setItem(key, JSON.stringify([...done]))
+        localStorage.setItem(keyFor(), JSON.stringify([...done]))
       } catch {}
       syncUI()
     })
@@ -588,7 +604,7 @@ const numeroVisible = esNivel
       const done = new Set(read())
       done.add(leccionKey)
       try {
-        localStorage.setItem(key, JSON.stringify([...done]))
+        localStorage.setItem(keyFor(), JSON.stringify([...done]))
       } catch {}
     }
 
@@ -597,6 +613,17 @@ const numeroVisible = esNivel
     }
 
     syncUI()
+
+    // Seguir la config activa del configurador sin recargar: la dificultad fija
+    // la clave de progreso y la ruta fija el denominador de la barra.
+    const onConfig = (event) => {
+      const detail = (event && event.detail) || {}
+      dificultad = sanitizeDificultad(detail.config?.dificultad)
+      visiblesRuta = Array.isArray(detail.visibles) ? detail.visibles : null
+      syncUI()
+    }
+    document.addEventListener("ncw:course-config", onConfig)
+    window.addEventListener("ncw:course-config", onConfig)
 
     const tocDrawer = document.getElementById("toc-drawer")
     const tocOverlay = document.getElementById("toc-overlay")

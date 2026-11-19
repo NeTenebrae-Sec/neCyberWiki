@@ -8,6 +8,11 @@ export const LEGAL_KEY = "ncw:legal:v1"
 export const THEME_KEY = "ncw-theme"
 export const PROGRESS_PREFIX = "ncw:progress:"
 
+// Claves de progreso del curso adaptable antes de las rutas por dificultad.
+// Son residuos de la interfaz T3/T4 (el curso ya no guarda ahí); se borran,
+// nunca se migran.
+const LEGACY_PROGRESS_KEYS = [`${PROGRESS_PREFIX}arch-linux-facil`, `${PROGRESS_PREFIX}arch-linux`]
+
 export type Theme = "dark" | "light"
 
 export interface StorageLike {
@@ -48,6 +53,21 @@ const cleanSlug = (value: unknown, maxLength: number): string | null => {
   if (!slug || slug.length > maxLength) return null
   if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(slug)) return null
   return slug
+}
+
+// Clave de curso del perfil: slug base válido + opcional `:tag` con un solo `:`
+// y tag `/^[a-z][a-z0-9-]{0,20}$/` (p. ej. `arch-linux:facil`).
+const cleanCourseKey = (value: string): string | null => {
+  const key = value.trim()
+  if (!key) return null
+  const first = key.indexOf(":")
+  if (first === -1) return cleanSlug(key, MAX_COURSE_SLUG)
+  if (key.indexOf(":", first + 1) !== -1) return null
+  const base = key.slice(0, first)
+  const tag = key.slice(first + 1)
+  if (!cleanSlug(base, MAX_COURSE_SLUG)) return null
+  if (!/^[a-z][a-z0-9-]{0,20}$/.test(tag)) return null
+  return key
 }
 
 const cleanDate = (value: unknown): string | null => {
@@ -105,7 +125,9 @@ export function emptyProfile(): ProfileData {
 }
 
 // Reúne lo que hay guardado. `courseSlugs` añade cursos sin progreso para que
-// el JSON exportado documente también los cursos vacíos.
+// el JSON exportado documente también los cursos vacíos. Las filas son
+// `<slug>` o `<slug>:<dificultad>`; las claves legacy de Arch se descartan si
+// quien llama ya ejecutó `purgeLegacyProgress` (perfil lo hace antes de colectar).
 export function collectProfile(storage: StorageLike, courseSlugs: string[] = []): ProfileData {
   const courses: Record<string, string[]> = {}
   const candidates = new Set<string>()
@@ -187,7 +209,7 @@ export function validateProfile(value: unknown): ProfileParseResult {
 
   const courses: Record<string, string[]> = {}
   for (const [rawCourse, rawLessons] of Object.entries(rawCourses)) {
-    const course = cleanSlug(rawCourse, MAX_COURSE_SLUG)
+    const course = cleanCourseKey(rawCourse)
     if (!course) return { ok: false, error: `El curso «${rawCourse}» no es válido.` }
     const lessons = uniqueLessons(rawLessons)
     if (!lessons) {
@@ -210,6 +232,10 @@ export function validateProfile(value: unknown): ProfileParseResult {
 
 // Reemplaza por completo el estado local relacionado con el perfil. Los
 // módulos abiertos del temario son estado de interfaz y no se importan.
+// El barrido inicial borra TODAS las filas `ncw:progress:*` — incluidas las
+// legacy `arch-linux-facil`/`arch-linux` — y después escribe solo las filas del
+// JSON, así que las legacy no reaparecen (salvo que el JSON las trajera, lo cual
+// `validateProfile` permite para `arch-linux-facil` como clave base válida).
 export function applyProfile(storage: StorageLike, profile: ProfileData): void {
   for (const key of storageKeys(storage)) {
     if (key.startsWith(PROGRESS_PREFIX)) storage.removeItem(key)
@@ -230,6 +256,21 @@ export function applyProfile(storage: StorageLike, profile: ProfileData): void {
   else storage.removeItem(LEGAL_KEY)
 }
 
+// Borrado puro de las claves legacy de progreso. Devuelve las que eliminó.
+// No migra datos: el progreso legacy se descarta (decisión humana 2026-11-19).
+export function purgeLegacyProgress(storage: StorageLike): string[] {
+  const removed: string[] = []
+  for (const key of LEGACY_PROGRESS_KEYS) {
+    try {
+      if (storage.getItem(key) !== null) {
+        storage.removeItem(key)
+        removed.push(key)
+      }
+    } catch {}
+  }
+  return removed
+}
+
 export function clearProfile(storage: StorageLike): string[] {
   const removed = storageKeys(storage)
     .filter((key) => key === THEME_KEY || key.startsWith("ncw:"))
@@ -239,6 +280,10 @@ export function clearProfile(storage: StorageLike): string[] {
   return removed
 }
 
+// Suma de marcas por fila. Las filas `<slug>:<dificultad>` del mismo curso base
+// cuentan por separado: no hay dedup entre dificultades a propósito (el aislamiento
+// Fácil/Avanzada es por clave). El "totales del perfil" del header de /perfil sí
+// deduplica por unión de file-slugs en el cliente.
 export function totalLessons(profile: ProfileData): number {
   return Object.values(profile.courses).reduce((total, lessons) => total + lessons.length, 0)
 }

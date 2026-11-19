@@ -135,20 +135,36 @@ const unidad = curso.unidad === "nivel" ? "niveles" : "lecciones"
 )}
 
 <script>
+  // Une marcas de `ncw:progress:<slug>` y `ncw:progress:<slug>:<tag>` (tag válido),
+  // evitando colisiones tipo `arch-linux` vs `arch-linux-facil`.
+  const progressUnion = (slug: string): number => {
+    const union = new Set<string>()
+    const tagPattern = /^:[a-z][a-z0-9-]{0,20}$/
+    const prefix = `ncw:progress:${slug}`
+    try {
+      for (let index = 0; index < localStorage.length; index += 1) {
+        const key = localStorage.key(index)
+        if (!key || !key.startsWith(prefix)) continue
+        const rest = key.slice(prefix.length)
+        if (rest !== "" && !tagPattern.test(rest)) continue
+        try {
+          const parsed = JSON.parse(localStorage.getItem(key) || "[]")
+          if (Array.isArray(parsed)) {
+            for (const item of parsed) if (typeof item === "string") union.add(item)
+          }
+        } catch {}
+      }
+    } catch {}
+    return union.size
+  }
+
   const syncCourseProgress = () => {
     for (const root of document.querySelectorAll<HTMLElement>("[data-course-progress]")) {
       const slug = root.getAttribute("data-course-progress")
       const total = Number(root.getAttribute("data-total") || 0)
       if (!slug || !total) continue
 
-      let done: unknown
-      try {
-        done = JSON.parse(localStorage.getItem(`ncw:progress:${slug}`) || "[]")
-      } catch {
-        done = []
-      }
-
-      const count = Array.isArray(done) ? done.length : 0
+      const count = progressUnion(slug)
       const pct = Math.min(100, Math.round((count / total) * 100))
       const label = root.querySelector("[data-course-progress-label]")
       const fill = root.querySelector<HTMLElement>("[data-course-progress-fill]")

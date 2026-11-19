@@ -273,19 +273,45 @@ const leccionesJson = JSON.stringify(leccionesDefecto.map((leccion) => leccion.s
 
   <script>
     import { initCourseConfig } from "../../../../lib/course-config.client"
+    import { progresoKey } from "../../../../lib/tracks"
 
     initCourseConfig((state) => {
+      const key = state.ruta
+        ? progresoKey(state.slug, state.config.dificultad)
+        : progresoKey(state.slug)
+      let done: string[] = []
+      try {
+        const parsed = JSON.parse(localStorage.getItem(key) || "[]")
+        if (Array.isArray(parsed)) done = parsed.filter((item) => typeof item === "string")
+      } catch {}
+
+      // Aside de progreso: fila de la dificultad activa (denominador = ruta
+      // activa). Se actualiza en cada cambio de config, sin recargar.
+      const root = document.querySelector<HTMLElement>(`[data-progress-course="${state.slug}"]`)
+      if (root) {
+        const visibles = state.ruta ? state.visibles : null
+        const total = visibles
+          ? visibles.length
+          : Number(root.getAttribute("data-progress-total") || 0)
+        const marked = visibles ? visibles.filter((slug) => done.includes(slug)) : done
+        const n = marked.length
+        const pct = total > 0 ? Math.min(100, Math.round((n / total) * 100)) : 0
+        const unidad = root.getAttribute("data-unidad") || "lecciones"
+        root.setAttribute("data-progress-total", String(total))
+        const label = root.querySelector("[data-progress-label]")
+        if (label) label.textContent = `${n} / ${total} ${unidad} (${pct}%)`
+        const fill = root.querySelector<HTMLElement>("[data-progress-fill]")
+        if (fill) fill.style.width = `${pct}%`
+        const bar = root.querySelector('[role="progressbar"]')
+        bar?.setAttribute("aria-valuenow", String(n))
+        bar?.setAttribute("aria-valuemax", String(total))
+      }
+
       const cta = document.getElementById("cta-continue")
       if (!cta) return
 
       const base = cta.getAttribute("data-base") || ""
       const etiqueta = cta.getAttribute("data-unidad") || "clase"
-      let done = []
-      try {
-        done = JSON.parse(localStorage.getItem(`ncw:progress:${state.slug}`) || "[]")
-      } catch {}
-      if (!Array.isArray(done)) done = []
-
       const visibles = state.visibles
       cta.setAttribute("data-lessons", JSON.stringify(visibles))
 
@@ -306,11 +332,21 @@ const leccionesJson = JSON.stringify(leccionesDefecto.map((leccion) => leccion.s
     })
   </script>
 
-  <script is:inline define:vars={{ slug: info.slug, total: totalDefecto, unidad }}>
+  <script
+    is:inline
+    define:vars={{ slug: info.slug, total: totalDefecto, unidad, tieneRutas: Boolean(info.rutas) }}
+  >
     try {
-      const done = JSON.parse(localStorage.getItem(`ncw:progress:${slug}`) || "[]")
-      const key = Array.isArray(done) ? done : []
-      const n = key.length
+      // Clave de progreso de la fila activa (default facil si no hay dificultad guardada).
+      const sanitize = (value) => (value === "avanzada" ? "avanzada" : "facil")
+      let dificultad = "facil"
+      try {
+        dificultad = sanitize(localStorage.getItem(`ncw:difficulty:${slug}`))
+      } catch {}
+      const key = tieneRutas ? `ncw:progress:${slug}:${dificultad}` : `ncw:progress:${slug}`
+      const done = JSON.parse(localStorage.getItem(key) || "[]")
+      const marks = Array.isArray(done) ? done : []
+      const n = marks.length
       const pct = Math.round((n / total) * 100)
 
       const root = document.querySelector(`[data-progress-course="${slug}"]`)
@@ -326,7 +362,7 @@ const leccionesJson = JSON.stringify(leccionesDefecto.map((leccion) => leccion.s
         const lessons = JSON.parse(cta.getAttribute("data-lessons") || "[]")
         const baseHref = cta.getAttribute("data-base") || ""
         const etiqueta = cta.getAttribute("data-unidad") || "clase"
-        const nextSlug = lessons.find((lesson) => !key.includes(lesson))
+        const nextSlug = lessons.find((lesson) => !marks.includes(lesson))
         if (nextSlug) {
           const nextIndex = lessons.indexOf(nextSlug)
           cta.setAttribute("href", `${baseHref}${nextSlug}/`)
@@ -343,12 +379,12 @@ const leccionesJson = JSON.stringify(leccionesDefecto.map((leccion) => leccion.s
       }
 
       for (const item of document.querySelectorAll("[data-lesson-item]")) {
-        item.classList.toggle("is-done", key.includes(item.getAttribute("data-lesson-item")))
+        item.classList.toggle("is-done", marks.includes(item.getAttribute("data-lesson-item")))
       }
       for (const mod of document.querySelectorAll("[data-module-key]")) {
         const items = [...mod.querySelectorAll("[data-lesson-item]")]
         const doneCount = items.filter((item) =>
-          key.includes(item.getAttribute("data-lesson-item")),
+          marks.includes(item.getAttribute("data-lesson-item")),
         ).length
         const doneEl = mod.querySelector("[data-module-done]")
         const fillEl = mod.querySelector("[data-module-fill]")
