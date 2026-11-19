@@ -66,7 +66,7 @@ test("los cursos publicados apuntan a categorías existentes y declaran módulos
 
 test("getCurso resuelve por slug y devuelve undefined si no existe", () => {
   assert.equal(getCurso("bandit")?.titulo, "Bandit: terminal desde cero")
-  assert.equal(getCurso("arch-linux-facil")?.unidad, "clase")
+  assert.equal(getCurso("arch-linux")?.unidad, "clase")
   assert.equal(getCurso("no-existe"), undefined)
 })
 
@@ -109,28 +109,135 @@ test("cada módulo declarado tiene al menos una lección real en Bandit", async 
   }
 })
 
-test("Arch Linux publica 8 clases ordenadas y sus módulos existen", async () => {
-  const curso = getCurso("arch-linux-facil")
-  const files = await lessonFiles("arch-linux-facil")
-  assert.equal(files.length, 8)
+test("Arch Linux publica 22 clases adaptables: esquema, rutas y estados", async () => {
+  const curso = getCurso("arch-linux")
+  const files = await lessonFiles("arch-linux")
+  assert.equal(files.length, 22)
 
   const modulos = new Set(curso.modulos.map((modulo) => modulo.id))
+  const variantes = new Set(["comun", "facil", "avanzada"])
+  const entornos = new Set(["ambos", "hardware", "vm"])
+  const arranques = new Set(["ambos", "solo", "dualboot"])
+  const estados = new Set(["publicada", "en-construccion"])
   const ordenes = []
+  const numeros = new Set()
+  const lecciones = []
 
   for (const file of files) {
     const fm = await frontmatter(file)
-    assert.equal(scalar(fm, "curso"), "arch-linux-facil", `${file} no declara curso`)
+    assert.equal(scalar(fm, "curso"), "arch-linux", `${file} no declara curso`)
+    assert.equal(scalar(fm, "video"), "", `${file} no debería prometer video`)
+    assert.equal(scalar(fm, "duracion"), "", `${file} no debería prometer duración`)
     const modulo = scalar(fm, "modulo")
     assert.ok(modulos.has(modulo), `${file} usa un módulo no declarado: ${modulo}`)
     const orden = scalar(fm, "orden")
     assert.ok(Number.isInteger(orden) && orden >= 0, `${file} tiene un orden inválido`)
     ordenes.push(orden)
+
+    const numero = scalar(fm, "numero")
+    assert.ok(typeof numero === "string" && /^[0-9]\.[0-9]+$/.test(numero), `${file} sin número`)
+    assert.equal(numeros.has(numero), false, `${file} duplica el número ${numero}`)
+    numeros.add(numero)
+
+    const variante = scalar(fm, "variante")
+    assert.ok(variantes.has(variante), `${file} variante inválida: ${variante}`)
+    const entorno = scalar(fm, "entorno")
+    assert.ok(entornos.has(entorno), `${file} entorno inválido: ${entorno}`)
+    const arranque = scalar(fm, "arranque")
+    assert.ok(arranques.has(arranque), `${file} arranque inválido: ${arranque}`)
+    const estado = scalar(fm, "estado")
+    assert.ok(estados.has(estado), `${file} estado inválido: ${estado}`)
+
+    const prerrequisitosLine = fm.match(/^prerrequisitos:\s*\[(.*?)\]/m)
+    assert.ok(prerrequisitosLine, `${file} no declara prerrequisitos`)
+
+    lecciones.push({ file, numero, variante, entorno, arranque, estado })
   }
 
   assert.deepEqual(
     ordenes.sort((a, b) => a - b),
-    Array.from({ length: 8 }, (_, i) => i),
+    Array.from({ length: 22 }, (_, i) => i),
   )
+  assert.equal(numeros.size, 22)
+
+  const porNumero = new Map(lecciones.map((l) => [l.numero, l]))
+  assert.equal(lecciones.filter((l) => l.estado === "publicada").length, 14)
+  assert.equal(lecciones.filter((l) => l.estado === "en-construccion").length, 8)
+
+  // Rutas adaptables: conteos, IDs existentes, sin duplicados, VM sin hardware/dualboot,
+  // dual boot con 2.4 antes de 2.3 y 2.8 antes de 2.9.
+  const esperadas = [
+    ["facil", "hardware", "solo", 14],
+    ["facil", "vm", "solo", 13],
+    ["facil", "hardware", "dualboot", 16],
+    ["avanzada", "hardware", "solo", 16],
+    ["avanzada", "vm", "solo", 15],
+    ["avanzada", "hardware", "dualboot", 18],
+  ]
+  assert.equal(curso.rutas?.length, 6)
+
+  const usadas = new Set()
+  for (const [dificultad, entorno, arranque, total] of esperadas) {
+    const ruta = curso.rutas.find(
+      (r) => r.dificultad === dificultad && r.entorno === entorno && r.arranque === arranque,
+    )
+    assert.ok(ruta, `Falta la ruta ${dificultad}/${entorno}/${arranque}`)
+    assert.equal(ruta.lecciones.length, total, `La ruta ${dificultad}/${entorno}/${arranque}`)
+    assert.equal(new Set(ruta.lecciones).size, total, "La ruta duplica lecciones")
+    for (const id of ruta.lecciones) {
+      assert.ok(porNumero.has(id), `La ruta referencia una lección inexistente: ${id}`)
+      usadas.add(id)
+      const l = porNumero.get(id)
+      assert.ok(
+        l.variante === "comun" || l.variante === dificultad,
+        `La ruta ${dificultad} incluye ${id} de variante ${l.variante}`,
+      )
+      if (entorno === "vm") {
+        assert.notEqual(l.entorno, "hardware", `La ruta VM incluye ${id} de hardware`)
+        assert.notEqual(l.arranque, "dualboot", `La ruta VM incluye ${id} de dual boot`)
+      }
+    }
+    if (arranque === "dualboot" && dificultad === "facil") {
+      assert.ok(ruta.lecciones.indexOf("2.2") < ruta.lecciones.indexOf("2.4"))
+      assert.ok(ruta.lecciones.indexOf("2.4") < ruta.lecciones.indexOf("2.3"))
+    }
+    if (arranque === "dualboot" && dificultad === "avanzada") {
+      assert.ok(ruta.lecciones.indexOf("2.7") < ruta.lecciones.indexOf("2.8"))
+      assert.ok(ruta.lecciones.indexOf("2.8") < ruta.lecciones.indexOf("2.9"))
+    }
+  }
+
+  // Toda lección específica aparece al menos en una ruta; las comunes aparecen en todas.
+  for (const l of lecciones) {
+    if (l.variante === "comun" && l.entorno === "ambos" && l.arranque === "ambos") {
+      assert.ok(usadas.has(l.numero), `La lección común ${l.numero} no aparece en ninguna ruta`)
+    } else {
+      assert.ok(
+        usadas.has(l.numero),
+        `La lección específica ${l.numero} no aparece en ninguna ruta`,
+      )
+    }
+  }
+})
+
+test("los prerrequisitos de Arch referencian IDs existentes", async () => {
+  const files = await lessonFiles("arch-linux")
+  const numeros = new Set()
+  const prerreqs = []
+
+  for (const file of files) {
+    const fm = await frontmatter(file)
+    numeros.add(scalar(fm, "numero"))
+    const line = fm.match(/^prerrequisitos:\s*\[(.*?)\]/m)
+    const ids = [...line[1].matchAll(/"([0-9]\.[0-9]+)"/g)].map((m) => m[1])
+    prerreqs.push([file, ids])
+  }
+
+  for (const [file, ids] of prerreqs) {
+    for (const id of ids) {
+      assert.ok(numeros.has(id), `${file} referencia un prerrequisito inexistente: ${id}`)
+    }
+  }
 })
 
 test("las imágenes de Bandit apuntan a /cursos/bandit/ y existen en public", async () => {
