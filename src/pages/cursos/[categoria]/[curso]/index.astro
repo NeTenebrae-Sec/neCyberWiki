@@ -39,10 +39,27 @@ const primeraDefecto = leccionesDefecto[0]
 const primeraUrl = primeraDefecto ? leccionUrl(info, primeraDefecto, base) : url
 const unidad = info.unidad === "nivel" ? "niveles" : "lecciones"
 const etiquetaUnidad = info.unidad === "nivel" ? "nivel" : "clase"
+// Hide-until-ready: solo los cursos adaptables emiten el script anti-parpadeo.
+const adaptativo = Boolean(info.rutas?.length)
 const leccionesJson = JSON.stringify(leccionesDefecto.map((leccion) => leccion.slug))
 ---
 
 <BaseLayout titulo={info.titulo} descripcion={info.descripcion}>
+  {adaptativo && <script is:inline define:vars={{ slug: info.slug }}>
+    ;(function () {
+      try {
+        const d = localStorage.getItem("ncw:difficulty:" + slug) || "facil"
+        const e = localStorage.getItem("ncw:environment:" + slug) || "hardware"
+        const b = e === "vm" ? "solo" : localStorage.getItem("ncw:boot:" + slug) || "solo"
+        if ([d, e, b].join("|") !== "facil|hardware|solo") {
+          document.documentElement.classList.add("ncw-route-pending")
+          setTimeout(function () {
+            document.documentElement.classList.remove("ncw-route-pending")
+          }, 3000)
+        }
+      } catch {}
+    })()
+  </script>}
   <section class="course-hero">
     <div class="container-page">
       <nav class="breadcrumb" aria-label="Miga de pan">
@@ -95,7 +112,7 @@ const leccionesJson = JSON.stringify(leccionesDefecto.map((leccion) => leccion.s
 
           <CourseConfig curso={info} variant="hero" />
           {info.rutas && (
-            <p class="course-route" data-course-route>
+            <p class="course-route" data-course-route data-route-only>
               Ruta: Fácil · Hardware · Solo Linux
             </p>
           )}
