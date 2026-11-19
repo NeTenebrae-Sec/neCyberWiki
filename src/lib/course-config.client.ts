@@ -1,13 +1,14 @@
 // Configurador de curso adaptable: lee query > localStorage > default,
 // pinta el estado, filtra/reordena el temario y emite `ncw:course-config`.
-// No toca el progreso guardado: la clave actual `ncw:progress:${slug}` se
-// lee solo para pintar contadores; T5 migra la clave.
+// La lectura de marcas por módulo usa la clave por dificultad cuando el curso
+// tiene rutas (T5); sin rutas (Bandit), la clave plana.
 import {
   buscarRuta,
   combinarConfig,
   leccionEnRuta,
   normalizarConfig,
   ordenarPorRuta,
+  progresoKey,
   type CursoConfig,
   type CursoRuta,
 } from "./tracks.ts"
@@ -161,8 +162,10 @@ function aplicarAlTemario(
   slug: string,
   ruta: CursoRuta | undefined,
   config: CursoConfig,
+  tieneRutas: boolean,
 ): string[] {
   const visiblesSlug: string[] = []
+  const claveProgreso = tieneRutas ? progresoKey(slug, config.dificultad) : progresoKey(slug)
 
   for (const mod of doc.querySelectorAll<HTMLElement>("[data-syllabus] details[data-module-key]")) {
     const items: LessonItem[] = [...mod.querySelectorAll<HTMLElement>("[data-lesson-item]")].map(
@@ -180,7 +183,7 @@ function aplicarAlTemario(
     let done = 0
     let progreso: string[]
     try {
-      const parseado = JSON.parse(window.localStorage.getItem(`ncw:progress:${slug}`) || "[]")
+      const parseado = JSON.parse(window.localStorage.getItem(claveProgreso) || "[]")
       progreso = Array.isArray(parseado) ? parseado : []
     } catch {
       progreso = []
@@ -295,7 +298,7 @@ export function initCourseConfig(
         previa = config
         const ruta = rutas.length ? buscarRuta(rutas, config) : undefined
         pintarConfigurador(root, config)
-        const visibles = aplicarAlTemario(document, slug, ruta, config)
+        const visibles = aplicarAlTemario(document, slug, ruta, config, rutas.length > 0)
         const state: CourseConfigState = { slug, config, ruta, visibles }
         emitir(document, state)
         onChange?.(state)
