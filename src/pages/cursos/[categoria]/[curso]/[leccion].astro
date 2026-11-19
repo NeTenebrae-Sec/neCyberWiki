@@ -45,6 +45,8 @@ if (!entry) throw new Error(`Lección no encontrada: ${leccion}`)
 
 const leccionKey = entry.id.split("/").pop()!
 const rutas = info.rutas
+// Hide-until-ready: solo los cursos adaptables emiten el script anti-parpadeo.
+const adaptativo = Boolean(rutas?.length)
 // Render inicial (sin JS): la ruta por defecto Fácil · Hardware · Solo.
 // Con JS, initCourseConfig repinta con la ruta activa del lector.
 const leccionesDefecto = leccionesDeRuta(info, CONFIG_POR_DEFECTO)
@@ -85,6 +87,21 @@ const numeroVisible = esNivel
 ---
 
 <BaseLayout titulo={`${entry.data.title} · ${info.titulo}`} descripcion={entry.data.description}>
+  {adaptativo && <script is:inline define:vars={{ slug: info.slug }}>
+    ;(function () {
+      try {
+        const d = localStorage.getItem("ncw:difficulty:" + slug) || "facil"
+        const e = localStorage.getItem("ncw:environment:" + slug) || "hardware"
+        const b = e === "vm" ? "solo" : localStorage.getItem("ncw:boot:" + slug) || "solo"
+        if ([d, e, b].join("|") !== "facil|hardware|solo") {
+          document.documentElement.classList.add("ncw-route-pending")
+          setTimeout(function () {
+            document.documentElement.classList.remove("ncw-route-pending")
+          }, 3000)
+        }
+      } catch {}
+    })()
+  </script>}
   <div class="player-bar" data-pagefind-ignore="all">
     <div class="container-page player-bar__inner">
       <nav class="breadcrumb player-bar__crumb" aria-label="Miga de pan">

@@ -290,15 +290,23 @@ export function initCourseConfig(
     let forzada: CursoConfig | undefined
 
     const aplicar = (): CourseConfigState => {
-      const config = forzada ?? configDesdeLayers(slug, window.location.search)
-      previa = config
-      const ruta = rutas.length ? buscarRuta(rutas, config) : undefined
-      pintarConfigurador(root, config)
-      const visibles = aplicarAlTemario(document, slug, ruta, config)
-      const state: CourseConfigState = { slug, config, ruta, visibles }
-      emitir(document, state)
-      onChange?.(state)
-      return state
+      try {
+        const config = forzada ?? configDesdeLayers(slug, window.location.search)
+        previa = config
+        const ruta = rutas.length ? buscarRuta(rutas, config) : undefined
+        pintarConfigurador(root, config)
+        const visibles = aplicarAlTemario(document, slug, ruta, config)
+        const state: CourseConfigState = { slug, config, ruta, visibles }
+        emitir(document, state)
+        onChange?.(state)
+        return state
+      } finally {
+        // Retira la clase anti-parpadeo aunque falle el repintado; si no
+        // estaba (config por defecto o sin JS previo), es un no-op.
+        if (typeof document !== "undefined") {
+          document.documentElement.classList.remove("ncw-route-pending")
+        }
+      }
     }
 
     root.addEventListener("change", (evento) => {

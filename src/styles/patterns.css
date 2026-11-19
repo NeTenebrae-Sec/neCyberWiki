@@ -752,3 +752,16 @@
 .hud-br {
   display: none;
 }
+
+/* --- Route pending -------------------------------------------------------- */
+/* Hide-until-ready: zonas dependientes de la ruta, ocultas con visibility
+   (sin reflow) solo mientras la config persistida no es la por defecto.
+   El script inline del body añade la clase; el cliente la retira tras
+   hidratar. Sin JS la clase nunca se añade y todo se ve. */
+
+html.ncw-route-pending [data-syllabus],
+html.ncw-route-pending .lesson-head__arrows,
+html.ncw-route-pending .lesson-nav,
+html.ncw-route-pending [data-route-only] {
+  visibility: hidden;
+}
