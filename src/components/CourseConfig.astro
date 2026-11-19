@@ -204,8 +204,40 @@ const uid = (eje: string) => `${curso.slug}-${eje}`
   }
 
   .course-config--lesson {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.35rem 0.5rem;
     margin-top: 0;
-    grid-template-columns: 1fr;
+    padding: 0.55rem;
+  }
+
+  .course-config--lesson .course-config__head {
+    padding-bottom: 0.35rem;
+  }
+
+  .course-config--lesson .course-config__group {
+    gap: 0.25rem;
+  }
+
+  .course-config--lesson .course-config__group legend {
+    margin-bottom: 0.2rem;
+  }
+
+  .course-config--lesson .config-option__body {
+    padding: 0.3rem 0.4rem;
+  }
+
+  .course-config--lesson .config-option__title {
+    font-size: 0.72rem;
+  }
+
+  .course-config--lesson .config-option__body small {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    .course-config--lesson {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 
   @media (max-width: 640px) {

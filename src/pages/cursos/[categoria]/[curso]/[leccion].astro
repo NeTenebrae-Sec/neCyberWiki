@@ -2,6 +2,7 @@
 import { getCollection, render } from "astro:content"
 import BaseLayout from "../../../../layouts/BaseLayout.astro"
 import CourseModuleList from "../../../../components/CourseModuleList.astro"
+import CourseConfig from "../../../../components/CourseConfig.astro"
 import TableOfContents from "../../../../components/TableOfContents.astro"
 import VideoEmbed from "../../../../components/VideoEmbed.astro"
 import {
@@ -9,7 +10,9 @@ import {
   getCursoPublicado,
   getCursosPublicados,
   leccionUrl,
+  leccionesDeRuta,
 } from "../../../../lib/catalog"
+import { CONFIG_POR_DEFECTO } from "../../../../lib/tracks"
 import { getCategoria } from "../../../../data/categorias"
 import { site } from "../../../../data/site"
 
@@ -41,9 +44,26 @@ const entry = entradas.find((item) => item.id.split("/").pop() === leccion)
 if (!entry) throw new Error(`Lección no encontrada: ${leccion}`)
 
 const leccionKey = entry.id.split("/").pop()!
-const idx = info.lecciones.findIndex((item) => item.slug === leccionKey)
-const prev = idx > 0 ? info.lecciones[idx - 1] : null
-const next = idx >= 0 && idx < info.lecciones.length - 1 ? info.lecciones[idx + 1] : null
+const rutas = info.rutas
+// Render inicial (sin JS): la ruta por defecto Fácil · Hardware · Solo.
+// Con JS, initCourseConfig repinta con la ruta activa del lector.
+const leccionesDefecto = leccionesDeRuta(info, CONFIG_POR_DEFECTO)
+const totalDefecto = leccionesDefecto.length
+const modulosDefecto = new Set(leccionesDefecto.map((leccion) => leccion.modulo)).size
+const entryNumero = entry.data.numero ?? ""
+const catalogoJson = rutas
+  ? JSON.stringify(
+      info.lecciones.map((leccion) => ({
+        slug: leccion.slug,
+        numero: leccion.numero,
+        title: leccion.title,
+        modulo: leccion.modulo,
+      })),
+    ).replace(/</g, "\\u003c")
+  : ""
+const idx = leccionesDefecto.findIndex((item) => item.slug === leccionKey)
+const prev = idx > 0 ? leccionesDefecto[idx - 1] : null
+const next = idx >= 0 && idx < leccionesDefecto.length - 1 ? leccionesDefecto[idx + 1] : null
 const currentModule = info.modulos.find((modulo) =>
   modulo.lecciones.some((item) => item.slug === leccionKey),
 )
@@ -57,10 +77,11 @@ const hasToc = tocItems.length >= 2
 const base = site.base
 const categoria = getCategoria(info.categoria)
 const url = cursoUrl(info, base)
-const totalLecciones = info.lecciones.length
 const esNivel = info.unidad === "nivel"
 const etiqueta = esNivel ? "Nivel" : "Clase"
-const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1).padStart(2, "0")
+const numeroVisible = esNivel
+  ? String(entry.data.orden)
+  : entry.data.numero || String(entry.data.orden + 1).padStart(2, "0")
 ---
 
 <BaseLayout titulo={`${entry.data.title} · ${info.titulo}`} descripcion={entry.data.description}>
@@ -76,7 +97,7 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
         </a>
         <span aria-hidden="true">/</span>
         <span aria-current="page">
-          {etiqueta} {numero} de {totalLecciones}
+          {etiqueta} {numeroVisible} de <span data-lesson-total>{totalDefecto}</span>
         </span>
       </nav>
 
@@ -84,7 +105,8 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
         <div class="player-bar__progress">
           <span id="player-progress-pct">0% completado</span>
           <span id="player-progress-count" class="player-bar__count">
-            (0 de {totalLecciones})
+            (<span id="player-progress-done">0</span> de{" "}
+            <span data-lesson-total>{totalDefecto}</span>)
           </span>
         </div>
         <div class="progress-track player-bar__track" aria-hidden="true">
@@ -99,6 +121,19 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
 
   <div class="container-page player-layout">
     <article class="player-main">
+      {rutas && <CourseConfig curso={info} variant="lesson" />}
+      {rutas && (
+        <div class="route-notice" data-route-notice role="status" hidden>
+          <p class="route-notice__text">
+            Esta lección no está en tu ruta actual (
+            <span data-route-notice-summary>Fácil · Hardware · Solo Linux</span>
+            ).
+          </p>
+          <button type="button" class="route-notice__cta" data-route-notice-cta>
+            Verla en la ruta que sí la incluye
+          </button>
+        </div>
+      )}
       {"video" in entry.data && (
         <div class="player-frame">
           <div class="player-frame__bar">
@@ -108,7 +143,7 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
               <span class="terminal__dot terminal__dot--green"></span>
             </span>
             <span class="terminal__title">
-              monitor · {etiqueta.toLowerCase()} {numero}
+              monitor · {etiqueta.toLowerCase()} {numeroVisible}
             </span>
             <span class="player-frame__state">
               <span class="status-dot status-dot--cyan" aria-hidden="true"></span> registro de campo
@@ -138,7 +173,7 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
             )}
             <p class="lesson-head__kicker">
               <span class="accent">
-                {etiqueta} {numero}
+                {etiqueta} {numeroVisible}
               </span>
               <span aria-hidden="true">·</span>
               <span>
@@ -149,32 +184,32 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
           </div>
 
           <div class="lesson-head__arrows">
-            {prev && (
-              <a
-                href={leccionUrl(info, prev, base)}
-                class="btn btn-secondary btn-sm"
-                title={`Anterior: ${prev.title}`}
-                aria-label="Lección anterior"
-              >
-                <span aria-hidden="true">←</span>
-              </a>
-            )}
-            {next ? (
-              <a
-                href={leccionUrl(info, next, base)}
-                class="btn btn-primary btn-sm"
-                title={`Siguiente: ${next.title}`}
-                data-mark-next
-              >
-                <span>Siguiente</span>
-                <span aria-hidden="true">→</span>
-              </a>
-            ) : (
-              <a href={url} class="btn btn-primary btn-sm">
-                <span>Volver al temario</span>
-                <span aria-hidden="true">→</span>
-              </a>
-            )}
+            <a
+              href={prev ? leccionUrl(info, prev, base) : undefined}
+              class="btn btn-secondary btn-sm"
+              title={prev ? `Anterior: ${prev.title}` : "No hay lección anterior"}
+              aria-label="Lección anterior"
+              data-route-prev
+              hidden={!prev}
+            >
+              <span aria-hidden="true">←</span>
+            </a>
+            <a
+              href={next ? leccionUrl(info, next, base) : undefined}
+              class="btn btn-primary btn-sm"
+              title={next ? `Siguiente: ${next.title}` : "Fin de la ruta"}
+              aria-label="Lección siguiente"
+              data-route-next
+              data-mark-next
+              hidden={!next}
+            >
+              <span>Siguiente</span>
+              <span aria-hidden="true">→</span>
+            </a>
+            <a href={url} class="btn btn-primary btn-sm" data-route-back hidden={Boolean(next)}>
+              <span>Volver al temario</span>
+              <span aria-hidden="true">→</span>
+            </a>
           </div>
         </div>
 
@@ -210,30 +245,43 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
       </section>
 
       <nav class="lesson-nav" aria-label="Navegación entre lecciones" data-pagefind-ignore="all">
-        {prev ? (
-          <a href={leccionUrl(info, prev, base)} class="lesson-nav__card sheet sheet--link">
-            <span class="lesson-nav__label">← {etiqueta} anterior</span>
-            <span class="lesson-nav__title">{prev.title}</span>
-          </a>
-        ) : (
-          <div class="lesson-nav__spacer" aria-hidden="true"></div>
-        )}
+        <div
+          class="lesson-nav__spacer"
+          data-route-prev-spacer
+          hidden={Boolean(prev)}
+          aria-hidden="true"
+        ></div>
+        <a
+          href={prev ? leccionUrl(info, prev, base) : undefined}
+          class="lesson-nav__card sheet sheet--link"
+          data-route-prev
+          aria-label="Lección anterior"
+          hidden={!prev}
+        >
+          <span class="lesson-nav__label">← {etiqueta} anterior</span>
+          <span class="lesson-nav__title">{prev?.title ?? ""}</span>
+        </a>
 
-        {next ? (
-          <a
-            href={leccionUrl(info, next, base)}
-            class="lesson-nav__card sheet sheet--link lesson-nav__card--next"
-            data-mark-next
-          >
-            <span class="lesson-nav__label">Siguiente {etiqueta.toLowerCase()} →</span>
-            <span class="lesson-nav__title">{next.title}</span>
-          </a>
-        ) : (
-          <a href={url} class="lesson-nav__card sheet sheet--link lesson-nav__card--next">
-            <span class="lesson-nav__label signal">Fin del curso</span>
-            <span class="lesson-nav__title">Volver al temario y repasar →</span>
-          </a>
-        )}
+        <a
+          href={next ? leccionUrl(info, next, base) : undefined}
+          class="lesson-nav__card sheet sheet--link lesson-nav__card--next"
+          data-route-next
+          data-mark-next
+          aria-label="Lección siguiente"
+          hidden={!next}
+        >
+          <span class="lesson-nav__label">Siguiente {etiqueta.toLowerCase()} →</span>
+          <span class="lesson-nav__title">{next?.title ?? ""}</span>
+        </a>
+        <a
+          href={url}
+          class="lesson-nav__card sheet sheet--link lesson-nav__card--next"
+          data-route-back
+          hidden={Boolean(next)}
+        >
+          <span class="lesson-nav__label signal">Fin del curso</span>
+          <span class="lesson-nav__title">Volver al temario y repasar →</span>
+        </a>
       </nav>
     </article>
 
@@ -249,7 +297,10 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
                   Temario
                 </h2>
                 <p class="temario__meta">
-                  {info.modulos.length} módulos · {totalLecciones} {esNivel ? "niveles" : "clases"}
+                  <span data-lesson-modules>{modulosDefecto} módulos</span>
+                  {" · "}
+                  <span data-lesson-total>{totalDefecto}</span>
+                  {` ${esNivel ? "niveles" : "clases"}`}
                 </p>
               </div>
               <button
@@ -353,10 +404,118 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
       <line x1="9" y1="13" x2="15" y2="13" />
       <line x1="9" y1="17" x2="12" y2="17" />
     </svg>
-    Temario · <span id="fab-temario-count">0/{totalLecciones}</span>
+    Temario ·{" "}
+    <span id="fab-temario-count">
+      <span id="fab-done">0</span>/<span data-lesson-total>{totalDefecto}</span>
+    </span>
   </button>
 
-  <script is:inline define:vars={{ slug: info.slug, leccionKey, totalLecciones }}>
+  {rutas && (
+    <script
+      type="application/json"
+      id="arch-catalog"
+      data-base={url}
+      data-numero={entryNumero}
+      set:html={catalogoJson}
+    />
+  )}
+
+  <script>
+    import {
+      SET_CONFIG_EVENT,
+      initCourseConfig,
+      primeraRutaConLeccion,
+      resumirConfig,
+    } from "../../../../lib/course-config.client"
+    import type { CourseConfigState } from "../../../../lib/course-config.client"
+    import type { CursoConfig, CursoRuta } from "../../../../lib/tracks"
+
+    interface CatalogoItem {
+      slug: string
+      numero: string
+      title: string
+      modulo: string
+    }
+
+    const catalogoEl = document.getElementById("arch-catalog")
+    let catalogo: CatalogoItem[]
+    try {
+      catalogo = JSON.parse(catalogoEl?.textContent ?? "[]")
+    } catch {
+      catalogo = []
+    }
+    const base = catalogoEl?.getAttribute("data-base") ?? ""
+    const entryNumero = catalogoEl?.getAttribute("data-numero") ?? ""
+    const porNumero = new Map(catalogo.map((item: CatalogoItem) => [item.numero, item]))
+
+    const configRoot = document.querySelector<HTMLElement>("[data-course-config]")
+    let rutas: CursoRuta[]
+    try {
+      rutas = JSON.parse(configRoot?.getAttribute("data-rutas") ?? "[]")
+    } catch {
+      rutas = []
+    }
+
+    const notice = document.querySelector<HTMLElement>("[data-route-notice]")
+    const noticeSummary = notice?.querySelector<HTMLElement>("[data-route-notice-summary]")
+    const noticeCta = notice?.querySelector<HTMLElement>("[data-route-notice-cta]")
+
+    let ultimaConfig: CursoConfig | undefined
+
+    noticeCta?.addEventListener("click", () => {
+      if (!configRoot) return
+      const objetivo = primeraRutaConLeccion(rutas, entryNumero, ultimaConfig)
+      if (!objetivo) return
+      configRoot.dispatchEvent(
+        new CustomEvent(SET_CONFIG_EVENT, {
+          detail: {
+            dificultad: objetivo.dificultad,
+            entorno: objetivo.entorno,
+            arranque: objetivo.arranque,
+          },
+        }),
+      )
+    })
+
+    const aplicarEnlace = (
+      el: HTMLElement,
+      target: CatalogoItem | null | undefined,
+      tipo: "prev" | "next",
+    ) => {
+      if (!target) {
+        el.hidden = true
+        return
+      }
+      el.hidden = false
+      el.setAttribute("href", `${base}${target.slug}/`)
+      el.setAttribute("title", `${tipo === "prev" ? "Anterior" : "Siguiente"}: ${target.title}`)
+      el.setAttribute("aria-label", tipo === "prev" ? "Lección anterior" : "Lección siguiente")
+      const titleEl = el.querySelector(".lesson-nav__title")
+      if (titleEl) titleEl.textContent = target.title
+    }
+
+    initCourseConfig((state: CourseConfigState) => {
+      if (!catalogoEl) return
+      ultimaConfig = state.config
+      if (noticeSummary) noticeSummary.textContent = resumirConfig(state.config)
+      const visibles = state.ruta ? state.ruta.lecciones : []
+      const i = visibles.indexOf(entryNumero)
+      const inRuta = i !== -1
+      const prev = inRuta && i > 0 ? porNumero.get(visibles[i - 1]) : null
+      const next = inRuta && i < visibles.length - 1 ? porNumero.get(visibles[i + 1]) : null
+      for (const el of document.querySelectorAll<HTMLElement>("[data-route-prev]"))
+        aplicarEnlace(el, prev, "prev")
+      for (const el of document.querySelectorAll<HTMLElement>("[data-route-next]"))
+        aplicarEnlace(el, next, "next")
+      const spacer = document.querySelector<HTMLElement>("[data-route-prev-spacer]")
+      if (spacer) spacer.hidden = Boolean(prev)
+      for (const el of document.querySelectorAll<HTMLElement>("[data-route-back]"))
+        el.hidden = Boolean(next)
+      if (notice) notice.hidden = inRuta
+    })
+  </script>
+
+  <script is:inline define:vars={{ slug: info.slug, leccionKey, totalDefecto }}>
     const key = `ncw:progress:${slug}`
     const btn = document.getElementById("marcar-completada")
     const label = btn?.querySelector(".btn-label")
@@ -374,7 +533,7 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
       const doneList = read()
       const isDone = doneList.includes(leccionKey)
       const count = doneList.length
-      const pct = Math.round((count / totalLecciones) * 100)
+      const pct = Math.round((count / totalDefecto) * 100)
 
       if (btn) {
         btn.setAttribute("aria-pressed", String(isDone))
@@ -386,14 +545,14 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
       }
 
       const pctEl = document.getElementById("player-progress-pct")
-      const countEl = document.getElementById("player-progress-count")
+      const doneEl = document.getElementById("player-progress-done")
       const barEl = document.getElementById("player-progress-bar")
       if (pctEl) pctEl.textContent = `${pct}% completado`
-      if (countEl) countEl.textContent = `(${count} de ${totalLecciones})`
+      if (doneEl) doneEl.textContent = String(count)
       if (barEl) barEl.style.width = `${pct}%`
 
-      const fabCount = document.getElementById("fab-temario-count")
-      if (fabCount) fabCount.textContent = `${count}/${totalLecciones}`
+      const fabDone = document.getElementById("fab-done")
+      if (fabDone) fabDone.textContent = String(count)
 
       for (const item of document.querySelectorAll("[data-lesson-item]")) {
         item.classList.toggle("is-done", doneList.includes(item.getAttribute("data-lesson-item")))
@@ -638,6 +797,49 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
   .player-aside {
     grid-column: span 4;
     min-width: 0;
+  }
+
+  .route-notice {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin-top: 1.25rem;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent);
+    border-left: 3px solid var(--warn);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--warn) 10%, transparent);
+    font-size: 0.8rem;
+    color: var(--ink-dim);
+  }
+
+  .route-notice__text {
+    flex: 1 1 16rem;
+    margin: 0;
+    line-height: 1.45;
+  }
+
+  .route-notice__cta {
+    padding: 0.4rem 0.7rem;
+    border: 1px solid var(--warn);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--warn);
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+  }
+
+  .route-notice__cta:hover {
+    background: color-mix(in srgb, var(--warn) 16%, transparent);
+  }
+
+  .route-notice__cta:focus-visible {
+    outline: 2px solid var(--warn);
+    outline-offset: 2px;
   }
 
   .player-frame {

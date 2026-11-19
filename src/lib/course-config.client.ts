@@ -10,9 +10,13 @@ import {
   ordenarPorRuta,
   type CursoConfig,
   type CursoRuta,
-} from "./tracks"
+} from "./tracks.ts"
 
 const COURSE_CONFIG_EVENT = "ncw:course-config"
+// Evento por el que la página pide aplicar una config completa (CTA «Verla en la
+// ruta que sí la incluye»). No es la interacción de los radios: no restaura el
+// arranque guardado, la config mandada es la elegida.
+export const SET_CONFIG_EVENT = "ncw:course-config:set"
 
 export interface CourseConfigState {
   slug: string
@@ -31,6 +35,19 @@ export function resumirConfig(config: CursoConfig): string {
     ENTORNO_LABEL[config.entorno],
     ARRANQUE_LABEL[config.arranque],
   ].join(" · ")
+}
+
+// Primera ruta que contiene `numero` (p. ej. "1.6"), prefiriendo la de la misma
+// dificultad que `preferencia`. `undefined` si ninguna ruta la incluye.
+export function primeraRutaConLeccion(
+  rutas: CursoRuta[],
+  numero: string,
+  preferencia: Partial<CursoConfig> = {},
+): CursoRuta | undefined {
+  const candidatas = rutas.filter((ruta) => ruta.lecciones.includes(numero))
+  if (candidatas.length === 0) return undefined
+  const dificultad = normalizarConfig(preferencia).dificultad
+  return candidatas.find((ruta) => ruta.dificultad === dificultad) ?? candidatas[0]
 }
 
 const almacenamiento = (): Storage | null => {
@@ -228,6 +245,13 @@ function aplicarAlTemario(
   for (const asideEl of doc.querySelectorAll<HTMLElement>("[data-course-aside-total]")) {
     asideEl.textContent = `${total} ${asideEl.getAttribute("data-unidad") ?? "lecciones"} en tu ruta`
   }
+  // Hooks de la página de lección: número desnudo (el texto de alrededor lo pone el HTML).
+  for (const totalEl of doc.querySelectorAll<HTMLElement>("[data-lesson-total]")) {
+    totalEl.textContent = String(total)
+  }
+  for (const modulesEl of doc.querySelectorAll<HTMLElement>("[data-lesson-modules]")) {
+    modulesEl.textContent = `${modulosVisibles} módulos`
+  }
 
   return porRuta
 }
@@ -261,9 +285,12 @@ export function initCourseConfig(
     persistirConfig(slug, configDesdeLayers(slug, search))
 
     let previa: CursoConfig | undefined
+    // Config forzada por un evento externo (CTA «Verla en la ruta…»). Gana a
+    // storage y query hasta la siguiente interacción con los radios.
+    let forzada: CursoConfig | undefined
 
     const aplicar = (): CourseConfigState => {
-      const config = configDesdeLayers(slug, window.location.search)
+      const config = forzada ?? configDesdeLayers(slug, window.location.search)
       previa = config
       const ruta = rutas.length ? buscarRuta(rutas, config) : undefined
       pintarConfigurador(root, config)
@@ -279,6 +306,7 @@ export function initCourseConfig(
       if (radio?.type !== "radio") return
       // Interacción del usuario: la query (deep link) deja de mandar para que
       // el clic tenga efecto; la preferencia queda en localStorage.
+      forzada = undefined
       try {
         const url = new URL(window.location.href)
         for (const clave of ["dificultad", "entorno", "arranque"]) url.searchParams.delete(clave)
@@ -292,6 +320,21 @@ export function initCourseConfig(
         capa.arranque = arranqueAlRestaurarHardware(slug)
       }
       persistirConfig(slug, normalizarConfig(capa))
+      aplicar()
+    })
+
+    // CTA externo (página de lección): aplica la config indicada tal cual, sin
+    // la restauración de arranque del listener de `change`.
+    root.addEventListener(SET_CONFIG_EVENT, (evento) => {
+      const detalle = (evento as CustomEvent<Partial<CursoConfig>>).detail ?? {}
+      forzada = normalizarConfig(detalle)
+      // La elección explícita pisa la query (deep link).
+      try {
+        const url = new URL(window.location.href)
+        for (const clave of ["dificultad", "entorno", "arranque"]) url.searchParams.delete(clave)
+        window.history.replaceState(window.history.state, "", url)
+      } catch {}
+      persistirConfig(slug, forzada)
       aplicar()
     })
 
