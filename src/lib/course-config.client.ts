@@ -127,7 +127,42 @@ const arranqueAlRestaurarHardware = (slug: string): CursoConfig["arranque"] => {
     .arranque
 }
 
-function pintarConfigurador(root: HTMLElement, config: CursoConfig): void {
+// Candado: en la lección (root con data-lesson-numero), las opciones del
+// configurador cuya ruta excluiría la clase actual quedan deshabilitadas.
+// Candidato = config vigente con ese eje pisado por el valor del radio,
+// normalizado (VM fuerza arranque "solo"); si la ruta resultante no incluye
+// el número de lección, la opción no es elegible. Se re-aplica en cada
+// repintado (cada toggle), así la atenuación sigue a la config vigente.
+function bloquearFueraDeRuta(
+  root: HTMLElement,
+  config: CursoConfig,
+  rutas: CursoRuta[],
+  numero: string,
+): void {
+  for (const eje of ["dificultad", "entorno", "arranque"] as const) {
+    for (const input of root.querySelectorAll<HTMLInputElement>(`input[name$="-${eje}"][value]`)) {
+      const capa: Record<string, string> = { ...config }
+      capa[eje] = input.value
+      const candidate = normalizarConfig(capa as Partial<CursoConfig>)
+      const ruta = rutas.length ? buscarRuta(rutas, candidate) : undefined
+      const habilitado = Boolean(ruta && ruta.lecciones.includes(numero))
+      const label = input.closest(".config-option")
+      if (habilitado) {
+        input.disabled = false
+        label?.classList.remove("is-locked")
+        label?.removeAttribute("title")
+        label?.removeAttribute("aria-disabled")
+      } else {
+        input.disabled = true
+        label?.classList.add("is-locked")
+        label?.setAttribute("title", "Esta clase no está en esa ruta")
+        label?.setAttribute("aria-disabled", "true")
+      }
+    }
+  }
+}
+
+function pintarConfigurador(root: HTMLElement, config: CursoConfig, rutas: CursoRuta[]): void {
   root.querySelectorAll<HTMLInputElement>('input[type="radio"]').forEach((radio) => {
     const eje = radio.name.endsWith("-dificultad")
       ? "dificultad"
@@ -140,6 +175,8 @@ function pintarConfigurador(root: HTMLElement, config: CursoConfig): void {
   if (boot) boot.hidden = config.entorno === "vm"
   const resumen = root.querySelector<HTMLElement>("[data-config-summary]")
   if (resumen) resumen.textContent = resumirConfig(config)
+  const numero = root.getAttribute("data-lesson-numero")
+  if (numero !== null) bloquearFueraDeRuta(root, config, rutas, numero)
 }
 
 interface LessonItem {
@@ -297,7 +334,7 @@ export function initCourseConfig(
         const config = forzada ?? configDesdeLayers(slug, window.location.search)
         previa = config
         const ruta = rutas.length ? buscarRuta(rutas, config) : undefined
-        pintarConfigurador(root, config)
+        pintarConfigurador(root, config, rutas)
         const visibles = aplicarAlTemario(document, slug, ruta, config, rutas.length > 0)
         const state: CourseConfigState = { slug, config, ruta, visibles }
         emitir(document, state)
