@@ -38,6 +38,61 @@ export function resumirConfig(config: CursoConfig): string {
   ].join(" · ")
 }
 
+// Copy aprobado de la ficha adaptable (T8c). «Qué necesitas» depende de
+// entorno/arranque; «Qué vas a saber», de la dificultad.
+export interface FichaRuta {
+  necesitas: string[]
+  sabes: string[]
+}
+
+const NECESITAS_SOLO = [
+  "PC con 4 GB RAM y 20 GB libres",
+  "USB 8 GB+",
+  "Internet",
+  "Respaldo de lo importante",
+] as const
+
+const NECESITAS_DUALBOOT = "Windows en UEFI/GPT y clave BitLocker"
+
+const NECESITAS_VM = [
+  "Una VM con 4 GB RAM y 20 GB de disco",
+  "Internet. Sin tocar tu máquina.",
+] as const
+
+const SABES_FACIL = [
+  "Instalar con archinstall en VM o hardware",
+  "GNOME listo",
+  "pacman, AUR y ZRAM sin miedo",
+  "Sistema actualizado y con firewall.",
+] as const
+
+const SABES_AVANZADA = [
+  "Particionar a mano y bootear manualmente",
+  "BSPWM y dotfiles",
+  "mkinitcpio/systemd-boot",
+  "Diagnóstico: qué hacer cuando algo falla.",
+] as const
+
+export const REGLA_DE_CAMPO =
+  "Nada de esto toca sistemas ajenos: practica en tu VM, tu hardware o el laboratorio autorizado."
+
+export function fichaDeRuta(config: Partial<CursoConfig> = {}): FichaRuta {
+  const { dificultad, entorno, arranque } = normalizarConfig(config)
+  const necesitas =
+    entorno === "vm"
+      ? [...NECESITAS_VM]
+      : [...NECESITAS_SOLO, ...(arranque === "dualboot" ? [NECESITAS_DUALBOOT] : [])]
+
+  return {
+    necesitas,
+    sabes: [...(dificultad === "avanzada" ? SABES_AVANZADA : SABES_FACIL)],
+  }
+}
+
+export function formatoDeRuta(totalRuta: number, totalCurso: number): string {
+  return `${totalRuta} clases en tu ruta · ${totalCurso} en total · Guía escrita; video en preparación.`
+}
+
 // Primera ruta que contiene `numero` (p. ej. "1.6"), prefiriendo la de la misma
 // dificultad que `preferencia`. `undefined` si ninguna ruta la incluye.
 export function primeraRutaConLeccion(
