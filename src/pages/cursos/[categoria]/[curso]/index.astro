@@ -9,8 +9,8 @@ import {
   leccionUrl,
   leccionesDeRuta,
 } from "../../../../lib/catalog"
-import { CONFIG_POR_DEFECTO } from "../../../../lib/tracks"
-import { REGLA_DE_CAMPO, fichaDeRuta, formatoDeRuta } from "../../../../lib/course-config.client"
+import { buscarRuta, CONFIG_POR_DEFECTO, numerosVisiblesPorRuta } from "../../../../lib/tracks"
+import { REGLA_DE_CAMPO, fichaDeRuta } from "../../../../lib/course-config.client"
 import { getCategoria } from "../../../../data/categorias"
 import { site } from "../../../../data/site"
 
@@ -37,6 +37,8 @@ const leccionesDefecto = leccionesDeRuta(info, CONFIG_POR_DEFECTO)
 const totalDefecto = leccionesDefecto.length
 const modulosDefecto = new Set(leccionesDefecto.map((leccion) => leccion.modulo)).size
 const primeraDefecto = leccionesDefecto[0]
+const rutaDefecto = info.rutas?.length ? buscarRuta(info.rutas, CONFIG_POR_DEFECTO) : undefined
+const numerosVisiblesDefecto = numerosVisiblesPorRuta(rutaDefecto)
 const primeraUrl = primeraDefecto ? leccionUrl(info, primeraDefecto, base) : url
 const unidad = info.unidad === "nivel" ? "niveles" : "lecciones"
 const etiquetaUnidad = info.unidad === "nivel" ? "nivel" : "clase"
@@ -45,103 +47,39 @@ const adaptativo = Boolean(info.rutas?.length)
 const leccionesJson = JSON.stringify(leccionesDefecto.map((leccion) => leccion.slug))
 // Ficha adaptable: SSR pinta la ruta por defecto (Fácil · Hardware · Solo).
 const fichaDefecto = fichaDeRuta(CONFIG_POR_DEFECTO)
-const formatoDefecto = formatoDeRuta(totalDefecto, info.lecciones.length)
 ---
 
 <BaseLayout titulo={info.titulo} descripcion={info.descripcion}>
-  {adaptativo && <script is:inline define:vars={{ slug: info.slug }}>
-    ;(function () {
-      try {
-        const d = localStorage.getItem("ncw:difficulty:" + slug) || "facil"
-        const e = localStorage.getItem("ncw:environment:" + slug) || "hardware"
-        const b = e === "vm" ? "solo" : localStorage.getItem("ncw:boot:" + slug) || "solo"
-        if ([d, e, b].join("|") !== "facil|hardware|solo") {
-          document.documentElement.classList.add("ncw-route-pending")
-          setTimeout(function () {
-            document.documentElement.classList.remove("ncw-route-pending")
-          }, 3000)
-        }
-      } catch {}
-    })()
-  </script>}
   <section class="course-hero">
     <div class="container-page">
-      <nav class="breadcrumb" aria-label="Miga de pan">
-        <a href={`${base}cursos/`}>Cursos</a>
-        <span aria-hidden="true">/</span>
-        {categoria && (
-          <>
-            <a href={`${base}cursos/${categoria.id}/`}>{categoria.titulo}</a>
-            <span aria-hidden="true">/</span>
-          </>
-        )}
-        <span aria-current="page">{info.titulo}</span>
-      </nav>
+      <div class="course-hero__top-bar">
+        <nav class="breadcrumb" aria-label="Miga de pan">
+          <a href={`${base}cursos/`}>Cursos</a>
+          <span aria-hidden="true">/</span>
+          {categoria && (
+            <>
+              <a href={`${base}cursos/${categoria.id}/`}>{categoria.titulo}</a>
+              <span aria-hidden="true">/</span>
+            </>
+          )}
+          <span aria-current="page">{info.titulo}</span>
+        </nav>
+      </div>
 
       <div class="course-hero__grid">
         <div class="course-hero__main">
-          <div class="course-hero__docket">
-            <span class="docket">
-              {categoria ? `Ruta ${categoria.indice}` : "Curso"} · <strong>{info.nivel}</strong>
-            </span>
-            <span class="chip chip--signal">
-              <span class="status-dot" aria-hidden="true"></span>
-              Guía publicada
-            </span>
-          </div>
-
           <h1 class="course-hero__title">{info.titulo}</h1>
-          {info.hero ? (
-            <div class="course-hero__editorial">
-              {info.hero.copy.map((parrafo) => (
-                <p class="course-hero__intro">{parrafo}</p>
-              ))}
-            </div>
-          ) : (
-            <p class="lead course-hero__promise">{info.promesa}</p>
-          )}
-
-          {videosEnPreparacion && (
-            <>
-              <div class="course-hero__video" data-pagefind-ignore="all">
-                <span class="course-hero__video-sello">
-                  <span class="status-dot" aria-hidden="true"></span>
-                  INTRO · EN PREPARACIÓN
-                </span>
-                <span class="course-hero__play" aria-hidden="true">
-                  ▶
-                </span>
-              </div>
-              <p class="course-hero__video-caption">Guía escrita disponible desde ya</p>
-            </>
-          )}
 
           <div class="course-hero__meta" data-pagefind-ignore="all">
-            <span data-course-total data-unidad={unidad}>
+            <span class="meta-highlight" data-course-total data-unidad={unidad}>
               {totalDefecto} {unidad}
             </span>
-            <span data-course-modules data-unidad="módulos">
-              {modulosDefecto} módulos
+            <span class="meta-sep" aria-hidden="true">
+              ·
             </span>
-            <span>
-              {videosEnPreparacion ? "Guía escrita · videos en preparación" : "Guía escrita"}
-            </span>
-            <span>Progreso local</span>
-          </div>
 
-          <CourseConfig curso={info} variant="hero" />
-          {info.rutas && (
-            <p class="course-route" data-course-route data-route-only>
-              Ruta: Fácil · Hardware · Solo Linux
-            </p>
-          )}
-          {info.rutas && (
-            <noscript>
-              <p class="course-noscript">
-                Activa JavaScript para adaptar el temario; abajo están todas las lecciones.
-              </p>
-            </noscript>
-          )}
+            <span class="meta-highlight">{modulosDefecto} módulos</span>
+          </div>
 
           <div
             class="mission-meter sheet sheet--flat"
@@ -172,6 +110,69 @@ const formatoDefecto = formatoDeRuta(totalDefecto, info.lecciones.length)
             <p class="mission-meter__note">Guardado solo en este navegador. Sin cuentas.</p>
           </div>
 
+          {videosEnPreparacion && (
+            <div class="course-hero__video-hud" data-pagefind-ignore="all">
+              <div class="video-hud__top">
+                <div class="video-hud__status">
+                  <span class="status-dot status-dot--cyan" aria-hidden="true"></span>
+                  <span class="video-hud__status-text">INTRODUCCIÓN Y PANORAMA DEL CURSO</span>
+                </div>
+                <div class="video-hud__badges">
+                  <span class="video-hud__badge video-hud__badge--accent">GUÍA DISPONIBLE</span>
+                  <span class="video-hud__badge">INTRO</span>
+                </div>
+              </div>
+
+              <div class="video-hud__stage">
+                <div class="video-hud__center">
+                  <div class="video-hud__play-btn" aria-hidden="true">
+                    <svg class="video-hud__play-icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
+                  <span class="video-hud__title">Video de introducción en preparación</span>
+                  <span class="video-hud__subtitle">
+                    La guía escrita ya está disponible completa abajo
+                  </span>
+                </div>
+                <div class="video-hud__timeline" aria-hidden="true">
+                  <div class="video-hud__timeline-bar"></div>
+                </div>
+              </div>
+
+              <div class="video-hud__bottom">
+                <span class="video-hud__caption">
+                  CAPÍTULO 1:{" "}
+                  <span class="video-hud__caption-highlight">
+                    Qué es Arch Linux y decisiones iniciales
+                  </span>
+                </span>
+                <a href="#temario" class="video-hud__bottom-link">
+                  [ VER GUÍA ESCRITA ↓ ]
+                </a>
+              </div>
+            </div>
+          )}
+
+          {info.hero ? (
+            <div class="course-hero__editorial">
+              {info.hero.copy.map((parrafo) => (
+                <p class="course-hero__intro">{parrafo}</p>
+              ))}
+            </div>
+          ) : (
+            <p class="lead course-hero__promise">{info.promesa}</p>
+          )}
+
+          <CourseConfig curso={info} variant="hero" />
+          {info.rutas && (
+            <noscript>
+              <p class="course-noscript">
+                Activa JavaScript para adaptar el temario; abajo están todas las lecciones.
+              </p>
+            </noscript>
+          )}
+
           {info.hero?.cta && <p class="course-hero__cta-note">{info.hero.cta}</p>}
 
           <div class="course-hero__actions" data-pagefind-ignore="all">
@@ -190,8 +191,8 @@ const formatoDefecto = formatoDeRuta(totalDefecto, info.lecciones.length)
                 </span>
               </a>
             )}
-            <a href="#temario" class="course-hero__link">
-              <span>Ver temario</span>
+            <a href="#temario" class="btn btn-secondary btn-hud course-hero__secondary">
+              <span>Ver temario completo</span>
               <span class="course-hero__link-arrow" aria-hidden="true">
                 ↓
               </span>
@@ -199,112 +200,153 @@ const formatoDefecto = formatoDeRuta(totalDefecto, info.lecciones.length)
           </div>
         </div>
 
-        <aside class="course-aside sheet sheet--cut" aria-labelledby="course-aside-title">
-          <span class="tape course-aside__tape" aria-hidden="true"></span>
-          <h2 id="course-aside-title" class="course-aside__title">
-            Ficha del curso
-          </h2>
-
-          {adaptativo ? (
-            <div data-ficha-adaptable data-ficha-total={info.lecciones.length} aria-live="polite">
-              <div class="course-aside__block" data-route-only>
-                <p class="course-aside__label">Qué necesitas</p>
-                <ul class="course-aside__req" data-ficha-necesitas>
-                  {fichaDefecto.necesitas.map((requisito) => (
-                    <li>
-                      <span aria-hidden="true">▹</span>
-                      {requisito}
-                    </li>
-                  ))}
-                </ul>
+        {adaptativo ? (
+          <aside
+            class="course-ficha-hud"
+            aria-labelledby="course-ficha-title"
+            data-ficha-adaptable
+            data-ficha-total={info.lecciones.length}
+          >
+            <div class="ficha-hud__head">
+              <div class="ficha-hud__title-wrap">
+                <span class="ficha-hud__indicator" aria-hidden="true" />
+                <h2 id="course-ficha-title" class="ficha-hud__title">
+                  REQUISITOS
+                </h2>
               </div>
+              <span class="ficha-hud__badge" data-ficha-route-badge>
+                HARDWARE · SOLO LINUX
+              </span>
+            </div>
 
-              <div class="course-aside__block" data-route-only>
-                <p class="course-aside__label">Qué vas a saber</p>
-                <ul class="course-aside__req" data-ficha-sabes>
-                  {fichaDefecto.sabes.map((resultado) => (
-                    <li>
-                      <span aria-hidden="true">▹</span>
-                      {resultado}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            {/* Dynamic Requirements List */}
+            <div class="ficha-hud__req-list" data-ficha-necesitas-hud>
+              {fichaDefecto.necesitas.map((req) => (
+                <div class="ficha-hud__req-item">
+                  <span class="status-dot status-dot--cyan" aria-hidden="true" />
+                  <span class="ficha-hud__req-text">{req}</span>
+                </div>
+              ))}
+            </div>
 
-              <div class="course-aside__block" data-route-only>
-                <p class="course-aside__label">Formato</p>
-                <p class="course-aside__text" data-ficha-formato>
-                  {formatoDefecto}
+            {/* Dynamic Security / Warning Alert */}
+            <div class="ficha-hud__warning ficha-hud__warning--danger" data-ficha-warning>
+              <span class="ficha-hud__warning-icon" data-ficha-warning-icon aria-hidden="true">
+                ▲
+              </span>
+              <div class="ficha-hud__warning-content">
+                <strong class="ficha-hud__warning-title" data-ficha-warning-title>
+                  ¡HAZ UN RESPALDO!
+                </strong>
+                <p class="ficha-hud__warning-desc" data-ficha-warning-desc>
+                  Esta ruta formateará el disco completo. Todo dato previo en el equipo será
+                  eliminado.
                 </p>
               </div>
             </div>
-          ) : (
-            <>
-              <div class="course-aside__block">
-                <p class="course-aside__label">Qué necesitas</p>
-                <ul class="course-aside__req">
-                  {info.requisitos.map((requisito) => (
-                    <li>
-                      <span aria-hidden="true">▹</span>
-                      {requisito}
-                    </li>
-                  ))}
-                </ul>
-              </div>
 
-              <div class="course-aside__block">
-                <p class="course-aside__label">Qué vas a saber</p>
-                <ul class="course-aside__req">
-                  {info.resultados.map((resultado) => (
-                    <li>
-                      <span aria-hidden="true">▹</span>
-                      {resultado}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            {/* Qué vas a saber */}
+            <div class="ficha-hud__block">
+              <p class="ficha-hud__block-label">QUÉ VAS A APRENDER:</p>
+              <ul class="ficha-hud__learn-list" data-ficha-sabes>
+                {fichaDefecto.sabes.map((item) => (
+                  <li>
+                    <span class="ficha-hud__learn-arrow" aria-hidden="true">
+                      ▸
+                    </span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-              <div class="course-aside__block">
-                <p class="course-aside__label">Formato</p>
-                <p class="course-aside__text">
-                  {videosEnPreparacion ? (
-                    <>
-                      <span data-course-aside-total data-unidad={unidad}>
-                        {totalDefecto} {unidad} en tu ruta
-                      </span>
-                      {` · ${info.lecciones.length} lecciones únicas · videos en preparación`}
-                    </>
-                  ) : (
-                    <>
-                      {totalDefecto} {unidad} en {info.modulos.length} módulos, con guía escrita,
-                      comandos y explicación del razonamiento. Sin videos prometidos.
-                    </>
-                  )}
-                </p>
-              </div>
-            </>
-          )}
+            {/* Regla de campo */}
+            <div class="ficha-hud__rule">
+              <p class="ficha-hud__rule-label">REGLA DE CAMPO:</p>
+              <p class="ficha-hud__rule-text">{REGLA_DE_CAMPO}</p>
+            </div>
 
-          {info.fuente && (
+            <div class="course-hero__top-cluster">
+              {adaptativo ? (
+                <CourseConfig curso={info} variant="top-difficulty" />
+              ) : (
+                <span class="chip chip--signal">
+                  <span class="status-dot" aria-hidden="true"></span>
+                  Guía publicada
+                </span>
+              )}
+            </div>
+          </aside>
+        ) : (
+          <aside class="course-aside sheet sheet--cut" aria-labelledby="course-aside-title">
+            <span class="tape course-aside__tape" aria-hidden="true" />
+            <h2 id="course-aside-title" class="course-aside__title">
+              Ficha del curso
+            </h2>
+
             <div class="course-aside__block">
-              <p class="course-aside__label">Laboratorio original</p>
+              <p class="course-aside__label">Qué necesitas</p>
+              <ul class="course-aside__req">
+                {info.requisitos.map((requisito) => (
+                  <li>
+                    <span aria-hidden="true">▹</span>
+                    {requisito}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div class="course-aside__block">
+              <p class="course-aside__label">Qué vas a saber</p>
+              <ul class="course-aside__req">
+                {info.resultados.map((resultado) => (
+                  <li>
+                    <span aria-hidden="true">▹</span>
+                    {resultado}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div class="course-aside__block">
+              <p class="course-aside__label">Formato</p>
               <p class="course-aside__text">
-                <a href={info.fuente.url} target="_blank" rel="noopener">
-                  {info.fuente.nombre} <span aria-hidden="true">↗</span>
-                </a>
+                {videosEnPreparacion ? (
+                  <>
+                    <span data-course-aside-total data-unidad={unidad}>
+                      {totalDefecto} {unidad} en tu ruta
+                    </span>
+                    {` · ${info.lecciones.length} lecciones únicas · videos en preparación`}
+                  </>
+                ) : (
+                  <>
+                    {totalDefecto} {unidad} en {info.modulos.length} módulos, con guía escrita,
+                    comandos y explicación del razonamiento. Sin videos prometidos.
+                  </>
+                )}
               </p>
             </div>
-          )}
 
-          <div class="course-aside__block course-aside__block--last">
-            <p class="course-aside__label">Regla de campo</p>
-            <p class="course-aside__text">
-              {adaptativo
-                ? REGLA_DE_CAMPO
-                : "Practica en una máquina virtual, en hardware propio o en el laboratorio autorizado del curso. Nunca en sistemas ajenos."}
-            </p>
-          </div>
-        </aside>
+            {info.fuente && (
+              <div class="course-aside__block">
+                <p class="course-aside__label">Laboratorio original</p>
+                <p class="course-aside__text">
+                  <a href={info.fuente.url} target="_blank" rel="noopener">
+                    {info.fuente.nombre} <span aria-hidden="true">↗</span>
+                  </a>
+                </p>
+              </div>
+            )}
+
+            <div class="course-aside__block course-aside__block--last">
+              <p class="course-aside__label">Regla de campo</p>
+              <p class="course-aside__text">
+                Practica en una máquina virtual, en hardware propio o en el laboratorio autorizado
+                del curso. Nunca en sistemas ajenos.
+              </p>
+            </div>
+          </aside>
+        )}
       </div>
     </div>
   </section>
@@ -333,6 +375,7 @@ const formatoDefecto = formatoDeRuta(totalDefecto, info.lecciones.length)
         cursoBase={url}
         unidad={info.unidad}
         variant="page"
+        routeNumbers={numerosVisiblesDefecto}
       />
     </div>
   </section>
@@ -345,16 +388,56 @@ const formatoDefecto = formatoDeRuta(totalDefecto, info.lecciones.length)
     } from "../../../../lib/course-config.client"
     import { progresoKey } from "../../../../lib/tracks"
 
+    // Astro escopa el CSS con el atributo data-astro-cid-<hash>: los nodos creados
+    // en runtime (createElement + className) no lo traen, asi que el selector escopado
+    // deja de matchear y el repintado post-hidratacion se ve sin estilos.
+    const heredarScope = (el: Element, origen: Element): void => {
+      for (const atributo of Array.from(origen.attributes)) {
+        if (atributo.name.startsWith("data-astro-cid-")) {
+          el.setAttribute(atributo.name, atributo.value)
+        }
+      }
+    }
+
     const pintarLista = (lista: Element | null, items: string[]) => {
       if (!lista) return
-      lista.replaceChildren(
+      const contenedor = lista
+      contenedor.replaceChildren(
         ...items.map((texto) => {
           const li = document.createElement("li")
           const marca = document.createElement("span")
+          marca.className = "ficha-hud__learn-arrow"
           marca.setAttribute("aria-hidden", "true")
-          marca.textContent = "▹"
-          li.append(marca, document.createTextNode(texto))
+          marca.textContent = "▸"
+          const span = document.createElement("span")
+          span.textContent = texto
+          li.append(marca, span)
+          heredarScope(li, contenedor)
+          heredarScope(marca, contenedor)
+          heredarScope(span, contenedor)
           return li
+        }),
+      )
+    }
+
+    const pintarReqsHud = (container: Element | null, items: string[]) => {
+      if (!container) return
+      const contenedor = container
+      contenedor.replaceChildren(
+        ...items.map((texto) => {
+          const card = document.createElement("div")
+          card.className = "ficha-hud__req-item"
+          const dot = document.createElement("span")
+          dot.className = "status-dot status-dot--cyan"
+          dot.setAttribute("aria-hidden", "true")
+          const text = document.createElement("span")
+          text.className = "ficha-hud__req-text"
+          text.textContent = texto
+          card.append(dot, text)
+          heredarScope(card, contenedor)
+          heredarScope(dot, contenedor)
+          heredarScope(text, contenedor)
+          return card
         }),
       )
     }
@@ -365,11 +448,59 @@ const formatoDefecto = formatoDeRuta(totalDefecto, info.lecciones.length)
       const ficha = document.querySelector<HTMLElement>("[data-ficha-adaptable]")
       if (ficha) {
         const copy = fichaDeRuta(state.config)
-        pintarLista(ficha.querySelector("[data-ficha-necesitas]"), copy.necesitas)
+        pintarReqsHud(ficha.querySelector("[data-ficha-necesitas-hud]"), copy.necesitas)
         pintarLista(ficha.querySelector("[data-ficha-sabes]"), copy.sabes)
         const formato = ficha.querySelector<HTMLElement>("[data-ficha-formato]")
         const totalCurso = Number(ficha.getAttribute("data-ficha-total") || 0)
         if (formato) formato.textContent = formatoDeRuta(state.visibles.length, totalCurso)
+
+        const badge = ficha.querySelector<HTMLElement>("[data-ficha-route-badge]")
+        if (badge) {
+          const env = state.config.entorno === "vm" ? "VM" : "HARDWARE"
+          const boot =
+            state.config.entorno === "vm"
+              ? "SOLO LINUX"
+              : state.config.arranque === "dualboot"
+                ? "DUAL BOOT"
+                : "SOLO LINUX"
+          badge.textContent = `${env} · ${boot}`
+        }
+
+        const warnBox = ficha.querySelector<HTMLElement>("[data-ficha-warning]")
+        if (warnBox) {
+          const titleEl = warnBox.querySelector<HTMLElement>("[data-ficha-warning-title]")
+          const descEl = warnBox.querySelector<HTMLElement>("[data-ficha-warning-desc]")
+          const iconEl = warnBox.querySelector<HTMLElement>("[data-ficha-warning-icon]")
+
+          warnBox.classList.remove(
+            "ficha-hud__warning--danger",
+            "ficha-hud__warning--warn",
+            "ficha-hud__warning--safe",
+          )
+
+          if (state.config.entorno === "vm") {
+            warnBox.classList.add("ficha-hud__warning--safe")
+            if (iconEl) iconEl.textContent = "●"
+            if (titleEl) titleEl.textContent = "ENTORNO SEGURO Y CONTROLADO"
+            if (descEl)
+              descEl.textContent =
+                "No requiere formatear pendrive ni tocar tu PC; todo ocurre dentro del disco virtual."
+          } else if (state.config.arranque === "dualboot") {
+            warnBox.classList.add("ficha-hud__warning--warn")
+            if (iconEl) iconEl.textContent = "▲"
+            if (titleEl) titleEl.textContent = "DUAL BOOT CON WINDOWS"
+            if (descEl)
+              descEl.textContent =
+                "Requiere Windows instalado en modo UEFI/GPT y tener tu clave de recuperación de BitLocker a mano."
+          } else {
+            warnBox.classList.add("ficha-hud__warning--danger")
+            if (iconEl) iconEl.textContent = "▲"
+            if (titleEl) titleEl.textContent = "¡HAZ UN RESPALDO!"
+            if (descEl)
+              descEl.textContent =
+                "Esta ruta formateará el disco completo. Todo dato previo en el equipo será eliminado."
+          }
+        }
       }
 
       const key = state.ruta
@@ -500,7 +631,6 @@ const formatoDefecto = formatoDeRuta(totalDefecto, info.lecciones.length)
     position: relative;
     padding-block: clamp(1.25rem, 3vw, 2.25rem) clamp(2.5rem, 5vw, 4.5rem);
     border-bottom: 1px solid var(--line);
-    overflow: hidden;
   }
 
   .course-hero::after {
@@ -519,6 +649,22 @@ const formatoDefecto = formatoDeRuta(totalDefecto, info.lecciones.length)
     z-index: 1;
   }
 
+  .course-hero__top-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+  }
+
+  .course-hero__top-cluster {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
   .course-hero__grid {
     display: grid;
     grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.65fr);
@@ -535,7 +681,7 @@ const formatoDefecto = formatoDeRuta(totalDefecto, info.lecciones.length)
   }
 
   .course-hero__title {
-    margin-top: 0.9rem;
+    margin-top: 0.4rem;
     max-width: 22ch;
     font-size: clamp(2.1rem, 4.4vw, 3.6rem);
     line-height: 0.98;
@@ -552,7 +698,7 @@ const formatoDefecto = formatoDeRuta(totalDefecto, info.lecciones.length)
     display: flex;
     flex-direction: column;
     gap: 0.6rem;
-    max-width: 56ch;
+    max-width: 90ch;
   }
 
   .course-hero__intro {
@@ -561,62 +707,423 @@ const formatoDefecto = formatoDeRuta(totalDefecto, info.lecciones.length)
     color: var(--ink-dim);
   }
 
-  .course-hero__video {
+  /* Video Hero Protagonist (16:9 HUD) */
+  .course-hero__video-hud {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  }
+
+  .video-hud__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.45rem 0.85rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-deep);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+  }
+
+  .video-hud__status {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--ink-dim);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .video-hud__badges {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .video-hud__badge {
+    padding: 0.12rem 0.4rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    color: var(--ink-muted);
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+  }
+
+  .video-hud__badge--accent {
+    border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .video-hud__stage {
     position: relative;
     aspect-ratio: 16 / 9;
     width: 100%;
-    max-width: 25rem;
-    margin-top: 1.35rem;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--bg-raised);
-    overflow: hidden;
-  }
-
-  .course-hero__video-sello {
-    position: absolute;
-    top: 0.7rem;
-    left: 0.7rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    padding: 0.3rem 0.65rem;
-    border: 1px solid var(--line-strong);
-    border-radius: 999px;
-    background: var(--bg-card);
-    color: var(--signal);
-    font-family: var(--font-mono);
-    font-size: 0.6rem;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-  }
-
-  .course-hero__play {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 3rem;
-    height: 3rem;
-    border: 1px solid var(--line-strong);
-    border-radius: 50%;
-    background: var(--bg-card);
-    color: var(--accent);
-    font-size: 0.8rem;
-    line-height: 1;
+    background: radial-gradient(circle at center, var(--bg-sunken) 0%, var(--bg-deep) 100%);
+    overflow: hidden;
   }
 
-  .course-hero__video-caption {
-    margin-top: 0.6rem;
-    max-width: 25rem;
+  .video-hud__stage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(
+        to right,
+        color-mix(in srgb, var(--line) 40%, transparent) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--line) 40%, transparent) 1px,
+        transparent 1px
+      );
+    background-size: 24px 24px;
+    opacity: 0.25;
+    pointer-events: none;
+  }
+
+  .video-hud__center {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-inline: 1rem;
+    max-width: 28rem;
+  }
+
+  .video-hud__play-btn {
+    width: 3.5rem;
+    height: 3.5rem;
+    margin-bottom: 0.85rem;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 24px color-mix(in srgb, var(--accent) 30%, transparent);
+    transition:
+      transform 0.2s ease,
+      background 0.2s ease,
+      box-shadow 0.2s ease;
+    cursor: pointer;
+  }
+
+  .video-hud__play-btn:hover {
+    transform: scale(1.05);
+    background: var(--accent);
+    color: var(--bg-deep);
+    box-shadow: 0 0 30px var(--accent);
+  }
+
+  .video-hud__play-icon {
+    width: 1.4rem;
+    height: 1.4rem;
+    margin-left: 0.15rem;
+  }
+
+  .video-hud__title {
+    font-family: var(--font-mono);
+    font-size: 0.88rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+  }
+
+  .video-hud__subtitle {
+    margin-top: 0.35rem;
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    color: var(--ink-muted);
+  }
+
+  .video-hud__timeline {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--line);
+  }
+
+  .video-hud__timeline-bar {
+    width: 38%;
+    height: 100%;
+    background: var(--accent);
+  }
+
+  .video-hud__bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.45rem 0.85rem;
+    border-top: 1px solid var(--line);
+    background: var(--bg-deep);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--ink-muted);
+  }
+
+  .video-hud__caption-highlight {
+    color: var(--ink-dim);
+  }
+
+  .video-hud__bottom-link {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .video-hud__bottom-link:hover {
+    color: var(--ink);
+    text-decoration: underline;
+  }
+
+  /* Ficha HUD */
+  .course-ficha-hud {
+    position: sticky;
+    top: 8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 1.15rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  .ficha-hud__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .ficha-hud__title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .ficha-hud__indicator {
+    width: 0.35rem;
+    height: 0.85rem;
+    background: var(--signal);
+    border-radius: 1px;
+  }
+
+  .ficha-hud__title {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+    text-transform: uppercase;
+  }
+
+  .ficha-hud__badge {
+    padding: 0.18rem 0.5rem;
+    border: 1px solid color-mix(in srgb, var(--signal) 35%, transparent);
+    background: color-mix(in srgb, var(--signal) 12%, transparent);
+    color: var(--signal);
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-radius: var(--radius-sm);
+  }
+
+  .ficha-hud__req-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .ficha-hud__req-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    padding: 0.45rem 0.65rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--bg-deep);
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease;
+  }
+
+  .ficha-hud__req-item:hover {
+    border-color: var(--line-strong);
+    background: var(--bg-raised);
+  }
+
+  .ficha-hud__req-item .status-dot {
+    margin-top: 0.28rem;
+    flex-shrink: 0;
+  }
+
+  .ficha-hud__req-text {
     font-family: var(--font-mono);
     font-size: 0.68rem;
-    letter-spacing: 0.05em;
     color: var(--ink-dim);
+    line-height: 1.4;
+  }
+
+  .ficha-hud__warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--bg-deep);
+    transition: all 0.2s ease;
+  }
+
+  .ficha-hud__warning--danger {
+    border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+    background: color-mix(in srgb, var(--danger) 8%, var(--bg-deep));
+    color: var(--danger);
+  }
+
+  .ficha-hud__warning--warn {
+    border-color: color-mix(in srgb, var(--warn) 45%, transparent);
+    background: color-mix(in srgb, var(--warn) 8%, var(--bg-deep));
+    color: var(--warn);
+  }
+
+  .ficha-hud__warning--safe {
+    border-color: color-mix(in srgb, var(--signal) 40%, transparent);
+    background: color-mix(in srgb, var(--signal) 8%, var(--bg-deep));
+    color: var(--signal);
+  }
+
+  .ficha-hud__warning-icon {
+    font-size: 0.75rem;
+    margin-top: 0.1rem;
+    flex-shrink: 0;
+  }
+
+  .ficha-hud__warning-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .ficha-hud__warning-title {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .ficha-hud__warning-desc {
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+    color: var(--ink-dim);
+    line-height: 1.4;
+  }
+
+  .ficha-hud__block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .ficha-hud__block-label {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+  }
+
+  .ficha-hud__learn-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ficha-hud__learn-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    color: var(--ink-dim);
+    line-height: 1.4;
+  }
+
+  .ficha-hud__learn-arrow {
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    margin-top: 0.05rem;
+    flex-shrink: 0;
+  }
+
+  .ficha-hud__text {
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    color: var(--ink-muted);
+    line-height: 1.45;
+  }
+
+  .ficha-hud__rule {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid color-mix(in srgb, var(--signal) 30%, transparent);
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--signal) 5%, var(--bg-deep));
+  }
+
+  .ficha-hud__rule-label {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--signal);
+    text-transform: uppercase;
+  }
+
+  .ficha-hud__rule-text {
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+    color: var(--ink-dim);
+    line-height: 1.4;
+  }
+
+  .meta-sep {
+    color: var(--line-strong);
+  }
+
+  .meta-highlight {
+    color: var(--accent);
   }
 
   .course-hero__cta-note {
@@ -656,7 +1163,6 @@ const formatoDefecto = formatoDeRuta(totalDefecto, info.lecciones.length)
   }
 
   .mission-meter {
-    max-width: 34rem;
     margin-top: 1.5rem;
     padding: 1rem 1.1rem;
   }
