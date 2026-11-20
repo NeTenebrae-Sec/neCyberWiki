@@ -101,6 +101,21 @@ const formatoDefecto = formatoDeRuta(totalDefecto, info.lecciones.length)
             <p class="lead course-hero__promise">{info.promesa}</p>
           )}
 
+          {videosEnPreparacion && (
+            <>
+              <div class="course-hero__video" data-pagefind-ignore="all">
+                <span class="course-hero__video-sello">
+                  <span class="status-dot" aria-hidden="true"></span>
+                  INTRO · EN PREPARACIÓN
+                </span>
+                <span class="course-hero__play" aria-hidden="true">
+                  ▶
+                </span>
+              </div>
+              <p class="course-hero__video-caption">Guía escrita disponible desde ya</p>
+            </>
+          )}
+
           <div class="course-hero__meta" data-pagefind-ignore="all">
             <span data-course-total data-unidad={unidad}>
               {totalDefecto} {unidad}
@@ -164,18 +179,22 @@ const formatoDefecto = formatoDeRuta(totalDefecto, info.lecciones.length)
               <a
                 href={primeraUrl}
                 id="cta-continue"
-                class="btn btn-primary btn-lg"
+                class="btn btn-primary btn-hud course-hero__start"
                 data-lessons={leccionesJson}
                 data-base={url}
                 data-unidad={etiquetaUnidad}
               >
                 <span>Empezar {info.unidad === "nivel" ? "por el nivel 0" : "la clase 1"}</span>
-                <span aria-hidden="true">→</span>
+                <span class="course-hero__start-arrow" aria-hidden="true">
+                  →
+                </span>
               </a>
             )}
-            <a href="#temario" class="btn btn-secondary btn-lg">
+            <a href="#temario" class="course-hero__link">
               <span>Ver temario</span>
-              <span aria-hidden="true">↓</span>
+              <span class="course-hero__link-arrow" aria-hidden="true">
+                ↓
+              </span>
             </a>
           </div>
         </div>
@@ -185,18 +204,6 @@ const formatoDefecto = formatoDeRuta(totalDefecto, info.lecciones.length)
           <h2 id="course-aside-title" class="course-aside__title">
             Ficha del curso
           </h2>
-
-          {videosEnPreparacion && (
-            <div class="course-aside__video" data-pagefind-ignore="all">
-              <span class="course-aside__video-icon" aria-hidden="true">
-                ▶
-              </span>
-              <span class="course-aside__video-body">
-                <span class="course-aside__video-title">Video de introducción en preparación</span>
-                <span class="course-aside__video-note">La guía escrita ya está disponible</span>
-              </span>
-            </div>
-          )}
 
           {adaptativo ? (
             <div data-ficha-adaptable data-ficha-total={info.lecciones.length} aria-live="polite">
@@ -554,6 +561,64 @@ const formatoDefecto = formatoDeRuta(totalDefecto, info.lecciones.length)
     color: var(--ink-dim);
   }
 
+  .course-hero__video {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    max-width: 25rem;
+    margin-top: 1.35rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg-raised);
+    overflow: hidden;
+  }
+
+  .course-hero__video-sello {
+    position: absolute;
+    top: 0.7rem;
+    left: 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.3rem 0.65rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--bg-card);
+    color: var(--signal);
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .course-hero__play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    background: var(--bg-card);
+    color: var(--accent);
+    font-size: 0.8rem;
+    line-height: 1;
+  }
+
+  .course-hero__video-caption {
+    margin-top: 0.6rem;
+    max-width: 25rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    color: var(--ink-dim);
+  }
+
   .course-hero__cta-note {
     margin-top: 0.9rem;
     font-family: var(--font-mono);
@@ -624,8 +689,47 @@ const formatoDefecto = formatoDeRuta(totalDefecto, info.lecciones.length)
   .course-hero__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.7rem;
+    align-items: center;
+    gap: 0.65rem 1.25rem;
     margin-top: 1.5rem;
+  }
+
+  .course-hero__start-arrow,
+  .course-hero__link-arrow {
+    transition: transform var(--dur-ui) var(--ease-out);
+  }
+
+  .course-hero__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding-block: 0.35rem;
+    border-bottom: 1px solid var(--line-strong);
+    color: var(--ink-dim);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition:
+      color var(--dur-ui) var(--ease-out),
+      border-color var(--dur-ui) var(--ease-out);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .course-hero__start:hover .course-hero__start-arrow {
+      transform: translateX(2px);
+    }
+
+    .course-hero__link:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .course-hero__link:hover .course-hero__link-arrow {
+      transform: translateY(2px);
+    }
   }
 
   .course-aside {
@@ -640,47 +744,6 @@ const formatoDefecto = formatoDeRuta(totalDefecto, info.lecciones.length)
     right: 1.75rem;
     width: 4.5rem;
     transform: rotate(4deg);
-  }
-
-  .course-aside__video {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-    margin-top: 0.85rem;
-    padding: 0.6rem 0.7rem;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sm, 4px);
-    background: var(--bg-card);
-  }
-
-  .course-aside__video-icon {
-    display: grid;
-    place-items: center;
-    flex: none;
-    width: 2rem;
-    height: 2rem;
-    border: 1px solid var(--line-strong);
-    border-radius: 50%;
-    color: var(--signal);
-    font-size: 0.7rem;
-  }
-
-  .course-aside__video-body {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    min-width: 0;
-  }
-
-  .course-aside__video-title {
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--ink);
-  }
-
-  .course-aside__video-note {
-    font-size: 0.7rem;
-    color: var(--ink-muted);
   }
 
   .course-aside__title {
@@ -772,9 +835,8 @@ const formatoDefecto = formatoDeRuta(totalDefecto, info.lecciones.length)
   }
 
   @media (max-width: 640px) {
-    .course-hero__actions .btn {
-      width: 100%;
-      justify-content: center;
+    .course-hero__actions {
+      gap: 0.55rem 1rem;
     }
   }
 </style>
