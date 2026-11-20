@@ -42,6 +42,12 @@ const nav = [
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {cursoActual?.rutas?.length && <style is:inline>
+      html.ncw-route-pending .lesson-hud__head,
+      html.ncw-route-pending .lesson-hud__controls {
+        visibility: hidden;
+      }
+    </style>}
     <title>{titulo} · {site.nombre}</title>
     <meta name="description" content={descripcion} />
     {noindex && <meta name="robots" content="noindex" />}
@@ -62,6 +68,41 @@ const nav = [
           ?.setAttribute("content", theme === "light" ? "#e9e1cf" : "#070a08")
       } catch {}
     </script>
+    {cursoActual?.rutas?.length && <script is:inline define:vars={{ cursoSlug: cursoActual.slug }}>
+      ;(function () {
+        try {
+          const params = new URLSearchParams(window.location.search)
+          const dificultad =
+            params.get("dificultad") ||
+            localStorage.getItem("ncw:difficulty:" + cursoSlug) ||
+            "facil"
+          const entorno =
+            params.get("entorno") ||
+            localStorage.getItem("ncw:environment:" + cursoSlug) ||
+            "hardware"
+          const arranque =
+            entorno === "vm"
+              ? "solo"
+              : params.get("arranque") || localStorage.getItem("ncw:boot:" + cursoSlug) || "solo"
+          const effectiveDifficulty = dificultad === "avanzada" ? "avanzada" : "facil"
+          const effectiveEnvironment = entorno === "vm" ? "vm" : "hardware"
+          const effectiveBoot =
+            effectiveEnvironment === "vm" ? "solo" : arranque === "dualboot" ? "dualboot" : "solo"
+
+          if (
+            effectiveDifficulty !== "facil" ||
+            effectiveEnvironment !== "hardware" ||
+            effectiveBoot !== "solo"
+          ) {
+            document.documentElement.classList.add("ncw-route-pending")
+            // Si el bundle no hidrata (red, error de JS), no dejar el contenido oculto.
+            setTimeout(function () {
+              document.documentElement.classList.remove("ncw-route-pending")
+            }, 3000)
+          }
+        } catch {}
+      })()
+    </script>}
   </head>
   <body class="antialiased">
     {buscadorHeader && (
