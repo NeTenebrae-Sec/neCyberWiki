@@ -10,6 +10,7 @@ import {
   leccionesDeRuta,
 } from "../../../../lib/catalog"
 import { CONFIG_POR_DEFECTO } from "../../../../lib/tracks"
+import { REGLA_DE_CAMPO, fichaDeRuta, formatoDeRuta } from "../../../../lib/course-config.client"
 import { getCategoria } from "../../../../data/categorias"
 import { site } from "../../../../data/site"
 
@@ -42,6 +43,9 @@ const etiquetaUnidad = info.unidad === "nivel" ? "nivel" : "clase"
 // Hide-until-ready: solo los cursos adaptables emiten el script anti-parpadeo.
 const adaptativo = Boolean(info.rutas?.length)
 const leccionesJson = JSON.stringify(leccionesDefecto.map((leccion) => leccion.slug))
+// Ficha adaptable: SSR pinta la ruta por defecto (Fácil · Hardware · Solo).
+const fichaDefecto = fichaDeRuta(CONFIG_POR_DEFECTO)
+const formatoDefecto = formatoDeRuta(totalDefecto, info.lecciones.length)
 ---
 
 <BaseLayout titulo={info.titulo} descripcion={info.descripcion}>
@@ -194,48 +198,85 @@ const leccionesJson = JSON.stringify(leccionesDefecto.map((leccion) => leccion.s
             </div>
           )}
 
-          <div class="course-aside__block">
-            <p class="course-aside__label">Qué necesitas</p>
-            <ul class="course-aside__req">
-              {info.requisitos.map((requisito) => (
-                <li>
-                  <span aria-hidden="true">▹</span>
-                  {requisito}
-                </li>
-              ))}
-            </ul>
-          </div>
+          {adaptativo ? (
+            <div data-ficha-adaptable data-ficha-total={info.lecciones.length} aria-live="polite">
+              <div class="course-aside__block" data-route-only>
+                <p class="course-aside__label">Qué necesitas</p>
+                <ul class="course-aside__req" data-ficha-necesitas>
+                  {fichaDefecto.necesitas.map((requisito) => (
+                    <li>
+                      <span aria-hidden="true">▹</span>
+                      {requisito}
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-          <div class="course-aside__block">
-            <p class="course-aside__label">Qué vas a saber</p>
-            <ul class="course-aside__req">
-              {info.resultados.map((resultado) => (
-                <li>
-                  <span aria-hidden="true">▹</span>
-                  {resultado}
-                </li>
-              ))}
-            </ul>
-          </div>
+              <div class="course-aside__block" data-route-only>
+                <p class="course-aside__label">Qué vas a saber</p>
+                <ul class="course-aside__req" data-ficha-sabes>
+                  {fichaDefecto.sabes.map((resultado) => (
+                    <li>
+                      <span aria-hidden="true">▹</span>
+                      {resultado}
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-          <div class="course-aside__block">
-            <p class="course-aside__label">Formato</p>
-            <p class="course-aside__text">
-              {videosEnPreparacion ? (
-                <>
-                  <span data-course-aside-total data-unidad={unidad}>
-                    {totalDefecto} {unidad} en tu ruta
-                  </span>
-                  {` · ${info.lecciones.length} lecciones únicas · videos en preparación`}
-                </>
-              ) : (
-                <>
-                  {totalDefecto} {unidad} en {info.modulos.length} módulos, con guía escrita,
-                  comandos y explicación del razonamiento. Sin videos prometidos.
-                </>
-              )}
-            </p>
-          </div>
+              <div class="course-aside__block" data-route-only>
+                <p class="course-aside__label">Formato</p>
+                <p class="course-aside__text" data-ficha-formato>
+                  {formatoDefecto}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div class="course-aside__block">
+                <p class="course-aside__label">Qué necesitas</p>
+                <ul class="course-aside__req">
+                  {info.requisitos.map((requisito) => (
+                    <li>
+                      <span aria-hidden="true">▹</span>
+                      {requisito}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div class="course-aside__block">
+                <p class="course-aside__label">Qué vas a saber</p>
+                <ul class="course-aside__req">
+                  {info.resultados.map((resultado) => (
+                    <li>
+                      <span aria-hidden="true">▹</span>
+                      {resultado}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div class="course-aside__block">
+                <p class="course-aside__label">Formato</p>
+                <p class="course-aside__text">
+                  {videosEnPreparacion ? (
+                    <>
+                      <span data-course-aside-total data-unidad={unidad}>
+                        {totalDefecto} {unidad} en tu ruta
+                      </span>
+                      {` · ${info.lecciones.length} lecciones únicas · videos en preparación`}
+                    </>
+                  ) : (
+                    <>
+                      {totalDefecto} {unidad} en {info.modulos.length} módulos, con guía escrita,
+                      comandos y explicación del razonamiento. Sin videos prometidos.
+                    </>
+                  )}
+                </p>
+              </div>
+            </>
+          )}
 
           {info.fuente && (
             <div class="course-aside__block">
@@ -251,8 +292,9 @@ const leccionesJson = JSON.stringify(leccionesDefecto.map((leccion) => leccion.s
           <div class="course-aside__block course-aside__block--last">
             <p class="course-aside__label">Regla de campo</p>
             <p class="course-aside__text">
-              Practica en una máquina virtual, en hardware propio o en el laboratorio autorizado del
-              curso. Nunca en sistemas ajenos.
+              {adaptativo
+                ? REGLA_DE_CAMPO
+                : "Practica en una máquina virtual, en hardware propio o en el laboratorio autorizado del curso. Nunca en sistemas ajenos."}
             </p>
           </div>
         </aside>
@@ -289,10 +331,40 @@ const leccionesJson = JSON.stringify(leccionesDefecto.map((leccion) => leccion.s
   </section>
 
   <script>
-    import { initCourseConfig } from "../../../../lib/course-config.client"
+    import {
+      fichaDeRuta,
+      formatoDeRuta,
+      initCourseConfig,
+    } from "../../../../lib/course-config.client"
     import { progresoKey } from "../../../../lib/tracks"
 
+    const pintarLista = (lista: Element | null, items: string[]) => {
+      if (!lista) return
+      lista.replaceChildren(
+        ...items.map((texto) => {
+          const li = document.createElement("li")
+          const marca = document.createElement("span")
+          marca.setAttribute("aria-hidden", "true")
+          marca.textContent = "▹"
+          li.append(marca, document.createTextNode(texto))
+          return li
+        }),
+      )
+    }
+
     initCourseConfig((state) => {
+      // Ficha adaptable: «Qué necesitas», «Qué vas a saber» y «Formato» se
+      // repintan con la config y el total de la ruta activa (T8c).
+      const ficha = document.querySelector<HTMLElement>("[data-ficha-adaptable]")
+      if (ficha) {
+        const copy = fichaDeRuta(state.config)
+        pintarLista(ficha.querySelector("[data-ficha-necesitas]"), copy.necesitas)
+        pintarLista(ficha.querySelector("[data-ficha-sabes]"), copy.sabes)
+        const formato = ficha.querySelector<HTMLElement>("[data-ficha-formato]")
+        const totalCurso = Number(ficha.getAttribute("data-ficha-total") || 0)
+        if (formato) formato.textContent = formatoDeRuta(state.visibles.length, totalCurso)
+      }
+
       const key = state.ruta
         ? progresoKey(state.slug, state.config.dificultad)
         : progresoKey(state.slug)

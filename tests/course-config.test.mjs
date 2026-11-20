@@ -2,6 +2,7 @@
 import test from "node:test"
 import assert from "node:assert/strict"
 import { primeraRutaConLeccion, resumirConfig } from "../src/lib/course-config.client.ts"
+import { REGLA_DE_CAMPO, fichaDeRuta, formatoDeRuta } from "../src/lib/course-config.client.ts"
 
 const rutas = [
   { dificultad: "facil", entorno: "hardware", arranque: "solo", lecciones: ["1.1", "1.6", "2.4"] },
@@ -57,4 +58,72 @@ test("primeraRutaConLeccion normaliza preferencias inválidas antes de preferir"
   const elegida = primeraRutaConLeccion(rutas, "2.5", { dificultad: "media" })
   // "media" normaliza a "facil"; ninguna candidata es facil, gana la primera.
   assert.deepEqual(elegida, rutas[3])
+})
+
+const NECESITAS_HARDWARE = [
+  "PC con 4 GB RAM y 20 GB libres",
+  "USB 8 GB+",
+  "Internet",
+  "Respaldo de lo importante",
+]
+
+test("fichaDeRuta: hardware y solo Linux usa la lista aprobada", () => {
+  const ficha = fichaDeRuta({ dificultad: "facil", entorno: "hardware", arranque: "solo" })
+  assert.deepEqual(ficha.necesitas, NECESITAS_HARDWARE)
+})
+
+test("fichaDeRuta: dual boot añade el requisito de Windows/BitLocker", () => {
+  const ficha = fichaDeRuta({ dificultad: "facil", entorno: "hardware", arranque: "dualboot" })
+  assert.deepEqual(ficha.necesitas, [
+    ...NECESITAS_HARDWARE,
+    "Windows en UEFI/GPT y clave BitLocker",
+  ])
+})
+
+test("fichaDeRuta: VM reemplaza la lista y no menciona dual boot", () => {
+  const ficha = fichaDeRuta({ entorno: "vm", arranque: "dualboot" })
+  assert.deepEqual(ficha.necesitas, [
+    "Una VM con 4 GB RAM y 20 GB de disco",
+    "Internet. Sin tocar tu máquina.",
+  ])
+})
+
+test("fichaDeRuta: «Qué vas a saber» depende de la dificultad", () => {
+  assert.deepEqual(fichaDeRuta({ dificultad: "facil" }).sabes, [
+    "Instalar con archinstall en VM o hardware",
+    "GNOME listo",
+    "pacman, AUR y ZRAM sin miedo",
+    "Sistema actualizado y con firewall.",
+  ])
+  assert.deepEqual(fichaDeRuta({ dificultad: "avanzada" }).sabes, [
+    "Particionar a mano y bootear manualmente",
+    "BSPWM y dotfiles",
+    "mkinitcpio/systemd-boot",
+    "Diagnóstico: qué hacer cuando algo falla.",
+  ])
+})
+
+test("fichaDeRuta: sin config usa el default Fácil · Hardware · Solo", () => {
+  assert.deepEqual(fichaDeRuta(), {
+    necesitas: NECESITAS_HARDWARE,
+    sabes: fichaDeRuta({ dificultad: "facil" }).sabes,
+  })
+})
+
+test("formatoDeRuta compone el copy honesto con el total de la ruta", () => {
+  assert.equal(
+    formatoDeRuta(14, 22),
+    "14 clases en tu ruta · 22 en total · Guía escrita; video en preparación.",
+  )
+  assert.equal(
+    formatoDeRuta(18, 22),
+    "18 clases en tu ruta · 22 en total · Guía escrita; video en preparación.",
+  )
+})
+
+test("REGLA_DE_CAMPO conserva el copy aprobado", () => {
+  assert.equal(
+    REGLA_DE_CAMPO,
+    "Nada de esto toca sistemas ajenos: practica en tu VM, tu hardware o el laboratorio autorizado.",
+  )
 })
