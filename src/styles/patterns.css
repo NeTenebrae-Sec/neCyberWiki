@@ -78,6 +78,40 @@
   width: 100%;
 }
 
+/* Compact HUD-flavoured CTA for course actions. Opt-in: keep the base .btn intact. */
+.btn-hud {
+  position: relative;
+  gap: 0.8rem;
+  padding: 0.46rem 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.btn-primary.btn-hud::before,
+.btn-primary.btn-hud::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border: solid color-mix(in srgb, var(--accent-ink) 45%, transparent);
+  pointer-events: none;
+}
+
+.btn-primary.btn-hud::before {
+  top: 2px;
+  left: 2px;
+  border-width: 1px 0 0 1px;
+}
+
+.btn-primary.btn-hud::after {
+  right: 2px;
+  bottom: 2px;
+  border-width: 0 1px 1px 0;
+}
+
 @media (hover: hover) and (pointer: fine) {
   .btn-primary:hover {
     background: color-mix(in srgb, var(--accent) 88%, var(--ink));
