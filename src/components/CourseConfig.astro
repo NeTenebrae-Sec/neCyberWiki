@@ -104,7 +104,8 @@ const leccionAttrs =
     margin-top: 1.25rem;
     padding: 1rem;
     border: 1px solid var(--line);
-    background: var(--bg-raised);
+    background: var(--bg-card);
+    --hud-cut: 6px;
   }
 
   .course-config__head {
@@ -144,6 +145,15 @@ const leccionAttrs =
     min-width: 0;
   }
 
+  .course-config__group[data-config-difficulty] {
+    --config-eje: var(--signal);
+  }
+
+  .course-config__group[data-config-environment],
+  .course-config__group[data-config-boot] {
+    --config-eje: var(--accent);
+  }
+
   .course-config__group legend {
     font-family: var(--font-mono);
     font-size: 0.6rem;
@@ -158,37 +168,70 @@ const leccionAttrs =
     display: none;
   }
 
+  /* T8g — opción como botón HUD: radio visible + placa con chamfer.
+     El eje del grupo define el acento activo (--signal: dificultad, --accent: entorno/arranque). */
   .config-option {
-    display: block;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
     cursor: pointer;
   }
 
   .config-option input {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    clip-path: inset(50%);
+    flex: 0 0 auto;
+    width: 0.85rem;
+    height: 0.85rem;
+    margin: 0.22rem 0 0;
+    appearance: none;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    transition:
+      border-color 0.15s ease,
+      background-color 0.15s ease;
+  }
+
+  .config-option input:checked {
+    border-color: var(--config-eje, var(--accent));
+    background: var(--config-eje, var(--accent));
   }
 
   .config-option__body {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 0.15rem;
-    height: 100%;
+    flex: 1;
+    min-width: 0;
     padding: 0.55rem 0.65rem;
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-raised);
+    clip-path: polygon(
+      0 var(--hud-cut),
+      var(--hud-cut) 0,
+      calc(100% - var(--hud-cut)) 0,
+      100% var(--hud-cut),
+      100% calc(100% - var(--hud-cut)),
+      calc(100% - var(--hud-cut)) 100%,
+      var(--hud-cut) 100%,
+      0 calc(100% - var(--hud-cut))
+    );
     transition:
       border-color 0.15s ease,
       background 0.15s ease;
   }
 
+  .config-option__body:hover {
+    border-color: var(--line-strong);
+    background: var(--bg-raised);
+  }
+
   .config-option__title {
     font-size: 0.85rem;
     font-weight: 600;
-    color: var(--ink);
+    color: var(--ink-dim);
   }
 
   .config-option__body small {
@@ -197,21 +240,17 @@ const leccionAttrs =
     color: var(--ink-muted);
   }
 
-  .config-option:hover .config-option__body {
-    border-color: var(--ink-muted);
-  }
-
   .config-option input:checked + .config-option__body {
-    border-color: var(--signal);
-    background: color-mix(in srgb, var(--signal) 10%, transparent);
+    border-color: var(--config-eje, var(--accent));
+    background: color-mix(in srgb, var(--config-eje, var(--accent)) 10%, transparent);
   }
 
   .config-option input:checked + .config-option__body .config-option__title {
-    color: var(--signal);
+    color: var(--config-eje, var(--accent));
   }
 
   .config-option input:focus-visible + .config-option__body {
-    outline: 2px solid var(--signal);
+    outline: 2px solid var(--config-eje, var(--accent));
     outline-offset: 2px;
   }
 
@@ -231,7 +270,9 @@ const leccionAttrs =
 
   .config-option.is-locked .config-option__body::after {
     content: "🔒";
-    align-self: flex-end; /* esquina superior derecha del cuerpo */
+    position: absolute;
+    top: 0.45rem;
+    right: 0.5rem;
     font-size: 0.68rem;
     opacity: 0.8;
   }
@@ -245,6 +286,7 @@ const leccionAttrs =
     gap: 0.35rem 0.5rem;
     margin-top: 0;
     padding: 0.55rem;
+    --hud-cut: 3px;
   }
 
   .course-config--lesson .course-config__head {
