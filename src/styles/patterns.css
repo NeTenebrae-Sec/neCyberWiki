@@ -762,6 +762,7 @@
 html.ncw-route-pending [data-syllabus],
 html.ncw-route-pending .lesson-head__arrows,
 html.ncw-route-pending .lesson-nav,
-html.ncw-route-pending [data-route-only] {
+html.ncw-route-pending [data-route-only],
+html.ncw-route-pending .course-config--lesson {
   visibility: hidden;
 }

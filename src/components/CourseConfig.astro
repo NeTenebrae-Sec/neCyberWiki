@@ -5,11 +5,22 @@ import type { CursoPublicado } from "../lib/catalog"
 interface Props {
   curso: Pick<CursoPublicado, "slug" | "rutas">
   variant?: "hero" | "lesson"
+  leccion?: { numero: string; variante: string; entorno: string; arranque: string }
 }
 
-const { curso, variant = "hero" } = Astro.props
+const { curso, variant = "hero", leccion } = Astro.props
 const rutas = curso.rutas
 const uid = (eje: string) => `${curso.slug}-${eje}`
+// Solo la lección emite data-lesson-*: sin ellos no hay atenuación (la ficha no pasa el prop).
+const leccionAttrs =
+  variant === "lesson" && leccion
+    ? {
+        "data-lesson-numero": leccion.numero,
+        "data-lesson-variante": leccion.variante,
+        "data-lesson-entorno": leccion.entorno,
+        "data-lesson-arranque": leccion.arranque,
+      }
+    : {}
 ---
 
 {rutas && (
@@ -19,6 +30,7 @@ const uid = (eje: string) => `${curso.slug}-${eje}`
     data-slug={curso.slug}
     data-rutas={JSON.stringify(rutas)}
     data-default={JSON.stringify(CONFIG_POR_DEFECTO)}
+    {...leccionAttrs}
   >
     <div class="course-config__head">
       <p class="course-config__kicker">Tu ruta</p>
@@ -201,6 +213,31 @@ const uid = (eje: string) => `${curso.slug}-${eje}`
   .config-option input:focus-visible + .config-option__body {
     outline: 2px solid var(--signal);
     outline-offset: 2px;
+  }
+
+  .config-option.is-locked {
+    cursor: not-allowed;
+  }
+
+  .config-option.is-locked input {
+    pointer-events: none;
+  }
+
+  .config-option.is-locked .config-option__body {
+    opacity: 0.38;
+    filter: grayscale(0.6);
+    border-style: dashed;
+  }
+
+  .config-option.is-locked .config-option__body::after {
+    content: "🔒";
+    align-self: flex-end; /* esquina superior derecha del cuerpo */
+    font-size: 0.68rem;
+    opacity: 0.8;
+  }
+
+  .config-option.is-locked .config-option__body small {
+    color: inherit;
   }
 
   .course-config--lesson {

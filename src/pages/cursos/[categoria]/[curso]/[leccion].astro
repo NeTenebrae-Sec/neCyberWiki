@@ -138,18 +138,17 @@ const numeroVisible = esNivel
 
   <div class="container-page player-layout">
     <article class="player-main">
-      {rutas && <CourseConfig curso={info} variant="lesson" />}
       {rutas && (
-        <div class="route-notice" data-route-notice role="status" hidden>
-          <p class="route-notice__text">
-            Esta lección no está en tu ruta actual (
-            <span data-route-notice-summary>Fácil · Hardware · Solo Linux</span>
-            ).
-          </p>
-          <button type="button" class="route-notice__cta" data-route-notice-cta>
-            Verla en la ruta que sí la incluye
-          </button>
-        </div>
+        <CourseConfig
+          curso={info}
+          variant="lesson"
+          leccion={{
+            numero: entry.data.numero,
+            variante: entry.data.variante,
+            entorno: entry.data.entorno,
+            arranque: entry.data.arranque,
+          }}
+        />
       )}
       {"video" in entry.data && (
         <div class="player-frame">
@@ -438,14 +437,9 @@ const numeroVisible = esNivel
   )}
 
   <script>
-    import {
-      SET_CONFIG_EVENT,
-      initCourseConfig,
-      primeraRutaConLeccion,
-      resumirConfig,
-    } from "../../../../lib/course-config.client"
+    import { initCourseConfig } from "../../../../lib/course-config.client"
     import type { CourseConfigState } from "../../../../lib/course-config.client"
-    import type { CursoConfig, CursoRuta } from "../../../../lib/tracks"
+    import type { CursoRuta } from "../../../../lib/tracks"
 
     interface CatalogoItem {
       slug: string
@@ -473,27 +467,6 @@ const numeroVisible = esNivel
       rutas = []
     }
 
-    const notice = document.querySelector<HTMLElement>("[data-route-notice]")
-    const noticeSummary = notice?.querySelector<HTMLElement>("[data-route-notice-summary]")
-    const noticeCta = notice?.querySelector<HTMLElement>("[data-route-notice-cta]")
-
-    let ultimaConfig: CursoConfig | undefined
-
-    noticeCta?.addEventListener("click", () => {
-      if (!configRoot) return
-      const objetivo = primeraRutaConLeccion(rutas, entryNumero, ultimaConfig)
-      if (!objetivo) return
-      configRoot.dispatchEvent(
-        new CustomEvent(SET_CONFIG_EVENT, {
-          detail: {
-            dificultad: objetivo.dificultad,
-            entorno: objetivo.entorno,
-            arranque: objetivo.arranque,
-          },
-        }),
-      )
-    })
-
     const aplicarEnlace = (
       el: HTMLElement,
       target: CatalogoItem | null | undefined,
@@ -512,9 +485,15 @@ const numeroVisible = esNivel
     }
 
     initCourseConfig((state: CourseConfigState) => {
+      // URL profunda incompatible (localStorage o deep link): la lección no
+      // pertenece a la ruta resuelta; vuelve a la ficha ("../"), que acepta
+      // cualquier configuración. También cubre toggles posteriores y eventos
+      // ncw:course-config:set que excluyan la lección actual.
+      if (rutas.length && state.ruta && !state.ruta.lecciones.includes(entryNumero)) {
+        window.location.replace("../")
+        return
+      }
       if (!catalogoEl) return
-      ultimaConfig = state.config
-      if (noticeSummary) noticeSummary.textContent = resumirConfig(state.config)
       const visibles = state.ruta ? state.ruta.lecciones : []
       const i = visibles.indexOf(entryNumero)
       const inRuta = i !== -1
@@ -528,7 +507,6 @@ const numeroVisible = esNivel
       if (spacer) spacer.hidden = Boolean(prev)
       for (const el of document.querySelectorAll<HTMLElement>("[data-route-back]"))
         el.hidden = Boolean(next)
-      if (notice) notice.hidden = inRuta
     })
   </script>
 
@@ -841,49 +819,6 @@ const numeroVisible = esNivel
   .player-aside {
     grid-column: span 4;
     min-width: 0;
-  }
-
-  .route-notice {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem 0.75rem;
-    margin-top: 1.25rem;
-    padding: 0.6rem 0.8rem;
-    border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent);
-    border-left: 3px solid var(--warn);
-    border-radius: var(--radius);
-    background: color-mix(in srgb, var(--warn) 10%, transparent);
-    font-size: 0.8rem;
-    color: var(--ink-dim);
-  }
-
-  .route-notice__text {
-    flex: 1 1 16rem;
-    margin: 0;
-    line-height: 1.45;
-  }
-
-  .route-notice__cta {
-    padding: 0.4rem 0.7rem;
-    border: 1px solid var(--warn);
-    border-radius: var(--radius-sm);
-    background: transparent;
-    color: var(--warn);
-    font-size: 0.75rem;
-    font-weight: 600;
-    font-family: var(--font-mono);
-    cursor: pointer;
-    transition: background-color 0.15s ease;
-  }
-
-  .route-notice__cta:hover {
-    background: color-mix(in srgb, var(--warn) 16%, transparent);
-  }
-
-  .route-notice__cta:focus-visible {
-    outline: 2px solid var(--warn);
-    outline-offset: 2px;
   }
 
   .player-frame {
