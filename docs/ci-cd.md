@@ -53,10 +53,6 @@ Los errores se revisan en el resumen del run; un enlace muerto se corrige o se e
 
 GitHub Pages solo permite un sitio por repositorio y los deployments son atómicos: cada push publica el artifact completo con las dos versiones. Por eso un push a `main` también reconstruye staging, y viceversa.
 
-### Configuración previa
-
-El environment `github-pages` debe permitir deployments desde `main` **y** `dev` (Settings → Environments → Deployment branches). Si solo permite `main`, el job de `dev` falla con «Branch dev is not allowed to deploy».
-
 ### Verificación del despliegue
 
 Tras un push:
