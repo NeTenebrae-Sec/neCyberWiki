@@ -7,12 +7,15 @@
 | Código del sitio                                                  | GPL-3.0-or-later · [`LICENSE.txt`](LICENSE.txt)              |
 | Contenido propio (cursos, lecciones, bitácora, roadmap, capturas) | CC BY-NC-SA 4.0 · [`LICENSE-CONTENT.md`](LICENSE-CONTENT.md) |
 | Marca e identidad                                                 | Reservada · [`TRADEMARK.md`](TRADEMARK.md)                   |
+| Writeups sobre retos de terceros                                  | Sin licencia del proyecto · ver más abajo                    |
 
 Si reutilizas contenido, acredita «neCyberWiki — NeTenebrae», enlaza la web original y di si lo has modificado. El enlace a [Ko-fi](https://ko-fi.com/netenebrae) es una cortesía, no una condición.
 
 ## Writeups de terceros
 
- AS<Se usan explicaciones y capturas propias, se limitan las citas ajenas a lo necesario y no se publican credenciales ni datos personales. Las condiciones de cada plataforma se revisan antes de publicar y también en los writeups ya publicados. Consulta también [`CREDITS.md`](CREDITS.md).
+Los writeups en `content/_WRITEUPS/` son apuntes originales sobre retos de OverTheWire, VulnHub y PortSwigger Web Security Academy. Las soluciones son del autor y **no reciben licencia del proyecto**. Los nombres, enunciados, imágenes y máquinas de esas plataformas siguen siendo de sus titulares. Cada publicación enlaza la fuente oficial. El crédito no implica afiliación ni autorización.
+
+Se usan explicaciones y capturas propias, se limitan las citas ajenas a lo necesario y no se publican credenciales ni datos personales. Las condiciones de cada plataforma se revisan antes de publicar y también en los writeups ya publicados. Consulta también [`CREDITS.md`](CREDITS.md).
 
 ## Terceras partes
 
