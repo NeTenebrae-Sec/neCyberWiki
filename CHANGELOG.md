@@ -6,6 +6,18 @@ y el proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-11-21
+
+### Security
+
+- Añade `.github/CODEOWNERS` para exigir revisión del responsable en los PRs.
+- Activa la protección de `main` y `dev` con checks obligatorios, aprobación y sin force push; restringe las Actions permitidas y activa las actualizaciones de seguridad de Dependabot.
+
+### Fixed
+
+- Corrige el párrafo de writeups de terceros en `NOTICE.md`.
+- Excluye del chequeo de enlaces los hosts que bloquean a los checkers (`gnu.org`, `polimetro.com`).
+
 ## [1.1.0] - 2026-11-21
 
 ### Added
