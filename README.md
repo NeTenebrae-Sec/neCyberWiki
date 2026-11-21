@@ -1,95 +1,29 @@
 # neCyberWiki
 
-Archivo personal de aprendizaje sobre Linux, redes y ciberseguridad, en español. Cursos guiados, notas de laboratorio, bitácora y un roadmap público. Sin cuentas, sin backend y con el progreso guardado en el navegador.
+Bitácora de aprendizaje sobre Linux, redes y ciberseguridad, en español. Cursos guiados, notas de laboratorio y un roadmap público. Sin cuentas ni backend: el progreso se guarda en tu navegador.
+
+**<https://netenebrae-sec.github.io/neCyberWiki/>**
 
 ## Por qué existe
 
-neCyberWiki nació de dos cosas a la vez: de las ganas de compartir lo que me apasiona y de la
-certeza de que nadie debería pagar para aprender informática. Lo que hay aquí es para quien quiera
-empezar, para quien ya está en ello y para quien solo quiere entender algo, sin importar de dónde
-venga ni cuánto pueda invertir.
+Me apasiona la informática y quiero compartirla. También creo que nadie debería pagar para aprenderla. neCyberWiki es gratuita, se sostiene con donaciones y está pensada para seguir siéndolo: sin anuncios, sin muros de pago y sin datos que se van a otra parte. Si algún día alguien intenta cerrarla o venderla como propia, las licencias y la marca están ahí. No soy abogado, esto es una intención, no un contrato.
 
-Quiero que siga siendo así siempre. El sitio se sostiene con donaciones y eso es lo que lo mantiene
-abierto, sin anuncios, sin muros de pago y sin datos que se vayan a otra parte. Si algún día alguien
-intenta cerrarlo o convertirlo en un negocio ajeno, las licencias y la marca están ahí para que no
-pueda hacerlo. No soy abogado y esto no es un contrato, es simplemente la intención con la que se
-escribe y se cuida este proyecto.
-
-- **Sitio:** <https://netenebrae-sec.github.io/neCyberWiki/>
-- **Stack:** Astro 7, Tailwind CSS 4, TypeScript y JavaScript vanilla.
-- **Contenido:** Markdown validado en build con Content Collections.
-- **Buscador:** Pagefind con el componente oficial en la barra del header. El índice se genera al arrancar el desarrollo y en el `postbuild`.
-- **Perfil:** Almacén local con exportar, importar y borrar.
-
-## Aviso legal
-
-Todo el contenido de este repositorio tiene fines **educativos y formativos**. Las técnicas, conceptos y ejemplos descritos deben practicarse **únicamente** en entornos controlados, laboratorios personales o escenarios autorizados o diseñados para este propósito. El uso indebido de la información contenida fuera de un contexto ético o legal es responsabilidad exclusiva del usuario. Los autores y contribuidores no se hacen responsables de daños, sanciones o consecuencias derivadas de ese uso.
-
-## Arranque
+## Empezar
 
 ```bash
 npm install
 npm run dev
 ```
 
-El buscador funciona también en `npm run dev`: el `predev` construye el sitio y regenera el índice en `public/pagefind/` (ignorado por git) antes de arrancar Astro. El índice refleja el último arranque del servidor. Si añades contenido, reinicia `npm run dev`. `Ctrl/Cmd+K` enfoca la barra del header.
+El buscador se construye antes de arrancar. Para el resto de comandos, la estructura del repositorio y las pruebas: [`docs/desarrollo.md`](docs/desarrollo.md).
 
-`npm run build` ejecuta `astro build` y después el `postbuild` con Pagefind sobre `dist/pagefind/`. No hay que lanzar `pagefind` a mano ni versionar el índice.
+## Enlaces
 
-## Scripts
+- Cursos y lecciones: [`content/cursos/`](content/cursos/)
+- Contribuir: [`CONTRIBUTING.md`](CONTRIBUTING.md)
+- Desarrollo y pruebas: [`docs/desarrollo.md`](docs/desarrollo.md)
+- Seguridad: [`SECURITY.md`](SECURITY.md)
+- Licencias: [`LICENSE.txt`](LICENSE.txt), [`LICENSE-CONTENT.md`](LICENSE-CONTENT.md), [`TRADEMARK.md`](TRADEMARK.md)
+- Atribuciones de terceros: [`NOTICE.md`](NOTICE.md)
 
-| Script                  | Qué hace                                                 |
-| ----------------------- | -------------------------------------------------------- |
-| `npm run dev`           | Construye el índice y arranca el servidor de desarrollo. |
-| `npm run build`         | Genera el sitio estático y el índice Pagefind.           |
-| `npm run preview`       | Sirve `dist/` para probar el build real.                 |
-| `npm run check`         | Comprueba tipos y contenido de Astro.                    |
-| `npm run lint`          | ESLint sobre Astro, TS y JS.                             |
-| `npm test`              | Tests unitarios con el runner de Node.                   |
-| `npm run import:bandit` | Regenera el curso Bandit desde el archivo fuente.        |
-| `npm run format`        | Prettier sobre todo el proyecto.                         |
-
-Los tests de navegador automatizados aún no están integrados. La verificación manual con Playwright es parte del flujo local.
-
-## Estructura
-
-```text
-content/
-  cursos/          Cursos y lecciones en Markdown
-  blog/            Entradas de la bitácora
-public/
-  cursos/          Imágenes de los cursos
-src/
-  components/      Componentes de interfaz
-  data/            Categorías, cursos y roadmap
-  layouts/         Shell del sitio
-  lib/             Lógica pura y utilidades de build
-  pages/           Rutas de Astro
-  styles/          Tokens, base, patrones y shell
-```
-
-## Contribuciones
-
-Las contribuciones son bienvenidas: corrigiendo errores, mejorando redacción, añadiendo contenido relevante, proponiendo mejoras en estructura y navegación o reportando problemas en la pestaña _Issues_.
-
-- **Reglas, instalación, gates y cláusula inbound**: [`CONTRIBUTING.md`](CONTRIBUTING.md).
-- **Cambios**: un solo tipo de contribución por PR (código / contenido / corrección), revisión e integración a cargo únicamente del mantenedor.
-- **Empezar**: [Discussions](https://github.com/NeTenebrae-Sec/neCyberWiki/discussions) para propuestas, Issues para tareas concretas y [CONTRIBUTING.md](CONTRIBUTING.md) para el flujo completo.
-- **Seguridad**: [`SECURITY.md`](SECURITY.md), por canal privado.
-
-Antes de abrir un PR, ejecuta los gates: `npm run build`, `npm run check`, `npm run lint`, `npm test` y `npx prettier --check .`.
-
-## Licencia
-
-Copyright (c) 2026 NeTenebrae.
-
-| Material                                            | Régimen                                                                    |
-| --------------------------------------------------- | -------------------------------------------------------------------------- |
-| Código                                              | **GPL-3.0-or-later** — ver [`LICENSE.txt`](LICENSE.txt)                   |
-| Contenido propio (cursos, blog, bitácora, imágenes) | **CC BY-NC-SA 4.0** — <https://creativecommons.org/licenses/by-nc-sa/4.0/> |
-| Marca y logo («neCyberWiki», «NeTenebrae»)          | Reservados. No los concede ninguna licencia                                |
-| Dependencias y material de terceros                 | Sus propias licencias. Ver [`NOTICE.md`](NOTICE.md)                        |
-
-El **contenido** puede reutilizarse de forma no comercial con atribución (enlace a la web y licencia) y obligación de compartir igual en las adaptaciones. El **código** sigue GPL-3.0: libre uso, modificación y redistribución siempre que se respete el copyleft. El contenido y el código obtenidos antes de 2026-11-18 bajo MIT conservan esos derechos para quien los recibió.
-
-Si el proyecto te sirve, apoyarlo es una cortesía (no una obligación): [Ko-fi](https://ko-fi.com/netenebrae).
+Si el proyecto te sirve, apoyarlo es una cortesía: [Ko-fi](https://ko-fi.com/netenebrae).
