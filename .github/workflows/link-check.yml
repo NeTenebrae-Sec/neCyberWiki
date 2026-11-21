@@ -37,7 +37,8 @@ jobs:
           find "$CHECK_ROOT/site" -name '*.html' -print0 \
             | xargs -0 sed -i 's#https://netenebrae-sec\.github\.io/neCyberWiki#/neCyberWiki#g'
       # gnu.org responde 429 o timeout a los runners de GitHub de forma
-      # sostenida (bandit 17 y 18); no es un enlace roto y hace fallar el job.
+      # sostenida (bandit 17 y 18); polimetro.com devuelve 403 (bandit 14).
+      # Ninguno es un enlace roto y ambos hacen fallar el job.
       - name: Check links in the built site
         uses: lycheeverse/lychee-action@v2
         with:
@@ -47,6 +48,7 @@ jobs:
             --index-files index.html
             --exclude 'youtube\.com'
             --exclude 'www\.gnu\.org'
+            --exclude 'www\.polimetro\.com'
             --accept '100..=103, 200..=299, 429'
             '${{ runner.temp }}/ncw-linkcheck/site/**/*.html'
           fail: true

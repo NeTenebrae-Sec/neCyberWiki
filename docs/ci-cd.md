@@ -32,6 +32,7 @@ Cualquier gate que falle bloquea el PR. No se desactivan gates: si falla un chec
 - `--index-files index.html` para que las rutas con `/` final encuentren el `index.html`.
 - `--exclude youtube\.com` porque YouTube devuelve 403 a los checkers automatizados.
 - `--exclude www\.gnu\.org` porque responde 429 o timeout a los runners de forma sostenida (enlaces en `bandit/17.md` y `bandit/18.md`); no son enlaces muertos.
+- `--exclude www\.polimetro\.com` porque devuelve 403 a los checkers automatizados (enlace en `bandit/14.md`).
 - `--accept '100..=103, 200..=299, 429'` porque un 429 de otros hosts es rate limiting, no un enlace muerto.
 
 Los errores se revisan en el resumen del run; un enlace muerto se corrige o se elimina, no se ignora.
