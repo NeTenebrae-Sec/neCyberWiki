@@ -48,7 +48,7 @@ stockApi=http://api-logistica.com/check?id=123
 
 El servidor agarra esa URL, pregunta por el stock y te muestra el resultado. **¿Cuál es el truco?** Que nosotros podemos cambiar esa URL por lo que queramos.
 
-Imagina que la modificamos y mandamos esto: 
+Imagina que la modificamos y mandamos esto:
 ```http
 POST /product/stock
 

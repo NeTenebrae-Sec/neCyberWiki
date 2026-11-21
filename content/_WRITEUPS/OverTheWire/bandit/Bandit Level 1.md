@@ -48,7 +48,7 @@ ls -la
 cat -
 ```
 ![[Bandit_Level_1-03.webp]]
-    Si ejecutas `cat -`, el comando se quedará esperando una entrada del teclado porque interpreta el guion como la lectura de una **entrada estándar**. Tendrás que cancelarlo con `Ctrl+C`.
+Si ejecutas `cat -`, el comando se quedará esperando una entrada del teclado porque interpreta el guion como la lectura de una **entrada estándar**. Tendrás que cancelarlo con `Ctrl+C`.
 
 4.  **Leer el archivo de la forma correcta usando una ruta relativa.**
 ```
@@ -71,7 +71,7 @@ cat /home/bandit1/-
 ### Errores Comunes y Soluciones
 
 * **Error: El terminal se queda "congelado" después de ejecutar `cat -`**.
-    *   **Causa**: El comando `cat` está esperando que escribas algo. No está congelado.
-    *   **Solución**: Presiona `Ctrl+C` para cancelar el comando y volver al prompt del shell.
+*   **Causa**: El comando `cat` está esperando que escribas algo. No está congelado.
+*   **Solución**: Presiona `Ctrl+C` para cancelar el comando y volver al prompt del shell.
 
 ---

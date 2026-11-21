@@ -59,7 +59,7 @@ ssh bandit18@bandit.labs.overthewire.org -p 2220 -t "/bin/bash --norc"
 
 - **`/bin/bash`**: La ruta absoluta al binario del intérprete de comandos BASH.
 - **`--norc`**: (No Run Commands). Es el parámetro crítico que le ordena a Bash **no leer** el archivo de configuración personal `~/.bashrc` al iniciar una sesión interactiva.
-- `-p` seleccion de puertos.  
+- `-p` seleccion de puertos.
 - `-t` forzar TTY.
 
 De esta forma podemos evadir scripts de bloqueo en el login (como el `exit 0` de este nivel), automatizar auditorías en múltiples servidores, o exfiltrar archivos específicos de forma rápida sin dejar una sesión abierta en los registros de última conexión.
@@ -67,11 +67,11 @@ De esta forma podemos evadir scripts de bloqueo en el login (como el `exit 0` de
 ### Comandos Clave para este nivel
 
 - **ssh:** Comando para conectarse de forma segura a un servidor remoto.
-    - **Uso avanzado:** Al añadir un comando al final (`ssh, cat, whoami`), se ignora la carga interactiva del `.bashrc`.
+- **Uso avanzado:** Al añadir un comando al final (`ssh, cat, whoami`), se ignora la carga interactiva del `.bashrc`.
 
 - **ls -a:** Lista todos los archivos del directorio, incluyendo los ocultos (como el `.bashrc` que causaba el problema).
 - **cat:** Muestra el contenido de un archivo. En este nivel, se usa para leer el `readme` o inspeccionar el `.bashrc` malicioso.
-- **bash --norc:** Opción para iniciar el shell de Bash ignorando los archivos de configuración del usuario (_Run Commands_). Requiere el parámetro `-t` en SSH para funcionar correctamente. 
+- **bash --norc:** Opción para iniciar el shell de Bash ignorando los archivos de configuración del usuario (_Run Commands_). Requiere el parámetro `-t` en SSH para funcionar correctamente.
 ---
 ##  Solución directa
 

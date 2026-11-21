@@ -28,7 +28,7 @@ Este nivel refuerza la comprensión sobre los archivos ocultos en sistemas Unix.
 *   **`cd`**: Cambia el directorio actual.
 *   **`cat`**: Muestra el contenido de un archivo.
 *   **`find`**: Busca archivos y directorios en una jerarquía de directorios.
-    *   `find [ruta] -name "[patrón]"`: Busca archivos que coincidan con un patrón de nombre.
+*   `find [ruta] -name "[patrón]"`: Busca archivos que coincidan con un patrón de nombre.
 
 ---
 ### Solución Principal (Método con `ls`)
@@ -38,7 +38,7 @@ Este nivel refuerza la comprensión sobre los archivos ocultos en sistemas Unix.
 ssh bandit3@bandit.labs.overthewire.org -p 2220
 ```
 ![[Bandit_Level_3-01.webp]]
-    Se utiliza la contraseña del nivel anterior para iniciar la sesión SSH.
+Se utiliza la contraseña del nivel anterior para iniciar la sesión SSH.
 
 2. **Confirmamos la existencia de los directorios**
 ![[Bandit_Level_3-02.webp]]
@@ -48,14 +48,14 @@ ssh bandit3@bandit.labs.overthewire.org -p 2220
 cd inhere
 ```
 ![[Bandit_Level_3-03.webp]]
-    Se accede al directorio especificado en el objetivo.
+Se accede al directorio especificado en el objetivo.
 
 4.  **Listar todos los archivos para encontrar el oculto**
 ```
 ls -a
 ```
 ![[Bandit_Level_3-04.webp]]
-    El uso de `ls -a` revela el archivo `.hidden` que no es visible con un `ls` simple.
+El uso de `ls -a` revela el archivo `.hidden` que no es visible con un `ls` simple.
 
 5.  **Leer el contenido del archivo `...Hiding-From-You`**
 ```
@@ -90,9 +90,9 @@ cat ./inhere/...Hiding-From-You
 ### Errores Comunes y Soluciones
 
 *   **Error: El directorio `inhere` parece estar vacío.**
-    *   **Solución**: Ocurre al usar `ls` sin la opción `-a`. Siempre usa `-a` para asegurar que ves todos los archivos.
+*   **Solución**: Ocurre al usar `ls` sin la opción `-a`. Siempre usa `-a` para asegurar que ves todos los archivos.
 *   **Error: El comando `find` no devuelve nada o da un error.**
-    *   **Solución**: Verifica la sintaxis.
+*   **Solución**: Verifica la sintaxis.
 
 ### Recursos para Profundizar
 *   **Página del manual de `find`**: Ejecutar `man find` en la terminal o visitar la [página del manual en línea](https://man7.org/linux/man-pages/man1/find.1.html).

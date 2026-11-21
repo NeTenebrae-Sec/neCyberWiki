@@ -26,10 +26,10 @@ ROT13 es una variante simple del cifrado César donde cada letra se reemplaza po
 
 - `ssh`: Para acceder al servidor donde se realiza el nivel.
 - `ls`: Listado de archivo en Linux.
-- `cat`: Muestra el contenido de un archivo en la terminal.  
-- `tr`: Comando para traducir o transformar caracteres. Recibe dos parámetros de caracteres: 
-	- El primero es el de origen:  'A-Za-z'
-	- El segundo el de destino para la traducción: 'N-ZA-Mn-za-m'
+- `cat`: Muestra el contenido de un archivo en la terminal.
+- `tr`: Comando para traducir o transformar caracteres. Recibe dos parámetros de caracteres:
+- El primero es el de origen:  'A-Za-z'
+- El segundo el de destino para la traducción: 'N-ZA-Mn-za-m'
 
 - La sintaxis usada para aplicar ROT13:
 ```
@@ -38,22 +38,22 @@ tr 'A-Za-z' 'N-ZA-Mn-za-m'
 
 Esto garantiza que cada letra original (desde `'A-Z'` y `'a-z'`) se rote un equivalente a 13 lugares. La expresión `'N-ZA-Mn-za-m'` se usa para representar el alfabeto "rotado" 13 posiciones, separado en dos rangos, porque `tr` necesita que las listas de caracteres tengan la misma longitud:
 
-- Para mayúsculas:    
-    - De la `N` a la `Z` cubre la segunda mitad del alfabeto (N, O, P, ..., Z).        
-    - De la `A` a la `M` cubre la primera mitad (A, B, C, ..., M).
+- Para mayúsculas:
+- De la `N` a la `Z` cubre la segunda mitad del alfabeto (N, O, P, ..., Z).
+- De la `A` a la `M` cubre la primera mitad (A, B, C, ..., M).
         
-- Para minúsculas:    
-    - De la `n` a la `z` es la segunda mitad de las minúsculas.        
-    - De la `a` a la `m` es la primera mitad.
+- Para minúsculas:
+- De la `n` a la `z` es la segunda mitad de las minúsculas.
+- De la `a` a la `m` es la primera mitad.
 
 ![[Bandit_Level_11-02.webp]]
 
 Así, cada letra en el conjunto original `'A-Za-z'`, corresponde exactamente con la letra 13 posiciones rotada. En resumen, `'N-ZA-Mn-za-m'` es la forma de escribir el alfabeto rotado 13 posiciones (ROT13) en un formato continuo que `tr` puede usar para traducir cada letra original a su equivalente cifrado correcto.
 
-Así usando `tr 'A-Za-z' 'N-ZA-Mn-za-m'` traduces cada letra alfabética a su versión ROT13 en una sola pasada. Si no te quieres complicar mucho la cabeza recuerda que hay herramientas que hacen esto de forma automática, solo necesitas una búsqueda rapida: 
+Así usando `tr 'A-Za-z' 'N-ZA-Mn-za-m'` traduces cada letra alfabética a su versión ROT13 en una sola pasada. Si no te quieres complicar mucho la cabeza recuerda que hay herramientas que hacen esto de forma automática, solo necesitas una búsqueda rapida:
 
 ![[Bandit_Level_11-03.webp]]
-Hay un montón en internet he incluso puede programar una para prácticar el lenguaje que gustes ya que, **suelen ser muy sencillas de hacer**. 
+Hay un montón en internet he incluso puede programar una para prácticar el lenguaje que gustes ya que, **suelen ser muy sencillas de hacer**.
 
 Aquí te dejo un par de herramientas que encontré:
 - [Cryptii](https://cryptii.com/pipes/rot13-decoder)
@@ -75,7 +75,7 @@ ls
 cat data.txt
 ```
 ![[Bandit_Level_11-05.webp]]
-	Verificamos la existencia y el contenido del archivo. Aquí verás texto cifrado que no es legible.
+Verificamos la existencia y el contenido del archivo. Aquí verás texto cifrado que no es legible.
 
 3. Decodifica el archivo con ROT13 usando `tr` con la tubería `|` para pasar la salida de un comando como entrada de otro:
 
@@ -83,7 +83,7 @@ cat data.txt
 cat data.txt | tr 'A-Za-z' 'N-ZA-Mn-za-m'
 ```
 ![[Bandit_Level_11-06.webp]]
-	Esto traduce las letras cifradas del archivo, rotándolas 13 posiciones, y muestra la contraseña original en texto claro. **Contraseña Censurada** por [Reglas de OverTheWire.](https://overthewire.org/rules/)
+Esto traduce las letras cifradas del archivo, rotándolas 13 posiciones, y muestra la contraseña original en texto claro. **Contraseña Censurada** por [Reglas de OverTheWire.](https://overthewire.org/rules/)
 ### Por qué usar tuberías "|"
 
 Las tuberías permiten combinar comandos para procesar datos sin crear archivos temporales, haciendo que la manipulación sea rápida y eficiente.
@@ -95,7 +95,7 @@ Si quieres probar en la terminal:
 ```
 echo Hola | tr 'A-Za-z' 'N-ZA-Mn-za-m'
 ```
-	Recibirás la salida: Ubyn
+Recibirás la salida: Ubyn
 
 Si vuelves a aplicar el comando pero con la palabra `Ubyn`, recibirás `Hola` como resultado.
 

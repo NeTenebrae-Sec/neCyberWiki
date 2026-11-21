@@ -16,7 +16,7 @@ date: 2025-12-04
 ---
 ## Introducción y Desafío
 
-El desafío en este nivel consiste en encontrar un servicio cifrado (SSL/TLS) que escucha en un puerto dentro del amplio rango **31000 a 32000** en `localhost`. El objetivo es conectarnos al puerto correcto y enviarle la contraseña de Bandit16 para que nos devuelva la contraseña del siguiente nivel. 
+El desafío en este nivel consiste en encontrar un servicio cifrado (SSL/TLS) que escucha en un puerto dentro del amplio rango **31000 a 32000** en `localhost`. El objetivo es conectarnos al puerto correcto y enviarle la contraseña de Bandit16 para que nos devuelva la contraseña del siguiente nivel.
 ### nmap | Escaneo de Puertos
 ![[BanditLevel16-01.webp]]
 Nmap es una herramienta versátil y poderosa para escanear redes, descubrir hosts activos, puertos abiertos y servicios en ejecución. Se usa ampliamente en seguridad informática y pentesting para reconocimiento y auditoría de redes. Nmap envía paquetes a diferentes puertos de un objetivo para detectar cuáles están abiertos, filtrados o cerrados, incluso puede identificar el tipo de servicio y versión que escucha en esos puertos.
@@ -26,9 +26,9 @@ La flag `-p` permite especificar un rango o lista de puertos a escanear, por eje
 ### OpenSSL y parámetro -quiet
 Las opciones **`-quiet`** e **`-ign_eof`** son cruciales para superar los desafíos específicos de este nivel:
 
-- **`openssl s_client -connect localhost:31790`**:    
-	 - Inicia una conexión de cliente SSL/TLS al puerto `31790` del host local. Este puerto es el que se identifica como el servicio SSL/TLS correcto que contiene la clave (otros puertos como `31518` podrían ser SSL/TLS pero simplemente rebotan la entrada).
-	- Si un servicio no utiliza SSL/TLS, la conexión fallará inmediatamente.
+- **`openssl s_client -connect localhost:31790`**:
+- Inicia una conexión de cliente SSL/TLS al puerto `31790` del host local. Este puerto es el que se identifica como el servicio SSL/TLS correcto que contiene la clave (otros puertos como `31518` podrían ser SSL/TLS pero simplemente rebotan la entrada).
+- Si un servicio no utiliza SSL/TLS, la conexión fallará inmediatamente.
 
 - **`-quiet`**: Suprime la salida de diagnóstico detallada, incluyendo la información del **certificado** del servidor y la cadena de certificados. Esto es útil porque reduce el ruido y, en algunas versiones, ayuda a evitar que la salida de comandos internos como `KEYUPDATE` bloquee la entrada del usuario.
 
@@ -38,19 +38,19 @@ Las opciones **`-quiet`** e **`-ign_eof`** son cruciales para superar los desaf�
 
 ## Comandos Clave
 * **`ssh`**: Comando para conectarse de forma segura a un servidor remoto mediante el protocolo Secure Shell (SSH).
-    * Parámetros usados:
-        * `-p [puerto]`: Especifica el puerto remoto (ej: `-p 2220`).
-        * `usuario@host`: Define el usuario y el servidor al que te conectas.
+* Parámetros usados:
+* `-p [puerto]`: Especifica el puerto remoto (ej: `-p 2220`).
+* `usuario@host`: Define el usuario y el servidor al que te conectas.
 
 * **`nmap`**: Fundamental en las fases de **reconocimiento y auditoría básica**.
-    * Parámetros usados:
-        * `-p [puertos]`: Selecciona puertos específicos (ej: `-p 80,443` o `-p 30001-32000`).
-        * `localhost`: Se usa para escanear el propio sistema local.
+* Parámetros usados:
+* `-p [puertos]`: Selecciona puertos específicos (ej: `-p 80,443` o `-p 30001-32000`).
+* `localhost`: Se usa para escanear el propio sistema local.
 
 * **`openssl`**: Toolkit de línea de comandos para trabajar con **TLS/SSL y criptografía**.
-    * Subcomando clave para la tarea:
-        * **`s_client -connect host:puerto`**: Actúa como un cliente TLS/SSL para establecer una conexión segura. Es esencial para **probar el handshake**, ver el certificado y enviar datos cifrados.
-        * **`-quiet`**: Suprime la salida de diagnóstico detallada
+* Subcomando clave para la tarea:
+* **`s_client -connect host:puerto`**: Actúa como un cliente TLS/SSL para establecer una conexión segura. Es esencial para **probar el handshake**, ver el certificado y enviar datos cifrados.
+* **`-quiet`**: Suprime la salida de diagnóstico detallada
 ---
 
 ##  Solución Paso a Paso
@@ -125,7 +125,7 @@ man openssl s_client
 
 <!-- IResultado de la búsqueda en Google-->
 ![[BanditLevel16-08.webp]]
-Incluso una simple busqueda en google nos puede dar esta información si el manual nos está dando problemas. Gracias a [este usuario de Reddit](https://www.reddit.com/r/HowToHack/comments/1g2sivg/comment/lzxq8hc/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button) por compartir la solución. 
+Incluso una simple busqueda en google nos puede dar esta información si el manual nos está dando problemas. Gracias a [este usuario de Reddit](https://www.reddit.com/r/HowToHack/comments/1g2sivg/comment/lzxq8hc/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button) por compartir la solución.
 ### 5. Envío de la Contraseña
 
 Teniendo el parámetro `-quiet` en mano, probamos los dos puertos candidatos (31518 y 31790).
@@ -145,7 +145,7 @@ Solo nos devuelve la respuesta. **¡Fallo de servicio!**
 openssl s_client -quiet localhost:31790
 # Ingresar la contraseña de Bandit16 aquí
 ```
-¡Boom! Al enviar la contraseña de Bandit16, el servicio responde con la llave privada SSH, que es la contraseña de Bandit17. 
+¡Boom! Al enviar la contraseña de Bandit16, el servicio responde con la llave privada SSH, que es la contraseña de Bandit17.
 
 <!-- Imagen del éxito en 31790 -->
 ![[BanditLevel16-10.webp]]
@@ -158,6 +158,6 @@ Solo vamos a copiar las información para luego hacer las configuraciones de per
 
 Expande la sección con recursos clave para profundizar en nmap, openssl y conceptos SSL/TLS.
 
-- **[¿Qué es OpenSSL? ¿Cómo funciona OpenSSL?](https://www.ssldragon.com/es/blog/que-es-openssl/)**: Explicación completa del toolkit OpenSSL, su rol en TLS/SSL y casos de uso en pentesting.        
+- **[¿Qué es OpenSSL? ¿Cómo funciona OpenSSL?](https://www.ssldragon.com/es/blog/que-es-openssl/)**: Explicación completa del toolkit OpenSSL, su rol en TLS/SSL y casos de uso en pentesting.
 - **[Nmap Network Scanning Guide](https://nmap.org/book/man.html)**: Manual oficial con flags avanzados como `-sV`, `-sC` y escaneo de rangos para reconnaissance.
 - **[OpenSSL sclient manpage](https://www.openssl.org/docs/man1.1.1/man1/s_client.html)**: Detalles técnicos de `-quiet`, `-igneof` y comandos CONNECTED para debugging TLS.

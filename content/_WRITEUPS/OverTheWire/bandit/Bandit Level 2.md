@@ -49,7 +49,7 @@ ls -la
 cat ./--spaces in this filename--
 ```
 ![[Bandit_Level_2-03.webp]]
-	**Contraseña Censurada** por [Reglas de OverTheWire.](https://overthewire.org/rules/)
+**Contraseña Censurada** por [Reglas de OverTheWire.](https://overthewire.org/rules/)
 
 ---
 
@@ -59,5 +59,5 @@ cat ./--spaces in this filename--
 ### Errores Comunes y Soluciones
 
 *   **Error: `cat: spaces: No such file or directory`**.
-    *   **Causa**: No se usaron comillas ni caracteres de escape, por lo que `cat` intentó abrir tres archivos diferentes: `spaces`, `in`, y `this`.
-    *   **Solución**: Encierra el nombre completo del archivo entre comillas (`"..."` o `'...'`) o usa la tecla `TAB` para que el shell lo haga por ti.
+*   **Causa**: No se usaron comillas ni caracteres de escape, por lo que `cat` intentó abrir tres archivos diferentes: `spaces`, `in`, y `this`.
+*   **Solución**: Encierra el nombre completo del archivo entre comillas (`"..."` o `'...'`) o usa la tecla `TAB` para que el shell lo haga por ti.

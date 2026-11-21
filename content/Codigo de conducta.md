@@ -29,8 +29,8 @@ En la neCyberWiki estamos comprometidos con un entorno respetuoso, legal y étic
 
 ## Reportes y Consecuencias
 
-- Cualquier comportamiento que viole este código debe ser reportado a los administradores de la neCyberWiki a través del correo: netenebrae@duck.com.    
-- Los reportes serán tratados con confidencialidad y seriedad, y se evaluarán para tomar las medidas correspondientes.    
+- Cualquier comportamiento que viole este código debe ser reportado a los administradores de la neCyberWiki a través del correo: netenebrae@duck.com.
+- Los reportes serán tratados con confidencialidad y seriedad, y se evaluarán para tomar las medidas correspondientes.
 - Las consecuencias por incumplimiento pueden incluir advertencias, suspensión o exclusión de la comunidad, y en casos graves, acciones legales conforme a la legislación vigente.
 ## Responsabilidad Legal y Seguridad
 

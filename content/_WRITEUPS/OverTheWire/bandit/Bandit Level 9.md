@@ -42,4 +42,4 @@ ssh bandit9@bandit.labs.overthewire.org -p 2220
 strings data.txt | grep ==
 ```
 ![[content/_WRITEUPS/OverTheWire/bandit/assets/Bandit_Level_9-02.webp]]
-	**Contraseña Censurada** por [Reglas de OverTheWire.](https://overthewire.org/rules/)
+**Contraseña Censurada** por [Reglas de OverTheWire.](https://overthewire.org/rules/)

@@ -30,10 +30,10 @@ Este nivel representa un paso adelante en la búsqueda de archivos. En lugar de 
 
 ### Comandos y Conceptos Relevantes
 *   **`find`**: Herramienta para buscar archivos y directorios.
-    *   `-size 1033c`: Filtra por un tamaño exacto de 1033 bytes (`c` especifica bytes).
-    *   `-type f`: Filtra para buscar solo archivos.
-    *   `! -executable`: Filtra archivos que **no** tienen el bit de ejecución activado para el usuario. El `!` niega la condición.
-    *   `-readable`: Filtra archivos que el usuario actual tiene permiso para leer.
+*   `-size 1033c`: Filtra por un tamaño exacto de 1033 bytes (`c` especifica bytes).
+*   `-type f`: Filtra para buscar solo archivos.
+*   `! -executable`: Filtra archivos que **no** tienen el bit de ejecución activado para el usuario. El `!` niega la condición.
+*   `-readable`: Filtra archivos que el usuario actual tiene permiso para leer.
 *   **`ls -laR`**: Lista archivos de forma recursiva (`R`) con detalles (`la`), útil para inspeccionar visualmente una estructura de directorios compleja.
 
 ---
@@ -45,24 +45,22 @@ ssh bandit5@bandit.labs.overthewire.org -p 2220
 ```
 ![[Bandit_Level_5-01.webp]]
 
-2.  **Explorar la estructura del directorio `inhere`**
-    Antes de buscar, es útil entender la complejidad del directorio.
+2.  **Explorar la estructura del directorio `inhere`** Antes de buscar, es útil entender la complejidad del directorio.
 ```
 ls -R
 ```
 ![[Bandit_Level_5-02.webp]]
-    La salida mostrará muchos directorios anidados, lo que confirma que una búsqueda manual con `ls` y `cd` sería ineficiente.
-	- `-R`:  Hacemos que la respuesta sea **recursive.**
+La salida mostrará muchos directorios anidados, lo que confirma que una búsqueda manual con `ls` y `cd` sería ineficiente.
+- `-R`:  Hacemos que la respuesta sea **recursive.**
 
-3.  **Construir y ejecutar el comando `find`**
-    Se combinan los criterios clave del objetivo en un solo comando `find` que se ejecuta desde el directorio `inhere`.
+3.  **Construir y ejecutar el comando `find`** Se combinan los criterios clave del objetivo en un solo comando `find` que se ejecuta desde el directorio `inhere`.
 ```
 find . -type f -size 1033c
 ```
 ![[content/_WRITEUPS/OverTheWire/bandit/assets/Bandit_Level_5-03.webp]]
-	*   `find .`: Busca en el directorio actual y sus subdirectorios.
-    *   `-type f`: Limita la búsqueda solo a archivos.
-    *   `-size 1033c`: Especifica el tamaño exacto en bytes `(c)`.
+*   `find .`: Busca en el directorio actual y sus subdirectorios.
+*   `-type f`: Limita la búsqueda solo a archivos.
+*   `-size 1033c`: Especifica el tamaño exacto en bytes `(c)`.
 
 Este comando devolverá la ruta al único archivo que cumple las condiciones clave, en este caso: `./inhere/maybehere07/.file2`.
 
@@ -71,7 +69,7 @@ Este comando devolverá la ruta al único archivo que cumple las condiciones cla
 cat ./inhere/maybehere07/.file2
 ```
 ![[content/_WRITEUPS/OverTheWire/bandit/assets/Bandit_Level_5-04.webp]]
-    Una vez que `find` devuelve la ruta, se usa `cat` para leer el archivo y obtener la contraseña. **Contraseña Censurada** por [Reglas de OverTheWire.](https://overthewire.org/rules/)
+Una vez que `find` devuelve la ruta, se usa `cat` para leer el archivo y obtener la contraseña. **Contraseña Censurada** por [Reglas de OverTheWire.](https://overthewire.org/rules/)
 
 ---
 ### TIPS
@@ -83,9 +81,9 @@ find . -type f -size 1033c ! -executable -readable -exec cat {} \;
 ### Errores Comunes y Soluciones
 
 * **Error: `find` no devuelve ningún resultado.**
-    *   **Solución**: Revisa cuidadosamente cada parte del comando. Un error común es olvidar la `c` en `-size 1033c`, lo que haría que `find` interpretara el número como bloques de 512 bytes. También verifica que el `!` esté antes de `-executable`.
+*   **Solución**: Revisa cuidadosamente cada parte del comando. Un error común es olvidar la `c` en `-size 1033c`, lo que haría que `find` interpretara el número como bloques de 512 bytes. También verifica que el `!` esté antes de `-executable`.
 * **Error: `find: paths must precede expression`**
-    *   **Solución**: Olvidaste especificar la ruta de inicio (en este caso, `.`). El comando siempre debe empezar con `find <ruta> [expresiones]`.
+*   **Solución**: Olvidaste especificar la ruta de inicio (en este caso, `.`). El comando siempre debe empezar con `find <ruta> [expresiones]`.
 
 ### Recursos para Profundizar
 *   **Página del manual de `find`**: `man find` o [enlace web](https://man7.org/linux/man-pages/man1/find.1.html).

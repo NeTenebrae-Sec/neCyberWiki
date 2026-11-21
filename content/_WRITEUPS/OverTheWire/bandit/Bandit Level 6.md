@@ -30,9 +30,9 @@ Este nivel fomenta la habilidad de búsqueda avanzada en Linux usando `find`, co
 
 ### Comandos y Conceptos Relevantes
 * **`find`**: Busca archivos/directorios en el sistema.
-  * `-user bandit7`: Filtra por propietario usuario.
-  * `-group bandit6`: Filtra por grupo propietario.
-  * `-size 33c`: Selecciona archivos de tamaño exacto 33 bytes (`c` indica bytes).
+* `-user bandit7`: Filtra por propietario usuario.
+* `-group bandit6`: Filtra por grupo propietario.
+* `-size 33c`: Selecciona archivos de tamaño exacto 33 bytes (`c` indica bytes).
 * **Redirección `2>/dev/null`**: Oculta errores de permisos para una salida limpia.
 
 ---
@@ -45,20 +45,20 @@ ssh bandit6@bandit.labs.overthewire.org -p 2220
 ```
 ![[content/_WRITEUPS/OverTheWire/bandit/assets/Bandit_Level_6-01.webp]]
 
-2. **Buscar el archivo con las propiedades específicas**  
+2. **Buscar el archivo con las propiedades específicas**
 
 ```
 find / -user bandit7 -group bandit6 -size 33c 2>/dev/null
 ```
 ![[content/_WRITEUPS/OverTheWire/bandit/assets/Bandit_Level_6-02.webp]]
-	Este comando busca en todo el sistema el archivo con propietario "`bandit7`", grupo "`bandit6`" y tamaño 33 bytes, ignorando mensajes de error por permisos. La herramienta nos da como resultado: `/var/lib/dpkg/info/bandit7.password`.
+Este comando busca en todo el sistema el archivo con propietario "`bandit7`", grupo "`bandit6`" y tamaño 33 bytes, ignorando mensajes de error por permisos. La herramienta nos da como resultado: `/var/lib/dpkg/info/bandit7.password`.
 
-3. **Leer el contenido del archivo encontrado**  
+3. **Leer el contenido del archivo encontrado**
 ```
 cat /var/lib/dpkg/info/bandit7.password
 ```
 ![[content/_WRITEUPS/OverTheWire/bandit/assets/Bandit_Level_6-03.webp]]
-	Se muestra la contraseña necesaria para avanzar al siguiente nivel. **Contraseña Censurada** por [Reglas de OverTheWire.](https://overthewire.org/rules/)
+Se muestra la contraseña necesaria para avanzar al siguiente nivel. **Contraseña Censurada** por [Reglas de OverTheWire.](https://overthewire.org/rules/)
 
 ---
 

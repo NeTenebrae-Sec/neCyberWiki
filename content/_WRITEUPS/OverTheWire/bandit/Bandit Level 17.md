@@ -13,7 +13,7 @@ date: 2025-12-05
 ---
 ## Introducción y Desafío
 ![[Bandit_Level_17_01.webp]]
-Este nivel prueba tu capacidad para detectar cambios sutiles en archivos mediante herramientas de comparación. Con la llave SSH privada obtenida en [[Bandit Level 16]], accede como `bandit17` y usa el comando `diff` para identificar **la única** diferencia entre dos listas de contraseñas, `passwords.new` y `passwords.old`. 
+Este nivel prueba tu capacidad para detectar cambios sutiles en archivos mediante herramientas de comparación. Con la llave SSH privada obtenida en [[Bandit Level 16]], accede como `bandit17` y usa el comando `diff` para identificar **la única** diferencia entre dos listas de contraseñas, `passwords.new` y `passwords.old`.
 
 **El enfoque clave es la precisión**: Un solo cambio revela la solución sin necesidad de revisar manualmente miles de líneas.
 ##  Conceptos Clave
@@ -38,8 +38,8 @@ O, si quieres comparar directorios:
 diff [OPCIONES] DIRECTORIO1 DIRECTORIO2
 ```
 #### Argumentos Principales:
-- **`ARCHIVO1`**: El primer archivo que se va a comparar (a menudo considerado el "original").    
-- **`ARCHIVO2`**: El segundo archivo que se va a comparar (la versión "modificada").    
+- **`ARCHIVO1`**: El primer archivo que se va a comparar (a menudo considerado el "original").
+- **`ARCHIVO2`**: El segundo archivo que se va a comparar (la versión "modificada").
 - **`DIRECTORIO1`**: El primer directorio a comparar.
 - **`DIRECTORIO2`**: El segundo directorio a comparar.
 
@@ -47,13 +47,13 @@ diff [OPCIONES] DIRECTORIO1 DIRECTORIO2
 
 ## Comandos Clave para este nivel.
 * **`ssh`**: Comando para conectarse de forma segura a un servidor remoto mediante el protocolo Secure Shell (SSH).
-    * Parámetros usados:
-        * `-p [puerto]`: Especifica el puerto remoto (ej: `-p 2220`).
-        * `usuario@host`: Define el usuario y el servidor al que te conectas.
-- **`touch`**: Crea un archivo vacío.    
-- **`nano`**: Editor de texto en terminal.    
-- **`chmod`**: Cambia los permisos de un archivo (usado para asegurar la clave SSH).    
-- **`cat`**: Muestra el contenido de un archivo.    
+* Parámetros usados:
+* `-p [puerto]`: Especifica el puerto remoto (ej: `-p 2220`).
+* `usuario@host`: Define el usuario y el servidor al que te conectas.
+- **`touch`**: Crea un archivo vacío.
+- **`nano`**: Editor de texto en terminal.
+- **`chmod`**: Cambia los permisos de un archivo (usado para asegurar la clave SSH).
+- **`cat`**: Muestra el contenido de un archivo.
 - **`diff`**: Muestra diferencias entre dos archivos.
 
 ---
@@ -97,7 +97,7 @@ cat passwords.new passwords.old
 <!-- Listado de archivos con contraseñas -->
 ![[Bandit_Level_17_06.webp]]
 
-Usamos `ls` para verificar el contenido en el directorio `home` de `bandit17`. Encontramos dos listas: `passwords.old` y `passwords.new`.​ Vamos a relevar el contenido con cat para verificar la magnitud de lo que nos estamos enfrentando. 
+Usamos `ls` para verificar el contenido en el directorio `home` de `bandit17`. Encontramos dos listas: `passwords.old` y `passwords.new`.​ Vamos a relevar el contenido con cat para verificar la magnitud de lo que nos estamos enfrentando.
 
 ### 5. Comparativa de Archivos
 ```
@@ -120,4 +120,4 @@ Tras autenticarse, el servidor cierra la sesión mostrando un mensaje de despedi
 ## Lecturas recomendadas
 
 - [Documentación oficial de `diff`](https://www.gnu.org/software/diffutils/manual/diffutils) (GNU diffutils)
-- [Página de manual de `diff` en Linux](https://man7.org/linux/man-pages/man1/diff.1.html) 
+- [Página de manual de `diff` en Linux](https://man7.org/linux/man-pages/man1/diff.1.html)
