@@ -5,7 +5,8 @@ export const site = {
   tagline: "Bitácora de ciberseguridad: Linux, redes y ofensiva",
   descripcion:
     "Cursos, notas de laboratorio y bitácora sobre Linux, redes y ciberseguridad en español. Sin cuentas, sin backend y con el progreso guardado en tu navegador.",
-  base: "/neCyberWiki/",
+  // `import.meta.env` existe en Vite/Astro, no en Node (los tests importan este módulo).
+  base: (import.meta.env as ImportMetaEnv | undefined)?.PUBLIC_NCW_BASE || "/neCyberWiki/",
   redes: {
     github: "https://github.com/NeTenebrae-Sec/neCyberWiki",
     youtube: "https://www.youtube.com/@netenebrae",
