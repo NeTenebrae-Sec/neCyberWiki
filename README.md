@@ -91,14 +91,14 @@ Copyright (c) 2026 NeTenebrae.
 
 | Material                                            | Régimen                                                                    |
 | --------------------------------------------------- | -------------------------------------------------------------------------- |
-| Código                                              | **AGPL-3.0-or-later** — ver [`LICENSE.txt`](LICENSE.txt)                   |
+| Código                                              | **GPL-3.0-or-later** — ver [`LICENSE.txt`](LICENSE.txt)                   |
 | Contenido propio (cursos, blog, bitácora, imágenes) | **CC BY-NC-SA 4.0** — <https://creativecommons.org/licenses/by-nc-sa/4.0/> |
 | Marca y logo («neCyberWiki», «NeTenebrae»)          | Reservados; no los concede ninguna licencia                                |
 | Dependencias y material de terceros                 | Sus propias licencias; ver [`NOTICE.md`](NOTICE.md)                        |
 
 El **contenido** puede reutilizarse de forma no comercial con atribución (enlace a la
 web y licencia) y obligación de compartir igual en las adaptaciones. El **código** sigue
-AGPL-3.0: libre uso, modificación y redistribución siempre que se respete el copyleft.
+GPL-3.0: libre uso, modificación y redistribución siempre que se respete el copyleft.
 El contenido y el código obtenidos antes de 2026-11-18 bajo MIT conservan esos derechos
 para quien los recibió.
 

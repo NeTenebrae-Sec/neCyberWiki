@@ -9,7 +9,7 @@
 
 | Obra                      | Qué incluye                                                              | Régimen                                                                                                    |
 | ------------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| Código del sitio          | `src/`, `scripts/`, configuración y build                                | **AGPL-3.0-or-later** (ver `LICENSE.txt`) · Copyright (c) 2026 NeTenebrae                                  |
+| Código del sitio          | `src/`, `scripts/`, configuración y build                                | **GPL-3.0-or-later** (ver `LICENSE.txt`) · Copyright (c) 2026 NeTenebrae                                  |
 | Contenido propio          | `content/cursos/`, `content/blog/`, textos, lecciones, bitácora, roadmap | **CC BY-NC-SA 4.0** · <https://creativecommons.org/licenses/by-nc-sa/4.0/> · Copyright (c) 2026 NeTenebrae |
 | Imágenes y assets propios | capturas de terminal propias y assets del sitio                          | **CC BY-NC-SA 4.0** junto al contenido                                                                     |
 | Marca e identidad         | nombre «neCyberWiki», «NeTenebrae», logo, favicon e identidad visual     | **Reservados** — ninguna licencia del proyecto los concede; su uso en derivados requiere permiso           |
@@ -20,7 +20,7 @@
 Si reutilizas material de este repositorio, incluye:
 
 1. Enlace a la web original: <https://netenebrae-sec.github.io/neCyberWiki/>
-2. Indicación de la licencia correspondiente (AGPL-3.0 para código,
+2. Indicación de la licencia correspondiente (GPL-3.0 para código,
    CC BY-NC-SA 4.0 para contenido) y del aviso de autoría «NeTenebrae».
 3. Si modificas contenido, nota de que fue modificado.
 4. Como cortesía (no es una condición legal): un enlace visible a la página de
@@ -29,7 +29,7 @@ Si reutilizas material de este repositorio, incluye:
 Ejemplo:
 
 > Basado en neCyberWiki — <https://netenebrae-sec.github.io/neCyberWiki/> —
-> contenido bajo CC BY-NC-SA 4.0 · código bajo AGPL-3.0-or-later · NeTenebrae.
+> contenido bajo CC BY-NC-SA 4.0 · código bajo GPL-3.0-or-later · NeTenebrae.
 > Modificado el AAAA-MM-DD.
 
 ## Terceras partes
@@ -69,7 +69,7 @@ este repositorio.
 ### Material heredado del starter
 
 `LICENSE.txt` era una licencia MIT con aviso de autoría 2021 de «jackyzha0»
-(starter Quartz). Desde el 2026-11-18 este repositorio se rige por AGPL-3.0 para
+(starter Quartz). Desde el 2026-11-18 este repositorio se rige por GPL-3.0 para
 el código y CC BY-NC-SA 4.0 para el contenido. Quien obtuvo una copia antes de
 esa fecha conserva sus derechos MIT sobre lo que recibió. No se conserva código
 del starter en este repositorio.
@@ -77,5 +77,5 @@ del starter en este repositorio.
 ## Historial de licencias
 
 - Hasta 2026-11-17: `LICENSE.txt` = MIT, aviso 2021 «jackyzha0» (herencia).
-- Desde 2026-11-18: **AGPL-3.0-or-later** (código) + **CC BY-NC-SA 4.0**
+- Desde 2026-11-18: **GPL-3.0-or-later** (código) + **CC BY-NC-SA 4.0**
   (contenido e imágenes propias) + marca reservada.

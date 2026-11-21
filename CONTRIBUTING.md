@@ -69,7 +69,7 @@ El buscador solo existe en el build (`postbuild`), no en `npm run dev`.
 
 Al abrir un Pull Request aceptas que:
 
-1. Tu aporte se publica bajo el régimen de este repositorio: **AGPL-3.0-or-later**
+1. Tu aporte se publica bajo el régimen de este repositorio: **GPL-3.0-or-later**
    si es código; **CC BY-NC-SA 4.0** si es contenido o imágenes propias.
 2. Conservas la titularidad de tu aporte. El derecho que concedes a **NeTenebrae**
    (persona física, identidad pública del proyecto) es **no exclusivo, irrevocable
@@ -91,7 +91,7 @@ el mantenedor**. El resto del mundo recibe tu aporte bajo la licencia pública.
 ## Atribución que se espera de ti (y de tus reutilizadores)
 
 1. Enlace a la web original `https://netenebrae-sec.github.io/neCyberWiki/`.
-2. Indicación de la licencia (AGPL-3.0 código / CC BY-NC-SA 4.0 contenido).
+2. Indicación de la licencia (GPL-3.0 código / CC BY-NC-SA 4.0 contenido).
 3. Nota de modificaciones, si las hubo.
 4. Como cortesía (no obligatorio): enlace visible a <https://ko-fi.com/netenebrae>.
 
