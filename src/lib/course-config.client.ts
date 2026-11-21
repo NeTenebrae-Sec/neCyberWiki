@@ -1,13 +1,14 @@
 // Configurador de curso adaptable: lee query > localStorage > default,
 // pinta el estado, filtra/reordena el temario y emite `ncw:course-config`.
-// No toca el progreso guardado: la clave actual `ncw:progress:${slug}` se
-// lee solo para pintar contadores; T5 migra la clave.
+// La lectura de marcas por módulo usa la clave por dificultad cuando el curso
+// tiene rutas (T5); sin rutas (Bandit), la clave plana.
 import {
   buscarRuta,
   combinarConfig,
   leccionEnRuta,
   normalizarConfig,
   ordenarPorRuta,
+  progresoKey,
   type CursoConfig,
   type CursoRuta,
 } from "./tracks.ts"
@@ -35,6 +36,61 @@ export function resumirConfig(config: CursoConfig): string {
     ENTORNO_LABEL[config.entorno],
     ARRANQUE_LABEL[config.arranque],
   ].join(" · ")
+}
+
+// Copy aprobado de la ficha adaptable (T8c). «Qué necesitas» depende de
+// entorno/arranque; «Qué vas a saber», de la dificultad.
+export interface FichaRuta {
+  necesitas: string[]
+  sabes: string[]
+}
+
+const NECESITAS_SOLO = [
+  "PC con 4 GB RAM y 20 GB libres",
+  "USB 8 GB+",
+  "Internet",
+  "Respaldo de lo importante",
+] as const
+
+const NECESITAS_DUALBOOT = "Windows en UEFI/GPT y clave BitLocker"
+
+const NECESITAS_VM = [
+  "Una VM con 4 GB RAM y 20 GB de disco",
+  "Internet. Sin tocar tu máquina.",
+] as const
+
+const SABES_FACIL = [
+  "Instalar con archinstall en VM o hardware",
+  "GNOME listo",
+  "pacman, AUR y ZRAM sin miedo",
+  "Sistema actualizado y con firewall.",
+] as const
+
+const SABES_AVANZADA = [
+  "Particionar a mano y bootear manualmente",
+  "BSPWM y dotfiles",
+  "mkinitcpio/systemd-boot",
+  "Diagnóstico: qué hacer cuando algo falla.",
+] as const
+
+export const REGLA_DE_CAMPO =
+  "Nada de esto toca sistemas ajenos: practica en tu VM, tu hardware o el laboratorio autorizado."
+
+export function fichaDeRuta(config: Partial<CursoConfig> = {}): FichaRuta {
+  const { dificultad, entorno, arranque } = normalizarConfig(config)
+  const necesitas =
+    entorno === "vm"
+      ? [...NECESITAS_VM]
+      : [...NECESITAS_SOLO, ...(arranque === "dualboot" ? [NECESITAS_DUALBOOT] : [])]
+
+  return {
+    necesitas,
+    sabes: [...(dificultad === "avanzada" ? SABES_AVANZADA : SABES_FACIL)],
+  }
+}
+
+export function formatoDeRuta(totalRuta: number, totalCurso: number): string {
+  return `${totalRuta} clases en tu ruta · ${totalCurso} en total · Guía escrita; video en preparación.`
 }
 
 // Primera ruta que contiene `numero` (p. ej. "1.6"), prefiriendo la de la misma
@@ -126,7 +182,42 @@ const arranqueAlRestaurarHardware = (slug: string): CursoConfig["arranque"] => {
     .arranque
 }
 
-function pintarConfigurador(root: HTMLElement, config: CursoConfig): void {
+// Candado: en la lección (root con data-lesson-numero), las opciones del
+// configurador cuya ruta excluiría la clase actual quedan deshabilitadas.
+// Candidato = config vigente con ese eje pisado por el valor del radio,
+// normalizado (VM fuerza arranque "solo"); si la ruta resultante no incluye
+// el número de lección, la opción no es elegible. Se re-aplica en cada
+// repintado (cada toggle), así la atenuación sigue a la config vigente.
+function bloquearFueraDeRuta(
+  root: HTMLElement,
+  config: CursoConfig,
+  rutas: CursoRuta[],
+  numero: string,
+): void {
+  for (const eje of ["dificultad", "entorno", "arranque"] as const) {
+    for (const input of root.querySelectorAll<HTMLInputElement>(`input[name$="-${eje}"][value]`)) {
+      const capa: Record<string, string> = { ...config }
+      capa[eje] = input.value
+      const candidate = normalizarConfig(capa as Partial<CursoConfig>)
+      const ruta = rutas.length ? buscarRuta(rutas, candidate) : undefined
+      const habilitado = Boolean(ruta && ruta.lecciones.includes(numero))
+      const label = input.closest(".config-option")
+      if (habilitado) {
+        input.disabled = false
+        label?.classList.remove("is-locked")
+        label?.removeAttribute("title")
+        label?.removeAttribute("aria-disabled")
+      } else {
+        input.disabled = true
+        label?.classList.add("is-locked")
+        label?.setAttribute("title", "Esta clase no está en esa ruta")
+        label?.setAttribute("aria-disabled", "true")
+      }
+    }
+  }
+}
+
+function pintarConfigurador(root: HTMLElement, config: CursoConfig, rutas: CursoRuta[]): void {
   root.querySelectorAll<HTMLInputElement>('input[type="radio"]').forEach((radio) => {
     const eje = radio.name.endsWith("-dificultad")
       ? "dificultad"
@@ -139,6 +230,8 @@ function pintarConfigurador(root: HTMLElement, config: CursoConfig): void {
   if (boot) boot.hidden = config.entorno === "vm"
   const resumen = root.querySelector<HTMLElement>("[data-config-summary]")
   if (resumen) resumen.textContent = resumirConfig(config)
+  const numero = root.getAttribute("data-lesson-numero")
+  if (numero !== null) bloquearFueraDeRuta(root, config, rutas, numero)
 }
 
 interface LessonItem {
@@ -161,8 +254,10 @@ function aplicarAlTemario(
   slug: string,
   ruta: CursoRuta | undefined,
   config: CursoConfig,
+  tieneRutas: boolean,
 ): string[] {
   const visiblesSlug: string[] = []
+  const claveProgreso = tieneRutas ? progresoKey(slug, config.dificultad) : progresoKey(slug)
 
   for (const mod of doc.querySelectorAll<HTMLElement>("[data-syllabus] details[data-module-key]")) {
     const items: LessonItem[] = [...mod.querySelectorAll<HTMLElement>("[data-lesson-item]")].map(
@@ -180,7 +275,7 @@ function aplicarAlTemario(
     let done = 0
     let progreso: string[]
     try {
-      const parseado = JSON.parse(window.localStorage.getItem(`ncw:progress:${slug}`) || "[]")
+      const parseado = JSON.parse(window.localStorage.getItem(claveProgreso) || "[]")
       progreso = Array.isArray(parseado) ? parseado : []
     } catch {
       progreso = []
@@ -290,15 +385,23 @@ export function initCourseConfig(
     let forzada: CursoConfig | undefined
 
     const aplicar = (): CourseConfigState => {
-      const config = forzada ?? configDesdeLayers(slug, window.location.search)
-      previa = config
-      const ruta = rutas.length ? buscarRuta(rutas, config) : undefined
-      pintarConfigurador(root, config)
-      const visibles = aplicarAlTemario(document, slug, ruta, config)
-      const state: CourseConfigState = { slug, config, ruta, visibles }
-      emitir(document, state)
-      onChange?.(state)
-      return state
+      try {
+        const config = forzada ?? configDesdeLayers(slug, window.location.search)
+        previa = config
+        const ruta = rutas.length ? buscarRuta(rutas, config) : undefined
+        pintarConfigurador(root, config, rutas)
+        const visibles = aplicarAlTemario(document, slug, ruta, config, rutas.length > 0)
+        const state: CourseConfigState = { slug, config, ruta, visibles }
+        emitir(document, state)
+        onChange?.(state)
+        return state
+      } finally {
+        // Retira la clase anti-parpadeo aunque falle el repintado; si no
+        // estaba (config por defecto o sin JS previo), es un no-op.
+        if (typeof document !== "undefined") {
+          document.documentElement.classList.remove("ncw-route-pending")
+        }
+      }
     }
 
     root.addEventListener("change", (evento) => {

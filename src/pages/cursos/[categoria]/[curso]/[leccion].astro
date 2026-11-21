@@ -45,6 +45,8 @@ if (!entry) throw new Error(`Lección no encontrada: ${leccion}`)
 
 const leccionKey = entry.id.split("/").pop()!
 const rutas = info.rutas
+// Hide-until-ready: solo los cursos adaptables emiten el script anti-parpadeo.
+const adaptativo = Boolean(rutas?.length)
 // Render inicial (sin JS): la ruta por defecto Fácil · Hardware · Solo.
 // Con JS, initCourseConfig repinta con la ruta activa del lector.
 const leccionesDefecto = leccionesDeRuta(info, CONFIG_POR_DEFECTO)
@@ -85,6 +87,21 @@ const numeroVisible = esNivel
 ---
 
 <BaseLayout titulo={`${entry.data.title} · ${info.titulo}`} descripcion={entry.data.description}>
+  {adaptativo && <script is:inline define:vars={{ slug: info.slug }}>
+    ;(function () {
+      try {
+        const d = localStorage.getItem("ncw:difficulty:" + slug) || "facil"
+        const e = localStorage.getItem("ncw:environment:" + slug) || "hardware"
+        const b = e === "vm" ? "solo" : localStorage.getItem("ncw:boot:" + slug) || "solo"
+        if ([d, e, b].join("|") !== "facil|hardware|solo") {
+          document.documentElement.classList.add("ncw-route-pending")
+          setTimeout(function () {
+            document.documentElement.classList.remove("ncw-route-pending")
+          }, 3000)
+        }
+      } catch {}
+    })()
+  </script>}
   <div class="player-bar" data-pagefind-ignore="all">
     <div class="container-page player-bar__inner">
       <nav class="breadcrumb player-bar__crumb" aria-label="Miga de pan">
@@ -121,18 +138,17 @@ const numeroVisible = esNivel
 
   <div class="container-page player-layout">
     <article class="player-main">
-      {rutas && <CourseConfig curso={info} variant="lesson" />}
       {rutas && (
-        <div class="route-notice" data-route-notice role="status" hidden>
-          <p class="route-notice__text">
-            Esta lección no está en tu ruta actual (
-            <span data-route-notice-summary>Fácil · Hardware · Solo Linux</span>
-            ).
-          </p>
-          <button type="button" class="route-notice__cta" data-route-notice-cta>
-            Verla en la ruta que sí la incluye
-          </button>
-        </div>
+        <CourseConfig
+          curso={info}
+          variant="lesson"
+          leccion={{
+            numero: entry.data.numero,
+            variante: entry.data.variante,
+            entorno: entry.data.entorno,
+            arranque: entry.data.arranque,
+          }}
+        />
       )}
       {"video" in entry.data && (
         <div class="player-frame">
@@ -186,7 +202,7 @@ const numeroVisible = esNivel
           <div class="lesson-head__arrows">
             <a
               href={prev ? leccionUrl(info, prev, base) : undefined}
-              class="btn btn-secondary btn-sm"
+              class="btn btn-secondary btn-hud"
               title={prev ? `Anterior: ${prev.title}` : "No hay lección anterior"}
               aria-label="Lección anterior"
               data-route-prev
@@ -196,7 +212,7 @@ const numeroVisible = esNivel
             </a>
             <a
               href={next ? leccionUrl(info, next, base) : undefined}
-              class="btn btn-primary btn-sm"
+              class="btn btn-primary btn-hud"
               title={next ? `Siguiente: ${next.title}` : "Fin de la ruta"}
               aria-label="Lección siguiente"
               data-route-next
@@ -206,7 +222,7 @@ const numeroVisible = esNivel
               <span>Siguiente</span>
               <span aria-hidden="true">→</span>
             </a>
-            <a href={url} class="btn btn-primary btn-sm" data-route-back hidden={Boolean(next)}>
+            <a href={url} class="btn btn-primary btn-hud" data-route-back hidden={Boolean(next)}>
               <span>Volver al temario</span>
               <span aria-hidden="true">→</span>
             </a>
@@ -218,7 +234,7 @@ const numeroVisible = esNivel
         <div class="lesson-head__foot">
           <button
             id="marcar-completada"
-            class="btn btn-ghost"
+            class="btn btn-ghost lesson-complete"
             type="button"
             data-slug={info.slug}
             data-leccion={leccionKey}
@@ -253,7 +269,7 @@ const numeroVisible = esNivel
         ></div>
         <a
           href={prev ? leccionUrl(info, prev, base) : undefined}
-          class="lesson-nav__card sheet sheet--link"
+          class="lesson-nav__card"
           data-route-prev
           aria-label="Lección anterior"
           hidden={!prev}
@@ -264,7 +280,7 @@ const numeroVisible = esNivel
 
         <a
           href={next ? leccionUrl(info, next, base) : undefined}
-          class="lesson-nav__card sheet sheet--link lesson-nav__card--next"
+          class="lesson-nav__card lesson-nav__card--next"
           data-route-next
           data-mark-next
           aria-label="Lección siguiente"
@@ -275,7 +291,7 @@ const numeroVisible = esNivel
         </a>
         <a
           href={url}
-          class="lesson-nav__card sheet sheet--link lesson-nav__card--next"
+          class="lesson-nav__card lesson-nav__card--next"
           data-route-back
           hidden={Boolean(next)}
         >
@@ -421,14 +437,9 @@ const numeroVisible = esNivel
   )}
 
   <script>
-    import {
-      SET_CONFIG_EVENT,
-      initCourseConfig,
-      primeraRutaConLeccion,
-      resumirConfig,
-    } from "../../../../lib/course-config.client"
+    import { initCourseConfig } from "../../../../lib/course-config.client"
     import type { CourseConfigState } from "../../../../lib/course-config.client"
-    import type { CursoConfig, CursoRuta } from "../../../../lib/tracks"
+    import type { CursoRuta } from "../../../../lib/tracks"
 
     interface CatalogoItem {
       slug: string
@@ -456,27 +467,6 @@ const numeroVisible = esNivel
       rutas = []
     }
 
-    const notice = document.querySelector<HTMLElement>("[data-route-notice]")
-    const noticeSummary = notice?.querySelector<HTMLElement>("[data-route-notice-summary]")
-    const noticeCta = notice?.querySelector<HTMLElement>("[data-route-notice-cta]")
-
-    let ultimaConfig: CursoConfig | undefined
-
-    noticeCta?.addEventListener("click", () => {
-      if (!configRoot) return
-      const objetivo = primeraRutaConLeccion(rutas, entryNumero, ultimaConfig)
-      if (!objetivo) return
-      configRoot.dispatchEvent(
-        new CustomEvent(SET_CONFIG_EVENT, {
-          detail: {
-            dificultad: objetivo.dificultad,
-            entorno: objetivo.entorno,
-            arranque: objetivo.arranque,
-          },
-        }),
-      )
-    })
-
     const aplicarEnlace = (
       el: HTMLElement,
       target: CatalogoItem | null | undefined,
@@ -495,9 +485,15 @@ const numeroVisible = esNivel
     }
 
     initCourseConfig((state: CourseConfigState) => {
+      // URL profunda incompatible (localStorage o deep link): la lección no
+      // pertenece a la ruta resuelta; vuelve a la ficha ("../"), que acepta
+      // cualquier configuración. También cubre toggles posteriores y eventos
+      // ncw:course-config:set que excluyan la lección actual.
+      if (rutas.length && state.ruta && !state.ruta.lecciones.includes(entryNumero)) {
+        window.location.replace("../")
+        return
+      }
       if (!catalogoEl) return
-      ultimaConfig = state.config
-      if (noticeSummary) noticeSummary.textContent = resumirConfig(state.config)
       const visibles = state.ruta ? state.ruta.lecciones : []
       const i = visibles.indexOf(entryNumero)
       const inRuta = i !== -1
@@ -511,7 +507,6 @@ const numeroVisible = esNivel
       if (spacer) spacer.hidden = Boolean(prev)
       for (const el of document.querySelectorAll<HTMLElement>("[data-route-back]"))
         el.hidden = Boolean(next)
-      if (notice) notice.hidden = inRuta
     })
   </script>
 
@@ -574,7 +569,7 @@ const numeroVisible = esNivel
         item.classList.toggle("is-done", doneList.includes(item.getAttribute("data-lesson-item")))
       }
       for (const mod of document.querySelectorAll("[data-module-key]")) {
-        const items = [...mod.querySelectorAll("[data-lesson-item]")]
+        const items = [...mod.querySelectorAll("[data-lesson-item]:not([hidden])")]
         const done = items.filter((item) =>
           doneList.includes(item.getAttribute("data-lesson-item")),
         ).length
@@ -826,49 +821,6 @@ const numeroVisible = esNivel
     min-width: 0;
   }
 
-  .route-notice {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem 0.75rem;
-    margin-top: 1.25rem;
-    padding: 0.6rem 0.8rem;
-    border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent);
-    border-left: 3px solid var(--warn);
-    border-radius: var(--radius);
-    background: color-mix(in srgb, var(--warn) 10%, transparent);
-    font-size: 0.8rem;
-    color: var(--ink-dim);
-  }
-
-  .route-notice__text {
-    flex: 1 1 16rem;
-    margin: 0;
-    line-height: 1.45;
-  }
-
-  .route-notice__cta {
-    padding: 0.4rem 0.7rem;
-    border: 1px solid var(--warn);
-    border-radius: var(--radius-sm);
-    background: transparent;
-    color: var(--warn);
-    font-size: 0.75rem;
-    font-weight: 600;
-    font-family: var(--font-mono);
-    cursor: pointer;
-    transition: background-color 0.15s ease;
-  }
-
-  .route-notice__cta:hover {
-    background: color-mix(in srgb, var(--warn) 16%, transparent);
-  }
-
-  .route-notice__cta:focus-visible {
-    outline: 2px solid var(--warn);
-    outline-offset: 2px;
-  }
-
   .player-frame {
     border: 1px solid var(--line-strong);
     border-radius: var(--radius);
@@ -950,6 +902,7 @@ const numeroVisible = esNivel
 
   .lesson-head__arrows {
     display: flex;
+    align-items: center;
     justify-content: flex-end;
     gap: 0.4rem;
     flex-shrink: 0;
@@ -972,6 +925,41 @@ const numeroVisible = esNivel
     margin-top: 1.1rem;
     padding-top: 1rem;
     border-top: 1px solid var(--line);
+  }
+
+  .lesson-complete {
+    gap: 0.6rem;
+    padding: 0.42rem 0.7rem;
+    font-family: var(--font-mono);
+    font-size: 0.63rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .lesson-complete .btn-icon {
+    display: grid;
+    place-items: center;
+    width: 1rem;
+    height: 1rem;
+    border: 1px solid color-mix(in srgb, currentColor 55%, transparent);
+    border-radius: 50%;
+    font-size: 0.55rem;
+    line-height: 1;
+  }
+
+  .lesson-complete.btn-primary {
+    background: var(--signal-soft);
+    border-color: color-mix(in srgb, var(--signal) 45%, transparent);
+    color: var(--signal);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .lesson-complete.btn-primary:hover {
+      background: color-mix(in srgb, var(--signal) 16%, transparent);
+      border-color: color-mix(in srgb, var(--signal) 60%, transparent);
+      color: var(--signal);
+    }
   }
 
   .lesson-guide {
@@ -1014,9 +1002,34 @@ const numeroVisible = esNivel
   }
 
   .lesson-nav__card {
-    padding: 0.9rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.28rem;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: transparent;
     color: inherit;
     text-decoration: none;
+    transition:
+      border-color var(--dur-ui) var(--ease-out),
+      background-color var(--dur-ui) var(--ease-out);
+  }
+
+  .lesson-nav__card--next {
+    border-color: color-mix(in srgb, var(--accent) 28%, var(--line));
+    text-align: right;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .lesson-nav__card:hover {
+      border-color: var(--line-strong);
+      background: var(--bg-card);
+    }
+
+    .lesson-nav__card--next:hover {
+      border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+    }
   }
 
   .lesson-nav__label {
@@ -1034,15 +1047,10 @@ const numeroVisible = esNivel
 
   .lesson-nav__title {
     display: block;
-    margin-top: 0.3rem;
     color: var(--ink);
     font-size: 0.9rem;
     font-weight: 600;
     line-height: 1.35;
-  }
-
-  .lesson-nav__card--next {
-    text-align: right;
   }
 
   .temario-sheet {
@@ -1356,14 +1364,6 @@ const numeroVisible = esNivel
 
     .lesson-head__top {
       grid-template-columns: minmax(0, 1fr);
-    }
-
-    .lesson-head__arrows .btn {
-      flex: 1;
-    }
-
-    .lesson-head__arrows .btn:first-child:not(:only-child) {
-      flex: 0 0 auto;
     }
   }
 </style>
