@@ -7,6 +7,7 @@ import {
   combinarConfig,
   leccionEnRuta,
   normalizarConfig,
+  numerosVisiblesPorRuta,
   ordenarPorRuta,
   progresoKey,
   type CursoConfig,
@@ -46,31 +47,32 @@ export interface FichaRuta {
 }
 
 const NECESITAS_SOLO = [
-  "PC con 4 GB RAM y 20 GB libres",
-  "USB 8 GB+",
+  "PC con 4 GB RAM",
+  "20 GB de espacio libres",
+  "Memoria USB 2 GB+",
   "Internet",
-  "Respaldo de lo importante",
 ] as const
 
 const NECESITAS_DUALBOOT = "Windows en UEFI/GPT y clave BitLocker"
 
-const NECESITAS_VM = [
-  "Una VM con 4 GB RAM y 20 GB de disco",
-  "Internet. Sin tocar tu máquina.",
-] as const
+const NECESITAS_VM = ["Una VM con 4 GB RAM", "20 GB de espacio libres", "Internet"] as const
 
 const SABES_FACIL = [
-  "Instalar con archinstall en VM o hardware",
-  "GNOME listo",
-  "pacman, AUR y ZRAM sin miedo",
-  "Sistema actualizado y con firewall.",
+  "La filosofía KISS",
+  "Instalar Arch Linux usando archinstall",
+  "Qué es un Desktop Environment",
+  "Introducción a los dotfiles",
+  "Qué son pacman y la AUR",
+  "Configurar la swap",
+  "Configurar el firewall.",
 ] as const
 
 const SABES_AVANZADA = [
   "Particionar a mano y bootear manualmente",
-  "BSPWM y dotfiles",
   "mkinitcpio/systemd-boot",
-  "Diagnóstico: qué hacer cuando algo falla.",
+  "Instalar un WM",
+  "Configuración de dotfiles",
+  "Troubleshooting",
 ] as const
 
 export const REGLA_DE_CAMPO =
@@ -160,18 +162,6 @@ const storageLayer = (slug: string): Partial<CursoConfig> => {
   return capa as Partial<CursoConfig>
 }
 
-// Estado marcado en los radios del configurador (valores crudos).
-const configDesdeRadios = (root: HTMLElement): Partial<CursoConfig> => {
-  const marcado = (eje: string) =>
-    root.querySelector<HTMLInputElement>(`input[name$="-${eje}"]:checked`)?.value
-  const capa: Record<string, string> = {}
-  for (const eje of ["dificultad", "entorno", "arranque"]) {
-    const valor = marcado(eje)
-    if (valor !== undefined) capa[eje] = valor
-  }
-  return capa as Partial<CursoConfig>
-}
-
 const configDesdeLayers = (slug: string, search: string): CursoConfig =>
   normalizarConfig(combinarConfig(storageLayer(slug), queryLayer(search)))
 
@@ -230,6 +220,10 @@ function pintarConfigurador(root: HTMLElement, config: CursoConfig, rutas: Curso
   if (boot) boot.hidden = config.entorno === "vm"
   const resumen = root.querySelector<HTMLElement>("[data-config-summary]")
   if (resumen) resumen.textContent = resumirConfig(config)
+  const diffBadge = root.querySelector<HTMLElement>("[data-diff-badge]")
+  if (diffBadge)
+    diffBadge.textContent =
+      DIFICULTAD_LABEL[config.dificultad]?.toUpperCase() ?? config.dificultad.toUpperCase()
   const numero = root.getAttribute("data-lesson-numero")
   if (numero !== null) bloquearFueraDeRuta(root, config, rutas, numero)
 }
@@ -258,6 +252,7 @@ function aplicarAlTemario(
 ): string[] {
   const visiblesSlug: string[] = []
   const claveProgreso = tieneRutas ? progresoKey(slug, config.dificultad) : progresoKey(slug)
+  const numerosVisibles = numerosVisiblesPorRuta(ruta)
 
   for (const mod of doc.querySelectorAll<HTMLElement>("[data-syllabus] details[data-module-key]")) {
     const items: LessonItem[] = [...mod.querySelectorAll<HTMLElement>("[data-lesson-item]")].map(
@@ -289,6 +284,10 @@ function aplicarAlTemario(
         if (progreso.includes(item.slug)) done += 1
         visiblesSlug.push(item.slug)
       }
+      const visibleNumber = numerosVisibles[item.numero] || item.numero
+      item.el.setAttribute("data-numero-visible", visibleNumber)
+      const numberEl = item.el.querySelector<HTMLElement>(".sy-lesson__num")
+      if (numberEl) numberEl.textContent = visibleNumber
     }
 
     // Reordenar las listas planas según la ruta (no toca submódulos).
@@ -331,6 +330,13 @@ function aplicarAlTemario(
   for (const totalEl of doc.querySelectorAll<HTMLElement>("[data-course-total]")) {
     totalEl.textContent = `${total} ${totalEl.getAttribute("data-unidad") ?? "lecciones"}`
   }
+  for (const totalEl of doc.querySelectorAll<HTMLElement>("[data-config-total-lessons]")) {
+    totalEl.textContent = `${total} ${totalEl.getAttribute("data-unidad") ?? "lecciones"}`
+  }
+  for (const badge of doc.querySelectorAll<HTMLElement>("[data-ficha-route-badge]")) {
+    badge.textContent =
+      `${ENTORNO_LABEL[config.entorno]} · ${ARRANQUE_LABEL[config.arranque]}`.toUpperCase()
+  }
   for (const modulesEl of doc.querySelectorAll<HTMLElement>("[data-course-modules]")) {
     modulesEl.textContent = `${modulosVisibles} ${modulesEl.getAttribute("data-unidad") ?? "módulos"}`
   }
@@ -358,21 +364,35 @@ function emitir(doc: Document, state: CourseConfigState): void {
   doc.dispatchEvent(new CustomEvent(COURSE_CONFIG_EVENT, { detail: state }))
 }
 
+export function limpiarEstadoPendiente(doc: Document): void {
+  doc.documentElement.classList.remove("ncw-route-pending")
+  doc.querySelectorAll(".sy-lessons--route-skeleton").forEach((skeleton) => skeleton.remove())
+}
+
 export function initCourseConfig(
   onChange?: (state: CourseConfigState) => void,
 ): CourseConfigState[] {
   if (typeof document === "undefined") return []
   const states: CourseConfigState[] = []
 
-  for (const root of document.querySelectorAll<HTMLElement>("[data-course-config]")) {
-    const slug = root.getAttribute("data-slug") ?? ""
-    if (!slug) continue
+  const allRoots = [...document.querySelectorAll<HTMLElement>("[data-course-config]")]
+  const slugs = [
+    ...new Set(allRoots.map((el) => el.getAttribute("data-slug") || "").filter(Boolean)),
+  ]
+
+  for (const slug of slugs) {
+    const roots = allRoots.filter((el) => el.getAttribute("data-slug") === slug)
+    if (roots.length === 0) continue
 
     let rutas: CursoRuta[] = []
-    try {
-      rutas = JSON.parse(root.getAttribute("data-rutas") ?? "[]")
-    } catch {
-      rutas = []
+    for (const r of roots) {
+      try {
+        const raw = r.getAttribute("data-rutas")
+        if (raw) {
+          rutas = JSON.parse(raw)
+          if (rutas.length) break
+        }
+      } catch {}
     }
 
     const search = window.location.search
@@ -389,57 +409,69 @@ export function initCourseConfig(
         const config = forzada ?? configDesdeLayers(slug, window.location.search)
         previa = config
         const ruta = rutas.length ? buscarRuta(rutas, config) : undefined
-        pintarConfigurador(root, config, rutas)
+        for (const root of roots) {
+          pintarConfigurador(root, config, rutas)
+        }
+        for (const b of document.querySelectorAll<HTMLElement>("[data-diff-badge]")) {
+          b.textContent =
+            DIFICULTAD_LABEL[config.dificultad]?.toUpperCase() ?? config.dificultad.toUpperCase()
+        }
         const visibles = aplicarAlTemario(document, slug, ruta, config, rutas.length > 0)
         const state: CourseConfigState = { slug, config, ruta, visibles }
         emitir(document, state)
         onChange?.(state)
         return state
       } finally {
-        // Retira la clase anti-parpadeo aunque falle el repintado; si no
-        // estaba (config por defecto o sin JS previo), es un no-op.
-        if (typeof document !== "undefined") {
-          document.documentElement.classList.remove("ncw-route-pending")
-        }
+        // Eliminar el estado pending y los placeholders del DOM, aunque el
+        // repintado encuentre datos parciales o falle una sección secundaria.
+        limpiarEstadoPendiente(document)
       }
     }
 
-    root.addEventListener("change", (evento) => {
-      const radio = evento.target as HTMLInputElement
-      if (radio?.type !== "radio") return
-      // Interacción del usuario: la query (deep link) deja de mandar para que
-      // el clic tenga efecto; la preferencia queda en localStorage.
-      forzada = undefined
-      try {
-        const url = new URL(window.location.href)
-        for (const clave of ["dificultad", "entorno", "arranque"]) url.searchParams.delete(clave)
-        window.history.replaceState(window.history.state, "", url)
-      } catch {}
-      // Restaurar el último arranque solo al salir de VM hacia hardware;
-      // los demás cambios respetan lo que marcó el lector.
-      const capa = configDesdeRadios(root)
-      const cambioEntorno = (evento.target as HTMLInputElement)?.name?.endsWith("-entorno")
-      if (cambioEntorno && capa.entorno === "hardware" && previa?.entorno === "vm") {
-        capa.arranque = arranqueAlRestaurarHardware(slug)
-      }
-      persistirConfig(slug, normalizarConfig(capa))
-      aplicar()
-    })
+    for (const root of roots) {
+      root.addEventListener("change", (evento) => {
+        const radio = evento.target as HTMLInputElement
+        if (radio?.type !== "radio") return
+        // Interacción del usuario: la query (deep link) deja de mandar para que
+        // el clic tenga efecto; la preferencia queda en localStorage.
+        forzada = undefined
+        try {
+          const url = new URL(window.location.href)
+          for (const clave of ["dificultad", "entorno", "arranque"]) url.searchParams.delete(clave)
+          window.history.replaceState(window.history.state, "", url)
+        } catch {}
 
-    // CTA externo (página de lección): aplica la config indicada tal cual, sin
-    // la restauración de arranque del listener de `change`.
-    root.addEventListener(SET_CONFIG_EVENT, (evento) => {
-      const detalle = (evento as CustomEvent<Partial<CursoConfig>>).detail ?? {}
-      forzada = normalizarConfig(detalle)
-      // La elección explícita pisa la query (deep link).
-      try {
-        const url = new URL(window.location.href)
-        for (const clave of ["dificultad", "entorno", "arranque"]) url.searchParams.delete(clave)
-        window.history.replaceState(window.history.state, "", url)
-      } catch {}
-      persistirConfig(slug, forzada)
-      aplicar()
-    })
+        const eje = radio.name.endsWith("-dificultad")
+          ? "dificultad"
+          : radio.name.endsWith("-entorno")
+            ? "entorno"
+            : "arranque"
+        const capa: Record<string, string> = { ...previa }
+        capa[eje] = radio.value
+
+        const cambioEntorno = eje === "entorno"
+        if (cambioEntorno && radio.value === "hardware" && previa?.entorno === "vm") {
+          capa.arranque = arranqueAlRestaurarHardware(slug)
+        }
+        persistirConfig(slug, normalizarConfig(capa as Partial<CursoConfig>))
+        aplicar()
+      })
+
+      // CTA externo (página de lección): aplica la config indicada tal cual, sin
+      // la restauración de arranque del listener de `change`.
+      root.addEventListener(SET_CONFIG_EVENT, (evento) => {
+        const detalle = (evento as CustomEvent<Partial<CursoConfig>>).detail ?? {}
+        forzada = normalizarConfig(detalle)
+        // La elección explícita pisa la query (deep link).
+        try {
+          const url = new URL(window.location.href)
+          for (const clave of ["dificultad", "entorno", "arranque"]) url.searchParams.delete(clave)
+          window.history.replaceState(window.history.state, "", url)
+        } catch {}
+        persistirConfig(slug, forzada)
+        aplicar()
+      })
+    }
 
     states.push(aplicar())
   }

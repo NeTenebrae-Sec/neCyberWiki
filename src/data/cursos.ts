@@ -162,9 +162,8 @@ export const cursos: CursoInfo[] = [
     ] satisfies CursoRuta[],
     hero: {
       copy: [
-        "En este curso aprenderás a instalar Arch Linux desde cero y dejarlo funcional, seguro y usable.",
-        "Elige dificultad, entorno y arranque: el temario se reorganiza. Las lecciones comunes se quedan; las específicas aparecen o desaparecen.",
-        "No necesitas cuenta: tu progreso se guarda en este navegador.",
+        "En este curso aprenderás a instalar Arch Linux desde cero y dejarlo funcional, seguro y usable. ¡El temario se reorganizará automáticamente!",
+        "Elige la dificultad y el tipo de entorno que deseas instalar",
       ],
       cta: "Elige tu ruta y empieza por la lección 1.1",
       video: "",

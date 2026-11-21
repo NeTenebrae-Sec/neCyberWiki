@@ -9,6 +9,7 @@ import {
   combinarConfig,
   leccionEnRuta,
   normalizarConfig,
+  numerosVisiblesPorRuta,
   ordenarPorRuta,
   progresoKey,
   rutaKey,
@@ -142,6 +143,30 @@ test("ordenarPorRuta deja al final las lecciones fuera de ruta", () => {
     ordenarPorRuta(lecciones, rutaFacil).map((l) => l.numero ?? "sin-numero"),
     ["1.1", "1.2", "9.9", "", "sin-numero"],
   )
+})
+
+test("numerosVisiblesPorRuta renumera cada módulo dentro de la ruta", () => {
+  const rutaFacil = ruta("facil", "hardware", "solo", [
+    "1.1",
+    "1.2",
+    "1.3",
+    "1.5",
+    "1.7",
+    "2.1",
+    "2.2",
+    "2.3",
+  ])
+
+  assert.deepEqual(numerosVisiblesPorRuta(rutaFacil), {
+    1.1: "1.1",
+    1.2: "1.2",
+    1.3: "1.3",
+    1.5: "1.4",
+    1.7: "1.5",
+    2.1: "2.1",
+    2.2: "2.2",
+    2.3: "2.3",
+  })
 })
 
 test("progresoKey separa la dificultad y conserva la clave base", () => {

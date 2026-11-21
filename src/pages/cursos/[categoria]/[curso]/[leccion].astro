@@ -12,7 +12,7 @@ import {
   leccionUrl,
   leccionesDeRuta,
 } from "../../../../lib/catalog"
-import { CONFIG_POR_DEFECTO } from "../../../../lib/tracks"
+import { buscarRuta, CONFIG_POR_DEFECTO, numerosVisiblesPorRuta } from "../../../../lib/tracks"
 import { getCategoria } from "../../../../data/categorias"
 import { site } from "../../../../data/site"
 
@@ -45,12 +45,12 @@ if (!entry) throw new Error(`Lección no encontrada: ${leccion}`)
 
 const leccionKey = entry.id.split("/").pop()!
 const rutas = info.rutas
-// Hide-until-ready: solo los cursos adaptables emiten el script anti-parpadeo.
-const adaptativo = Boolean(rutas?.length)
 // Render inicial (sin JS): la ruta por defecto Fácil · Hardware · Solo.
 // Con JS, initCourseConfig repinta con la ruta activa del lector.
 const leccionesDefecto = leccionesDeRuta(info, CONFIG_POR_DEFECTO)
 const totalDefecto = leccionesDefecto.length
+const rutaDefecto = info.rutas?.length ? buscarRuta(info.rutas, CONFIG_POR_DEFECTO) : undefined
+const numerosVisiblesDefecto = numerosVisiblesPorRuta(rutaDefecto)
 const modulosDefecto = new Set(leccionesDefecto.map((leccion) => leccion.modulo)).size
 const entryNumero = entry.data.numero ?? ""
 const catalogoJson = rutas
@@ -83,25 +83,12 @@ const esNivel = info.unidad === "nivel"
 const etiqueta = esNivel ? "Nivel" : "Clase"
 const numeroVisible = esNivel
   ? String(entry.data.orden)
-  : entry.data.numero || String(entry.data.orden + 1).padStart(2, "0")
+  : numerosVisiblesDefecto[entry.data.numero] ||
+    entry.data.numero ||
+    String(entry.data.orden + 1).padStart(2, "0")
 ---
 
 <BaseLayout titulo={`${entry.data.title} · ${info.titulo}`} descripcion={entry.data.description}>
-  {adaptativo && <script is:inline define:vars={{ slug: info.slug }}>
-    ;(function () {
-      try {
-        const d = localStorage.getItem("ncw:difficulty:" + slug) || "facil"
-        const e = localStorage.getItem("ncw:environment:" + slug) || "hardware"
-        const b = e === "vm" ? "solo" : localStorage.getItem("ncw:boot:" + slug) || "solo"
-        if ([d, e, b].join("|") !== "facil|hardware|solo") {
-          document.documentElement.classList.add("ncw-route-pending")
-          setTimeout(function () {
-            document.documentElement.classList.remove("ncw-route-pending")
-          }, 3000)
-        }
-      } catch {}
-    })()
-  </script>}
   <div class="player-bar" data-pagefind-ignore="all">
     <div class="container-page player-bar__inner">
       <nav class="breadcrumb player-bar__crumb" aria-label="Miga de pan">
@@ -114,7 +101,8 @@ const numeroVisible = esNivel
         </a>
         <span aria-hidden="true">/</span>
         <span aria-current="page">
-          {etiqueta} {numeroVisible} de <span data-lesson-total>{totalDefecto}</span>
+          {etiqueta} <span data-lesson-visible-number>{numeroVisible}</span> de{" "}
+          <span data-lesson-total>{totalDefecto}</span>
         </span>
       </nav>
 
@@ -129,9 +117,18 @@ const numeroVisible = esNivel
         <div class="progress-track player-bar__track" aria-hidden="true">
           <div id="player-progress-bar" class="progress-fill progress-fill--accent"></div>
         </div>
-        <button type="button" id="temario-open" class="btn btn-ghost btn-sm">
-          Temario <span aria-hidden="true">▤</span>
-        </button>
+        {rutas && (
+          <CourseConfig
+            curso={info}
+            variant="top-difficulty"
+            leccion={{
+              numero: entry.data.numero,
+              variante: entry.data.variante,
+              entorno: entry.data.entorno,
+              arranque: entry.data.arranque,
+            }}
+          />
+        )}
       </div>
     </div>
   </div>
@@ -159,7 +156,7 @@ const numeroVisible = esNivel
               <span class="terminal__dot terminal__dot--green"></span>
             </span>
             <span class="terminal__title">
-              monitor · {etiqueta.toLowerCase()} {numeroVisible}
+              {etiqueta.toLowerCase()} <span data-lesson-visible-number>{numeroVisible}</span>
             </span>
             <span class="player-frame__state">
               <span class="status-dot status-dot--cyan" aria-hidden="true"></span> registro de campo
@@ -189,7 +186,7 @@ const numeroVisible = esNivel
             )}
             <p class="lesson-head__kicker">
               <span class="accent">
-                {etiqueta} {numeroVisible}
+                {etiqueta} <span data-lesson-visible-number>{numeroVisible}</span>
               </span>
               <span aria-hidden="true">·</span>
               <span>
@@ -335,6 +332,7 @@ const numeroVisible = esNivel
               unidad={info.unidad}
               current={leccionKey}
               variant="sidebar"
+              routeNumbers={numerosVisiblesDefecto}
             />
 
             <div class="temario__foot">
@@ -440,6 +438,7 @@ const numeroVisible = esNivel
     import { initCourseConfig } from "../../../../lib/course-config.client"
     import type { CourseConfigState } from "../../../../lib/course-config.client"
     import type { CursoRuta } from "../../../../lib/tracks"
+    import { numerosVisiblesPorRuta } from "../../../../lib/tracks"
 
     interface CatalogoItem {
       slug: string
@@ -495,6 +494,11 @@ const numeroVisible = esNivel
       }
       if (!catalogoEl) return
       const visibles = state.ruta ? state.ruta.lecciones : []
+      const numerosVisibles = numerosVisiblesPorRuta(state.ruta)
+      const numeroVisible = numerosVisibles[entryNumero] || entryNumero
+      for (const el of document.querySelectorAll<HTMLElement>("[data-lesson-visible-number]")) {
+        el.textContent = numeroVisible
+      }
       const i = visibles.indexOf(entryNumero)
       const inRuta = i !== -1
       const prev = inRuta && i > 0 ? porNumero.get(visibles[i - 1]) : null

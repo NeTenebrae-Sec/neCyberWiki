@@ -78,6 +78,22 @@ export function buscarRuta(
   return rutas.find((ruta) => rutaKey(ruta) === key)
 }
 
+// Numeración visible independiente del ID estable usado por rutas, enlaces y prerrequisitos.
+// En una ruta con 1.5 y 1.7 visibles, pasan a mostrarse como 1.4 y 1.5.
+export function numerosVisiblesPorRuta(ruta: CursoRuta | undefined): Record<string, string> {
+  if (!ruta) return {}
+
+  const contador: Record<string, number> = {}
+  const resultado: Record<string, string> = {}
+  for (const id of ruta.lecciones) {
+    const [modulo] = id.split(".")
+    if (!modulo) continue
+    contador[modulo] = (contador[modulo] ?? 0) + 1
+    resultado[id] = `${modulo}.${contador[modulo]}`
+  }
+  return resultado
+}
+
 export function leccionEnRuta(
   leccion: { variante: string; entorno: string; arranque: string },
   config: Partial<CursoConfig> = {},

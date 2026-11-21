@@ -8,8 +8,9 @@ interface Props {
   unidad: "clase" | "nivel"
   current?: string // slug de la lección actual (sidebar) — vacío en índice
   variant: "sidebar" | "page"
+  routeNumbers?: Record<string, string>
 }
-const { modules, cursoBase, unidad, current = "", variant } = Astro.props
+const { modules, cursoBase, unidad, current = "", variant, routeNumbers = {} } = Astro.props
 const isSidebar = variant === "sidebar"
 const lessonNumber = (orden: number) =>
   String(unidad === "nivel" ? orden : orden + 1).padStart(2, "0")
@@ -75,6 +76,14 @@ const lessonNumber = (orden: number) =>
         </span>
       </summary>
       <div class="sy-module__body">
+        <ol class="sy-lessons sy-lessons--route-skeleton" aria-hidden="true">
+          {[0, 1, 2].map((position) => (
+            <li class="sy-skeleton-row" style={`--skeleton-delay: ${position * 70}ms`}>
+              <span class="sy-skeleton-row__number"></span>
+              <span class="sy-skeleton-row__title"></span>
+            </li>
+          ))}
+        </ol>
         {(
           mod.submodulos ?? [{ key: "__all__", numero: "", titulo: "", lecciones: mod.lecciones }]
         ).map((sub) => (
@@ -88,7 +97,7 @@ const lessonNumber = (orden: number) =>
             <ol class="sy-lessons">
               {sub.lecciones.map((l) => {
                 const isCurrent = current === l.slug
-                const num = l.numero || lessonNumber(l.orden)
+                const num = routeNumbers[l.numero] || l.numero || lessonNumber(l.orden)
                 return (
                   <li
                     class={`sy-item${isCurrent ? " is-current" : ""}`}
@@ -97,6 +106,7 @@ const lessonNumber = (orden: number) =>
                     data-entorno={l.entorno}
                     data-arranque={l.arranque}
                     data-numero={l.numero || ""}
+                    data-numero-visible={num}
                   >
                     <a
                       href={`${cursoBase}${l.slug}/`}
