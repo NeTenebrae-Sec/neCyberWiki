@@ -2,26 +2,29 @@ import { defineConfig } from "astro/config"
 import tailwindcss from "@tailwindcss/vite"
 import rehypeLazyImages from "./src/lib/rehype-lazy-images.mjs"
 
-const base = "/neCyberWiki/"
+const base = process.env.PUBLIC_NCW_BASE || "/neCyberWiki/"
 
-const archLecciones = [
-  "01-que-es-arch-linux",
-  "02-usb-y-arranque",
-  "03-archiso-red-y-ssh",
-  "04-archinstall-disco",
-  "05-archinstall-escritorio",
-  "06-primer-arranque-y-gnome",
-  "07-pacman-aur-zram",
-  "08-seguridad-home-dotfiles",
-]
+// Mapa de slugs antiguos (curso `arch-linux-facil`) a los nuevos del curso adaptable.
+const archLecciones = {
+  "01-que-es-arch-linux": "que-es-arch-linux",
+  "02-usb-y-arranque": "crear-usb-instalacion",
+  "03-archiso-red-y-ssh": "archiso-terminal-teclado-red",
+  "04-archinstall-disco": "archinstall-disco-sistema-base",
+  "05-archinstall-escritorio": "archinstall-escritorio-perfil",
+  "06-primer-arranque-y-gnome": "primer-arranque-update",
+  "07-pacman-aur-zram": "pacman-instalar-buscar-mantener",
+  "08-seguridad-home-dotfiles": "ufw-dns",
+}
 
-const archRedirects = Object.fromEntries([
-  ["/cursos/arch-linux-facil", `${base}cursos/linux-y-sistemas/arch-linux-facil/`],
-  ...archLecciones.map((leccion) => [
-    `/cursos/arch-linux-facil/${leccion}`,
-    `${base}cursos/linux-y-sistemas/arch-linux-facil/${leccion}/`,
+const archRedirects = Object.fromEntries(
+  ["/cursos/arch-linux-facil", "/cursos/linux-y-sistemas/arch-linux-facil"].flatMap((prefijo) => [
+    [prefijo, `${base}cursos/linux-y-sistemas/arch-linux/`],
+    ...Object.entries(archLecciones).map(([antiguo, nuevo]) => [
+      `${prefijo}/${antiguo}`,
+      `${base}cursos/linux-y-sistemas/arch-linux/${nuevo}/`,
+    ]),
   ]),
-])
+)
 
 const banditRedirects = Object.fromEntries([
   ["/notas", `${base}cursos/`],

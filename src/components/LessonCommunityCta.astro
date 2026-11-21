@@ -1,0 +1,244 @@
+---
+import { site } from "../data/site"
+---
+
+<!-- Hueco superior: espacio reservado, sin producto ni enlace aún -->
+<div class="lesson-cta-slot" aria-hidden="true" data-pagefind-ignore>
+  <span class="lesson-cta-slot__label">ESPACIO RESERVADO · PRÓXIMAMENTE</span>
+  <span class="lesson-cta-slot__note">Invitación al canal de YouTube</span>
+</div>
+
+<aside class="lesson-cta" aria-labelledby="lesson-cta-title" data-pagefind-ignore>
+  <div class="lesson-cta__vapor" aria-hidden="true">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+  <p class="lesson-cta__eyebrow">FUEL THE AUTHOR</p>
+  <h2 class="lesson-cta__title" id="lesson-cta-title">
+    ¿Te sirvió esta lección?
+  </h2>
+  <p class="lesson-cta__desc">
+    Sin anuncios ni muros de pago. Mantén vivas las guías de Arch Linux y únete a la comunidad donde
+    resolvemos dudas entre todos.
+  </p>
+  <div class="lesson-cta__actions">
+    <a
+      class="lesson-cta__link lesson-cta__link--primary"
+      href={site.koFi}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Invitar un café en Ko-fi
+      <span class="sr-only">(abre en nueva pestaña)</span>
+      <span aria-hidden="true">↗</span>
+    </a>
+    <a
+      class="lesson-cta__link lesson-cta__link--secondary"
+      href={site.redes.youtube}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Únete a la comunidad
+      <span class="sr-only">(abre en nueva pestaña)</span>
+      <span aria-hidden="true">↗</span>
+    </a>
+  </div>
+</aside>
+
+<style>
+  .lesson-cta-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    min-height: 104px;
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--bg-deep) 70%, transparent);
+    text-align: center;
+  }
+
+  .lesson-cta-slot__label {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+  }
+
+  .lesson-cta-slot__note {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--ink-dim);
+  }
+
+  .lesson-cta {
+    position: sticky;
+    top: max(5rem, calc(50vh - 5.5rem));
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: clamp(1.1rem, 2.4vw, 1.6rem);
+    border: 1px solid color-mix(in srgb, var(--signal) 35%, transparent);
+    border-radius: var(--radius);
+    background: linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--signal) 8%, var(--bg-card)),
+      var(--bg-card) 60%
+    );
+    overflow: hidden;
+    animation: lesson-cta-aura 3.2s ease-in-out infinite;
+  }
+
+  @keyframes lesson-cta-aura {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--signal) 0%, transparent);
+    }
+    50% {
+      box-shadow: 0 0 20px 3px color-mix(in srgb, var(--signal) 18%, transparent);
+    }
+  }
+
+  .lesson-cta__vapor {
+    position: absolute;
+    top: -1.5rem;
+    right: 0.5rem;
+    display: flex;
+    align-items: flex-end;
+    gap: 0.3rem;
+    height: 4.5rem;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .lesson-cta__vapor span {
+    width: 2px;
+    height: 2.4rem;
+    border-radius: 2px;
+    background: var(--signal);
+    transform-origin: bottom;
+    animation: vapor 2.4s ease-in-out infinite;
+  }
+
+  .lesson-cta__vapor span:nth-child(2) {
+    height: 3.4rem;
+    animation-delay: -0.8s;
+  }
+
+  .lesson-cta__vapor span:nth-child(3) {
+    height: 2rem;
+    animation-delay: -1.6s;
+  }
+
+  @keyframes vapor {
+    0%,
+    100% {
+      transform: scaleY(0.4) translateY(0.3rem);
+      opacity: 0.25;
+    }
+    50% {
+      transform: scaleY(1) translateY(-0.4rem);
+      opacity: 0.8;
+    }
+  }
+
+  .lesson-cta:hover,
+  .lesson-cta:focus-within {
+    border-color: var(--signal);
+    animation-duration: 1.6s;
+  }
+
+  .lesson-cta__eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--signal);
+    text-transform: uppercase;
+  }
+
+  .lesson-cta__title {
+    font-family: var(--font-display);
+    font-size: clamp(1.1rem, 2vw, 1.35rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .lesson-cta__desc {
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: var(--ink-dim);
+  }
+
+  .lesson-cta__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.2rem;
+  }
+
+  .lesson-cta__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease,
+      transform 0.15s ease;
+  }
+
+  .lesson-cta__link:hover,
+  .lesson-cta__link:focus-visible {
+    transform: translateY(-1px);
+  }
+
+  .lesson-cta__link--primary {
+    border-color: var(--signal);
+    background: color-mix(in srgb, var(--signal) 16%, transparent);
+    color: var(--signal);
+  }
+
+  .lesson-cta__link--secondary {
+    color: var(--ink-dim);
+  }
+
+  .lesson-cta__link--secondary:hover,
+  .lesson-cta__link--secondary:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lesson-cta,
+    .lesson-cta__vapor span {
+      animation: none;
+    }
+
+    .lesson-cta {
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--signal) 20%, transparent);
+    }
+
+    .lesson-cta__link {
+      transition: none;
+    }
+
+    .lesson-cta__link:hover,
+    .lesson-cta__link:focus-visible {
+      transform: none;
+    }
+  }
+</style>

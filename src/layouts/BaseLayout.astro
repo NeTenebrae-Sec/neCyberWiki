@@ -42,6 +42,13 @@ const nav = [
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {cursoActual?.rutas?.length && <style is:inline>
+      html.ncw-route-pending .lesson-hud__head,
+      html.ncw-route-pending .lesson-hud__controls,
+      html.ncw-route-pending .lesson-hud__title {
+        visibility: hidden;
+      }
+    </style>}
     <title>{titulo} · {site.nombre}</title>
     <meta name="description" content={descripcion} />
     {noindex && <meta name="robots" content="noindex" />}
@@ -62,6 +69,41 @@ const nav = [
           ?.setAttribute("content", theme === "light" ? "#e9e1cf" : "#070a08")
       } catch {}
     </script>
+    {cursoActual?.rutas?.length && <script is:inline define:vars={{ cursoSlug: cursoActual.slug }}>
+      ;(function () {
+        try {
+          const params = new URLSearchParams(window.location.search)
+          const dificultad =
+            params.get("dificultad") ||
+            localStorage.getItem("ncw:difficulty:" + cursoSlug) ||
+            "facil"
+          const entorno =
+            params.get("entorno") ||
+            localStorage.getItem("ncw:environment:" + cursoSlug) ||
+            "hardware"
+          const arranque =
+            entorno === "vm"
+              ? "solo"
+              : params.get("arranque") || localStorage.getItem("ncw:boot:" + cursoSlug) || "solo"
+          const effectiveDifficulty = dificultad === "avanzada" ? "avanzada" : "facil"
+          const effectiveEnvironment = entorno === "vm" ? "vm" : "hardware"
+          const effectiveBoot =
+            effectiveEnvironment === "vm" ? "solo" : arranque === "dualboot" ? "dualboot" : "solo"
+
+          if (
+            effectiveDifficulty !== "facil" ||
+            effectiveEnvironment !== "hardware" ||
+            effectiveBoot !== "solo"
+          ) {
+            document.documentElement.classList.add("ncw-route-pending")
+            // Si el bundle no hidrata (red, error de JS), no dejar el contenido oculto.
+            setTimeout(function () {
+              document.documentElement.classList.remove("ncw-route-pending")
+            }, 3000)
+          }
+        } catch {}
+      })()
+    </script>}
   </head>
   <body class="antialiased">
     {buscadorHeader && (
@@ -537,23 +579,36 @@ const nav = [
       })
 
       const drawerProgress = document.querySelector("[data-drawer-progress]")
+      // Lee solo el bucket exacto `ncw:progress:<slug>` y cuenta slugs únicos:
+      // las claves `:<tag>` son legacy y no se leen; los IDs especiales
+      // (`slug@ruta`) se normalizan a su slug para no inflar el total.
+      const progressUnion = (slug) => {
+        const union = new Set()
+        try {
+          const parsed = JSON.parse(localStorage.getItem(`ncw:progress:${slug}`) || "[]")
+          if (Array.isArray(parsed)) {
+            for (const item of parsed) {
+              if (typeof item === "string") union.add(item.split("@")[0])
+            }
+          }
+        } catch {}
+        return union.size
+      }
+
       const syncGlobalProgress = () => {
         if (!(drawerProgress instanceof HTMLElement)) return
         const slug = drawerProgress.getAttribute("data-course-slug")
         const total = Number(drawerProgress.getAttribute("data-total") || 0)
         if (!slug || !total) return
 
-        try {
-          const done = JSON.parse(localStorage.getItem(`ncw:progress:${slug}`) || "[]")
-          const count = Array.isArray(done) ? done.length : 0
-          const pct = Math.min(100, Math.round((count / total) * 100))
-          const label = document.getElementById("mobile-progress-label")
-          const fill = document.getElementById("mobile-progress-fill")
-          const track = fill?.closest('[role="progressbar"]')
-          if (label) label.textContent = `${count} / ${total}`
-          if (fill) fill.style.width = `${pct}%`
-          track?.setAttribute("aria-valuenow", String(count))
-        } catch {}
+        const count = progressUnion(slug)
+        const pct = Math.min(100, Math.round((count / total) * 100))
+        const label = document.getElementById("mobile-progress-label")
+        const fill = document.getElementById("mobile-progress-fill")
+        const track = fill?.closest('[role="progressbar"]')
+        if (label) label.textContent = `${count} / ${total}`
+        if (fill) fill.style.width = `${pct}%`
+        track?.setAttribute("aria-valuenow", String(count))
       }
 
       syncGlobalProgress()

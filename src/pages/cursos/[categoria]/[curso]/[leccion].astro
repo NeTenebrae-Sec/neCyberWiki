@@ -2,14 +2,19 @@
 import { getCollection, render } from "astro:content"
 import BaseLayout from "../../../../layouts/BaseLayout.astro"
 import CourseModuleList from "../../../../components/CourseModuleList.astro"
+import CourseConfig from "../../../../components/CourseConfig.astro"
 import TableOfContents from "../../../../components/TableOfContents.astro"
 import VideoEmbed from "../../../../components/VideoEmbed.astro"
+import LessonCommunityCta from "../../../../components/LessonCommunityCta.astro"
 import {
   cursoUrl,
   getCursoPublicado,
   getCursosPublicados,
   leccionUrl,
+  leccionesDeRuta,
 } from "../../../../lib/catalog"
+import { buscarRuta, CONFIG_POR_DEFECTO, numerosVisiblesPorRuta } from "../../../../lib/tracks"
+import { resumirConfig } from "../../../../lib/course-config.client"
 import { getCategoria } from "../../../../data/categorias"
 import { site } from "../../../../data/site"
 
@@ -41,9 +46,28 @@ const entry = entradas.find((item) => item.id.split("/").pop() === leccion)
 if (!entry) throw new Error(`Lección no encontrada: ${leccion}`)
 
 const leccionKey = entry.id.split("/").pop()!
-const idx = info.lecciones.findIndex((item) => item.slug === leccionKey)
-const prev = idx > 0 ? info.lecciones[idx - 1] : null
-const next = idx >= 0 && idx < info.lecciones.length - 1 ? info.lecciones[idx + 1] : null
+const rutas = info.rutas
+// Render inicial (sin JS): la ruta por defecto Fácil · Hardware · Solo.
+// Con JS, initCourseConfig repinta con la ruta activa del lector.
+const leccionesDefecto = leccionesDeRuta(info, CONFIG_POR_DEFECTO)
+const totalDefecto = leccionesDefecto.length
+const rutaDefecto = info.rutas?.length ? buscarRuta(info.rutas, CONFIG_POR_DEFECTO) : undefined
+const numerosVisiblesDefecto = numerosVisiblesPorRuta(rutaDefecto)
+const modulosDefecto = new Set(leccionesDefecto.map((leccion) => leccion.modulo)).size
+const entryNumero = entry.data.numero ?? ""
+const catalogoJson = rutas
+  ? JSON.stringify(
+      info.lecciones.map((leccion) => ({
+        slug: leccion.slug,
+        numero: leccion.numero,
+        title: leccion.title,
+        modulo: leccion.modulo,
+      })),
+    ).replace(/</g, "\\u003c")
+  : ""
+const idx = leccionesDefecto.findIndex((item) => item.slug === leccionKey)
+const prev = idx > 0 ? leccionesDefecto[idx - 1] : null
+const next = idx >= 0 && idx < leccionesDefecto.length - 1 ? leccionesDefecto[idx + 1] : null
 const currentModule = info.modulos.find((modulo) =>
   modulo.lecciones.some((item) => item.slug === leccionKey),
 )
@@ -57,10 +81,18 @@ const hasToc = tocItems.length >= 2
 const base = site.base
 const categoria = getCategoria(info.categoria)
 const url = cursoUrl(info, base)
-const totalLecciones = info.lecciones.length
 const esNivel = info.unidad === "nivel"
 const etiqueta = esNivel ? "Nivel" : "Clase"
-const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1).padStart(2, "0")
+const numeroVisible = esNivel
+  ? String(entry.data.orden)
+  : numerosVisiblesDefecto[entry.data.numero] ||
+    entry.data.numero ||
+    String(entry.data.orden + 1).padStart(2, "0")
+// Posición del alumno dentro de la ruta (1..N). El `numeroVisible` (1.1, 2.5…) es un
+// índice estructural útil en las migas, pero «Clase 1.1» no communicates la posición.
+const numeroSecuencia = String(
+  Math.max(1, leccionesDefecto.findIndex((item) => item.slug === leccionKey) + 1),
+)
 ---
 
 <BaseLayout titulo={`${entry.data.title} · ${info.titulo}`} descripcion={entry.data.description}>
@@ -71,110 +103,84 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
         <span aria-hidden="true">/</span>
         <a href={`${base}cursos/${info.categoria}/`}>{categoria?.titulo || info.categoria}</a>
         <span aria-hidden="true">/</span>
-        <a href={url} class="player-bar__course">
+        <a href={url} class="player-bar__course" aria-current="page">
           {info.titulo}
         </a>
-        <span aria-hidden="true">/</span>
-        <span aria-current="page">
-          {etiqueta} {numero} de {totalLecciones}
-        </span>
       </nav>
 
       <div class="player-bar__tools">
         <div class="player-bar__progress">
           <span id="player-progress-pct">0% completado</span>
           <span id="player-progress-count" class="player-bar__count">
-            (0 de {totalLecciones})
+            (<span id="player-progress-done">0</span> de{" "}
+            <span data-lesson-total>{totalDefecto}</span>)
           </span>
         </div>
         <div class="progress-track player-bar__track" aria-hidden="true">
           <div id="player-progress-bar" class="progress-fill progress-fill--accent"></div>
         </div>
-        <button type="button" id="temario-open" class="btn btn-ghost btn-sm">
-          Temario <span aria-hidden="true">▤</span>
-        </button>
       </div>
     </div>
   </div>
 
   <div class="container-page player-layout">
     <article class="player-main">
-      {"video" in entry.data && (
-        <div class="player-frame">
-          <div class="player-frame__bar">
-            <span class="terminal__dots" aria-hidden="true">
-              <span class="terminal__dot terminal__dot--red"></span>
-              <span class="terminal__dot terminal__dot--yellow"></span>
-              <span class="terminal__dot terminal__dot--green"></span>
-            </span>
-            <span class="terminal__title">
-              monitor · {etiqueta.toLowerCase()} {numero}
-            </span>
-            <span class="player-frame__state">
-              <span class="status-dot status-dot--cyan" aria-hidden="true"></span> registro de campo
-            </span>
-          </div>
-          <VideoEmbed video={entry.data.video} titulo={entry.data.title} />
-        </div>
-      )}
-
       <header class="lesson-head sheet" data-pagefind-ignore="all">
         <div class="lesson-head__top">
           <div class="lesson-head__info">
-            {currentModule && (
-              <p class="lesson-head__module">
-                <span class="signal">
-                  M{currentModule.numero} · {currentModule.titulo}
-                </span>
-                {currentSub && (
-                  <>
-                    <span aria-hidden="true">/</span>
-                    <span class="accent">
-                      {currentSub.numero} · {currentSub.titulo}
-                    </span>
-                  </>
-                )}
-              </p>
-            )}
+            <p class="lesson-head__course">
+              <span class="lesson-head__eyebrow">CURSO</span>
+              <a href={url} class="signal">
+                {info.titulo}
+              </a>
+            </p>
             <p class="lesson-head__kicker">
-              <span class="accent">
-                {etiqueta} {numero}
+              <span class="lesson-head__class">
+                {etiqueta} <span data-lesson-sequence-number>{numeroSecuencia}</span>
+              </span>
+              <span aria-hidden="true">·</span>
+              <span>
+                de <span data-lesson-total>{totalDefecto}</span>
               </span>
               <span aria-hidden="true">·</span>
               <span>
                 {entry.data.video ? entry.data.duracion || "Video + guía" : "Guía escrita"}
+              </span>
+              <span aria-hidden="true">·</span>
+              <span class="lesson-head__route" data-lesson-route>
+                {resumirConfig(CONFIG_POR_DEFECTO)}
               </span>
             </p>
             <h1 class="lesson-head__title">{entry.data.title}</h1>
           </div>
 
           <div class="lesson-head__arrows">
-            {prev && (
-              <a
-                href={leccionUrl(info, prev, base)}
-                class="btn btn-secondary btn-sm"
-                title={`Anterior: ${prev.title}`}
-                aria-label="Lección anterior"
-              >
-                <span aria-hidden="true">←</span>
-              </a>
-            )}
-            {next ? (
-              <a
-                href={leccionUrl(info, next, base)}
-                class="btn btn-primary btn-sm"
-                title={`Siguiente: ${next.title}`}
-                data-mark-next
-              >
-                <span>Siguiente</span>
-                <span aria-hidden="true">→</span>
-              </a>
-            ) : (
-              <a href={url} class="btn btn-primary btn-sm">
-                <span>Volver al temario</span>
-                <span aria-hidden="true">→</span>
-              </a>
-            )}
+            <a
+              href={prev ? leccionUrl(info, prev, base) : undefined}
+              class="btn btn-secondary btn-hud"
+              title={prev ? `Anterior: ${prev.title}` : "No hay lección anterior"}
+              aria-label="Lección anterior"
+              data-route-prev
+              hidden={!prev}
+            >
+              <span aria-hidden="true">←</span>
+            </a>
+            <a
+              href={next ? leccionUrl(info, next, base) : undefined}
+              class="btn btn-primary btn-hud"
+              title={next ? `Siguiente: ${next.title}` : "Fin de la ruta"}
+              aria-label="Lección siguiente"
+              data-route-next
+              data-mark-next
+              hidden={!next}
+            >
+              <span>Siguiente</span>
+              <span aria-hidden="true">→</span>
+            </a>
+            <a href={url} class="btn btn-primary btn-hud" data-route-back hidden={Boolean(next)}>
+              <span>Volver al temario</span>
+              <span aria-hidden="true">→</span>
+            </a>
           </div>
         </div>
 
@@ -183,7 +189,7 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
         <div class="lesson-head__foot">
           <button
             id="marcar-completada"
-            class="btn btn-ghost"
+            class="btn btn-ghost lesson-complete"
             type="button"
             data-slug={info.slug}
             data-leccion={leccionKey}
@@ -198,6 +204,38 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
         </div>
       </header>
 
+      {rutas && (
+        <CourseConfig
+          curso={info}
+          variant="lesson"
+          leccion={{
+            numero: entry.data.numero,
+            variante: entry.data.variante,
+            entorno: entry.data.entorno,
+            arranque: entry.data.arranque,
+          }}
+        />
+      )}
+
+      {"video" in entry.data && (
+        <div class="player-frame">
+          <div class="player-frame__bar">
+            <span class="terminal__dots" aria-hidden="true">
+              <span class="terminal__dot terminal__dot--red"></span>
+              <span class="terminal__dot terminal__dot--yellow"></span>
+              <span class="terminal__dot terminal__dot--green"></span>
+            </span>
+            <span class="terminal__title">
+              {etiqueta.toLowerCase()} <span data-lesson-visible-number>{numeroVisible}</span>
+            </span>
+            <span class="player-frame__state">
+              <span class="status-dot status-dot--cyan" aria-hidden="true"></span> registro de campo
+            </span>
+          </div>
+          <VideoEmbed video={entry.data.video} titulo={entry.data.title} />
+        </div>
+      )}
+
       <section class="lesson-guide sheet" aria-labelledby="guia-title">
         <div class="lesson-guide__head" data-pagefind-ignore="all">
           <span class="status-dot status-dot--cyan" aria-hidden="true"></span>
@@ -210,74 +248,93 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
       </section>
 
       <nav class="lesson-nav" aria-label="Navegación entre lecciones" data-pagefind-ignore="all">
-        {prev ? (
-          <a href={leccionUrl(info, prev, base)} class="lesson-nav__card sheet sheet--link">
-            <span class="lesson-nav__label">← {etiqueta} anterior</span>
-            <span class="lesson-nav__title">{prev.title}</span>
-          </a>
-        ) : (
-          <div class="lesson-nav__spacer" aria-hidden="true"></div>
-        )}
+        <div
+          class="lesson-nav__spacer"
+          data-route-prev-spacer
+          hidden={Boolean(prev)}
+          aria-hidden="true"
+        ></div>
+        <a
+          href={prev ? leccionUrl(info, prev, base) : undefined}
+          class="lesson-nav__card"
+          data-route-prev
+          aria-label="Lección anterior"
+          hidden={!prev}
+        >
+          <span class="lesson-nav__label">← {etiqueta} anterior</span>
+          <span class="lesson-nav__title">{prev?.title ?? ""}</span>
+        </a>
 
-        {next ? (
-          <a
-            href={leccionUrl(info, next, base)}
-            class="lesson-nav__card sheet sheet--link lesson-nav__card--next"
-            data-mark-next
-          >
-            <span class="lesson-nav__label">Siguiente {etiqueta.toLowerCase()} →</span>
-            <span class="lesson-nav__title">{next.title}</span>
-          </a>
-        ) : (
-          <a href={url} class="lesson-nav__card sheet sheet--link lesson-nav__card--next">
-            <span class="lesson-nav__label signal">Fin del curso</span>
-            <span class="lesson-nav__title">Volver al temario y repasar →</span>
-          </a>
-        )}
+        <a
+          href={next ? leccionUrl(info, next, base) : undefined}
+          class="lesson-nav__card lesson-nav__card--next"
+          data-route-next
+          data-mark-next
+          aria-label="Lección siguiente"
+          hidden={!next}
+        >
+          <span class="lesson-nav__label">Siguiente {etiqueta.toLowerCase()} →</span>
+          <span class="lesson-nav__title">{next?.title ?? ""}</span>
+        </a>
+        <a
+          href={url}
+          class="lesson-nav__card lesson-nav__card--next"
+          data-route-back
+          hidden={Boolean(next)}
+        >
+          <span class="lesson-nav__label signal">Fin del curso</span>
+          <span class="lesson-nav__title">Volver al temario y repasar →</span>
+        </a>
       </nav>
     </article>
 
     <!-- Temario: fixed block on desktop, drawer on mobile -->
     <aside class="player-aside" data-pagefind-ignore="all">
-      <div class="player-aside__inner">
-        <div class="temario" id="temario" role="complementary" aria-label="Temario del curso">
-          <div class="temario-sheet">
-            <div class="temario__head">
-              <div>
-                <h2 class="temario__title">
-                  <span class="status-dot" aria-hidden="true"></span>
-                  Temario
-                </h2>
-                <p class="temario__meta">
-                  {info.modulos.length} módulos · {totalLecciones} {esNivel ? "niveles" : "clases"}
-                </p>
-              </div>
-              <button
-                type="button"
-                class="temario__close btn btn-ghost btn-sm"
-                id="temario-close"
-                aria-label="Cerrar temario"
-              >
-                <span aria-hidden="true">✕</span>
-              </button>
-            </div>
-
-            <CourseModuleList
-              modules={info.modulos}
-              cursoBase={url}
-              unidad={info.unidad}
-              current={leccionKey}
-              variant="sidebar"
-            />
-
-            <div class="temario__foot">
-              <span>Curso completo</span>
-              <a href={url}>Repasar el temario →</a>
-            </div>
-          </div>
-        </div>
-      </div>
+      <LessonCommunityCta />
     </aside>
+  </div>
+
+  <!-- Temario: drawer flotante en todas las vistas, abierto desde el FAB -->
+  <div class="temario-overlay" id="temario-overlay" aria-hidden="true"></div>
+  <div class="temario" id="temario" role="complementary" aria-label="Temario del curso" inert>
+    <div class="temario-sheet">
+      <div class="temario__head">
+        <div>
+          <h2 class="temario__title">
+            <span class="status-dot" aria-hidden="true"></span>
+            Temario
+          </h2>
+          <p class="temario__meta">
+            <span data-lesson-modules>{modulosDefecto} módulos</span>
+            {" · "}
+            <span data-lesson-total>{totalDefecto}</span>
+            {` ${esNivel ? "niveles" : "clases"}`}
+          </p>
+        </div>
+        <button
+          type="button"
+          class="temario__close btn btn-ghost btn-sm"
+          id="temario-close"
+          aria-label="Cerrar temario"
+        >
+          <span aria-hidden="true">✕</span>
+        </button>
+      </div>
+
+      <CourseModuleList
+        modules={info.modulos}
+        cursoBase={url}
+        unidad={info.unidad}
+        current={leccionKey}
+        variant="sidebar"
+        routeNumbers={numerosVisiblesDefecto}
+      />
+
+      <div class="temario__foot">
+        <span>Curso completo</span>
+        <a href={url}>Repasar el temario →</a>
+      </div>
+    </div>
   </div>
 
   <!-- TOC drawer (left side, floating) -->
@@ -353,18 +410,161 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
       <line x1="9" y1="13" x2="15" y2="13" />
       <line x1="9" y1="17" x2="12" y2="17" />
     </svg>
-    Temario · <span id="fab-temario-count">0/{totalLecciones}</span>
+    Temario ·{" "}
+    <span id="fab-temario-count">
+      <span id="fab-done">0</span>/<span data-lesson-total>{totalDefecto}</span>
+    </span>
   </button>
 
-  <script is:inline define:vars={{ slug: info.slug, leccionKey, totalLecciones }}>
-    const key = `ncw:progress:${slug}`
+  {rutas && (
+    <script
+      type="application/json"
+      id="arch-catalog"
+      data-base={url}
+      data-numero={entryNumero}
+      set:html={catalogoJson}
+    />
+  )}
+
+  <script>
+    import { initCourseConfig, resumirConfig } from "../../../../lib/course-config.client"
+    import type { CourseConfigState } from "../../../../lib/course-config.client"
+    import type { CursoRuta } from "../../../../lib/tracks"
+    import { numerosVisiblesPorRuta } from "../../../../lib/tracks"
+
+    interface CatalogoItem {
+      slug: string
+      numero: string
+      title: string
+      modulo: string
+    }
+
+    const catalogoEl = document.getElementById("arch-catalog")
+    let catalogo: CatalogoItem[]
+    try {
+      catalogo = JSON.parse(catalogoEl?.textContent ?? "[]")
+    } catch {
+      catalogo = []
+    }
+    const base = catalogoEl?.getAttribute("data-base") ?? ""
+    const entryNumero = catalogoEl?.getAttribute("data-numero") ?? ""
+    const porNumero = new Map(catalogo.map((item: CatalogoItem) => [item.numero, item]))
+
+    const configRoot = document.querySelector<HTMLElement>("[data-course-config]")
+    let rutas: CursoRuta[]
+    try {
+      rutas = JSON.parse(configRoot?.getAttribute("data-rutas") ?? "[]")
+    } catch {
+      rutas = []
+    }
+
+    const aplicarEnlace = (
+      el: HTMLElement,
+      target: CatalogoItem | null | undefined,
+      tipo: "prev" | "next",
+    ) => {
+      if (!target) {
+        el.hidden = true
+        return
+      }
+      el.hidden = false
+      el.setAttribute("href", `${base}${target.slug}/`)
+      el.setAttribute("title", `${tipo === "prev" ? "Anterior" : "Siguiente"}: ${target.title}`)
+      el.setAttribute("aria-label", tipo === "prev" ? "Lección anterior" : "Lección siguiente")
+      const titleEl = el.querySelector(".lesson-nav__title")
+      if (titleEl) titleEl.textContent = target.title
+    }
+
+    initCourseConfig((state: CourseConfigState) => {
+      // URL profunda incompatible (localStorage o deep link): la lección no
+      // pertenece a la ruta resuelta; vuelve a la ficha ("../"), que acepta
+      // cualquier configuración. También cubre toggles posteriores y eventos
+      // ncw:course-config:set que excluyan la lección actual.
+      if (rutas.length && state.ruta && !state.ruta.lecciones.includes(entryNumero)) {
+        window.location.replace("../")
+        return
+      }
+      const routeEl = document.querySelector<HTMLElement>("[data-lesson-route]")
+      if (routeEl) routeEl.textContent = resumirConfig(state.config)
+      if (!catalogoEl) return
+      const visibles = state.ruta ? state.ruta.lecciones : []
+      const numerosVisibles = numerosVisiblesPorRuta(state.ruta)
+      const numeroVisible = numerosVisibles[entryNumero] || entryNumero
+      for (const el of document.querySelectorAll<HTMLElement>("[data-lesson-visible-number]")) {
+        el.textContent = numeroVisible
+      }
+      const i = visibles.indexOf(entryNumero)
+      const inRuta = i !== -1
+      // Posición (1..N) dentro de la ruta activa; se recalcula al cambiar dificultad.
+      for (const el of document.querySelectorAll<HTMLElement>("[data-lesson-sequence-number]")) {
+        el.textContent = String(i + 1)
+      }
+      const prev = inRuta && i > 0 ? porNumero.get(visibles[i - 1]) : null
+      const next = inRuta && i < visibles.length - 1 ? porNumero.get(visibles[i + 1]) : null
+      for (const el of document.querySelectorAll<HTMLElement>("[data-route-prev]"))
+        aplicarEnlace(el, prev, "prev")
+      for (const el of document.querySelectorAll<HTMLElement>("[data-route-next]"))
+        aplicarEnlace(el, next, "next")
+      const spacer = document.querySelector<HTMLElement>("[data-route-prev-spacer]")
+      if (spacer) spacer.hidden = Boolean(prev)
+      for (const el of document.querySelectorAll<HTMLElement>("[data-route-back]"))
+        el.hidden = Boolean(next)
+    })
+  </script>
+
+  <script
+    is:inline
+    define:vars={{
+      slug: info.slug,
+      leccionKey,
+      variante: entry.data.variante,
+      compartirVariante: Boolean(info.progreso?.compartirVariante),
+      visiblesDefecto: leccionesDefecto.map((leccion) => leccion.slug),
+      totalDefecto,
+    }}
+  >
+    // Config activa: query > localStorage > default. El ID de una lección
+    // especial se califica con la ruta completa (dificultad-entorno-arranque).
+    const sanitizeDificultad = (value) => (value === "avanzada" ? "avanzada" : "facil")
+    const sanitizeEntorno = (value) => (value === "vm" ? "vm" : "hardware")
+    const sanitizeArranque = (value) => (value === "dualboot" ? "dualboot" : "solo")
+    const normalizarConfig = (config) => {
+      const entorno = sanitizeEntorno(config.entorno)
+      return {
+        dificultad: sanitizeDificultad(config.dificultad),
+        entorno,
+        arranque: entorno === "vm" ? "solo" : sanitizeArranque(config.arranque),
+      }
+    }
+    const rutaKey = (config) => `${config.dificultad}-${config.entorno}-${config.arranque}`
+
+    let config = { dificultad: "facil", entorno: "hardware", arranque: "solo" }
+    try {
+      const params = new URLSearchParams(window.location.search)
+      config = normalizarConfig({
+        dificultad: params.get("dificultad") ?? localStorage.getItem(`ncw:difficulty:${slug}`),
+        entorno: params.get("entorno") ?? localStorage.getItem(`ncw:environment:${slug}`),
+        arranque: params.get("arranque") ?? localStorage.getItem(`ncw:boot:${slug}`),
+      })
+    } catch {}
+
+    // Denominador de la barra: total de la ruta activa; fallback al render SSR.
+    let visiblesRuta = null
+
+    const keyFor = () => `ncw:progress:${slug}`
+    const routeTotal = () =>
+      Array.isArray(visiblesRuta) && visiblesRuta.length ? visiblesRuta.length : totalDefecto
+    const idDeItem = (itemSlug, itemVariante) =>
+      !compartirVariante || itemVariante === "comun" ? itemSlug : `${itemSlug}@${rutaKey(config)}`
+    const idActual = () => idDeItem(leccionKey, variante)
     const btn = document.getElementById("marcar-completada")
     const label = btn?.querySelector(".btn-label")
     const icon = btn?.querySelector(".btn-icon")
 
     const read = () => {
       try {
-        return JSON.parse(localStorage.getItem(key) || "[]")
+        const parsed = JSON.parse(localStorage.getItem(keyFor()) || "[]")
+        return Array.isArray(parsed) ? parsed.filter((item) => typeof item === "string") : []
       } catch {
         return []
       }
@@ -372,9 +572,17 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
 
     const syncUI = () => {
       const doneList = read()
-      const isDone = doneList.includes(leccionKey)
-      const count = doneList.length
-      const pct = Math.round((count / totalLecciones) * 100)
+      const isDone = doneList.includes(idActual())
+      const items = [...document.querySelectorAll("[data-lesson-item]")]
+      const porSlug = new Map(items.map((item) => [item.getAttribute("data-lesson-item"), item]))
+      const visibles =
+        Array.isArray(visiblesRuta) && visiblesRuta.length ? visiblesRuta : visiblesDefecto
+      const count = visibles.filter((itemSlug) => {
+        const item = porSlug.get(itemSlug)
+        if (!item) return false
+        return doneList.includes(idDeItem(itemSlug, item.getAttribute("data-variante") || "comun"))
+      }).length
+      const pct = Math.min(100, Math.round((count / routeTotal()) * 100))
 
       if (btn) {
         btn.setAttribute("aria-pressed", String(isDone))
@@ -386,22 +594,29 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
       }
 
       const pctEl = document.getElementById("player-progress-pct")
-      const countEl = document.getElementById("player-progress-count")
+      const doneEl = document.getElementById("player-progress-done")
       const barEl = document.getElementById("player-progress-bar")
       if (pctEl) pctEl.textContent = `${pct}% completado`
-      if (countEl) countEl.textContent = `(${count} de ${totalLecciones})`
+      if (doneEl) doneEl.textContent = String(count)
       if (barEl) barEl.style.width = `${pct}%`
 
-      const fabCount = document.getElementById("fab-temario-count")
-      if (fabCount) fabCount.textContent = `${count}/${totalLecciones}`
+      const fabDone = document.getElementById("fab-done")
+      if (fabDone) fabDone.textContent = String(count)
 
-      for (const item of document.querySelectorAll("[data-lesson-item]")) {
-        item.classList.toggle("is-done", doneList.includes(item.getAttribute("data-lesson-item")))
+      for (const item of items) {
+        const itemSlug = item.getAttribute("data-lesson-item") || ""
+        const itemVariante = item.getAttribute("data-variante") || "comun"
+        item.classList.toggle("is-done", doneList.includes(idDeItem(itemSlug, itemVariante)))
       }
       for (const mod of document.querySelectorAll("[data-module-key]")) {
-        const items = [...mod.querySelectorAll("[data-lesson-item]")]
+        const items = [...mod.querySelectorAll("[data-lesson-item]:not([hidden])")]
         const done = items.filter((item) =>
-          doneList.includes(item.getAttribute("data-lesson-item")),
+          doneList.includes(
+            idDeItem(
+              item.getAttribute("data-lesson-item") || "",
+              item.getAttribute("data-variante") || "comun",
+            ),
+          ),
         ).length
         const doneEl = mod.querySelector("[data-module-done]")
         const fillEl = mod.querySelector("[data-module-fill]")
@@ -414,22 +629,23 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
 
     btn?.addEventListener("click", () => {
       const done = new Set(read())
-      if (done.has(leccionKey)) {
-        done.delete(leccionKey)
+      const id = idActual()
+      if (done.has(id)) {
+        done.delete(id)
       } else {
-        done.add(leccionKey)
+        done.add(id)
       }
       try {
-        localStorage.setItem(key, JSON.stringify([...done]))
+        localStorage.setItem(keyFor(), JSON.stringify([...done]))
       } catch {}
       syncUI()
     })
 
     const markCompleted = () => {
       const done = new Set(read())
-      done.add(leccionKey)
+      done.add(idActual())
       try {
-        localStorage.setItem(key, JSON.stringify([...done]))
+        localStorage.setItem(keyFor(), JSON.stringify([...done]))
       } catch {}
     }
 
@@ -438,6 +654,17 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
     }
 
     syncUI()
+
+    // Seguir la config activa del configurador sin recargar: el ID de la
+    // lección y el denominador de la barra dependen de la ruta.
+    const onConfig = (event) => {
+      const detail = (event && event.detail) || {}
+      if (detail.config) config = normalizarConfig({ ...config, ...detail.config })
+      visiblesRuta = Array.isArray(detail.visibles) ? detail.visibles : null
+      syncUI()
+    }
+    document.addEventListener("ncw:course-config", onConfig)
+    window.addEventListener("ncw:course-config", onConfig)
 
     const tocDrawer = document.getElementById("toc-drawer")
     const tocOverlay = document.getElementById("toc-overlay")
@@ -476,41 +703,25 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
       ?.querySelectorAll("a[href]")
       .forEach((link) => link.addEventListener("click", closeAllDrawers))
 
-    // Temario drawer on mobile (opened from FAB or header button)
-    const playerAside = document.querySelector(".player-aside")
-    const temarioOverlayEl = document.createElement("div")
-    temarioOverlayEl.className = "temario-mobile-overlay"
-    temarioOverlayEl.style.cssText = `
-      position: fixed; inset: 0; z-index: var(--z-overlay);
-      background: rgba(0,0,0,0.5); opacity: 0; visibility: hidden;
-      transition: opacity 0.25s ease, visibility 0.25s ease;
-    `
-    document.body.appendChild(temarioOverlayEl)
-
-    const desktopQuery = window.matchMedia("(min-width: 1024px)")
+    // Temario drawer (siempre, en todas las vistas; abierto desde el FAB)
+    const temarioDrawer = document.getElementById("temario")
+    const temarioOverlayEl = document.getElementById("temario-overlay")
 
     const setTemarioDrawer = (open) => {
-      if (!playerAside) return
-      playerAside.classList.toggle("is-open", open)
-      playerAside.inert = !open && !desktopQuery.matches
-      temarioOverlayEl.style.opacity = open ? "1" : "0"
-      temarioOverlayEl.style.visibility = open ? "visible" : "hidden"
+      if (!temarioDrawer) return
+      temarioDrawer.classList.toggle("is-open", open)
+      temarioDrawer.inert = !open
+      temarioDrawer.setAttribute("aria-hidden", String(!open))
+      temarioOverlayEl?.classList.toggle("is-open", open)
+      temarioOverlayEl?.setAttribute("aria-hidden", String(!open))
       document.body.style.overflow = open ? "hidden" : ""
     }
-
-    const syncTemarioMode = () => {
-      if (desktopQuery.matches) {
-        setTemarioDrawer(false)
-      } else if (playerAside) {
-        playerAside.inert = !playerAside.classList.contains("is-open")
-      }
-    }
-    desktopQuery.addEventListener("change", syncTemarioMode)
-    syncTemarioMode()
+    setTemarioDrawer(false)
 
     document.getElementById("fab-temario-mobile")?.addEventListener("click", () => {
       closeTocDrawer()
       setTemarioDrawer(true)
+      document.getElementById("temario-close")?.focus()
     })
     document.getElementById("temario-open")?.addEventListener("click", () => {
       closeTocDrawer()
@@ -519,8 +730,8 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
     document
       .getElementById("temario-close")
       ?.addEventListener("click", () => setTemarioDrawer(false))
-    temarioOverlayEl.addEventListener("click", () => setTemarioDrawer(false))
-    playerAside
+    temarioOverlayEl?.addEventListener("click", () => setTemarioDrawer(false))
+    temarioDrawer
       ?.querySelectorAll("a[href]")
       .forEach((link) => link.addEventListener("click", () => setTemarioDrawer(false)))
 
@@ -587,6 +798,14 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
 
   .player-bar__crumb {
     min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+  }
+
+  .player-bar__crumb > * {
+    flex-shrink: 0;
   }
 
   .player-bar__course {
@@ -638,6 +857,7 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
   .player-aside {
     grid-column: span 4;
     min-width: 0;
+    align-self: stretch;
   }
 
   .player-frame {
@@ -670,7 +890,7 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
   }
 
   .lesson-head {
-    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
     padding: clamp(1.1rem, 2.4vw, 1.6rem);
   }
 
@@ -689,14 +909,19 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
     min-width: 0;
   }
 
-  .lesson-head__module {
+  .lesson-head__course {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    gap: 0.35rem 0.55rem;
+    gap: 0.4rem 0.55rem;
     font-family: var(--font-mono);
-    font-size: 0.6rem;
-    letter-spacing: 0.1em;
+    font-size: 0.62rem;
+  }
+
+  .lesson-head__eyebrow {
+    color: var(--ink-muted);
+    font-weight: 700;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
   }
 
@@ -704,11 +929,21 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    gap: 0.4rem;
+    gap: 0.4rem 0.55rem;
     margin-top: 0.55rem;
     font-family: var(--font-mono);
     font-size: 0.66rem;
     color: var(--ink-muted);
+  }
+
+  .lesson-head__class {
+    color: var(--accent);
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .lesson-head__route {
+    font-variant-numeric: tabular-nums;
   }
 
   .lesson-head__title {
@@ -721,6 +956,7 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
 
   .lesson-head__arrows {
     display: flex;
+    align-items: center;
     justify-content: flex-end;
     gap: 0.4rem;
     flex-shrink: 0;
@@ -743,6 +979,41 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
     margin-top: 1.1rem;
     padding-top: 1rem;
     border-top: 1px solid var(--line);
+  }
+
+  .lesson-complete {
+    gap: 0.6rem;
+    padding: 0.42rem 0.7rem;
+    font-family: var(--font-mono);
+    font-size: 0.63rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .lesson-complete .btn-icon {
+    display: grid;
+    place-items: center;
+    width: 1rem;
+    height: 1rem;
+    border: 1px solid color-mix(in srgb, currentColor 55%, transparent);
+    border-radius: 50%;
+    font-size: 0.55rem;
+    line-height: 1;
+  }
+
+  .lesson-complete.btn-primary {
+    background: var(--signal-soft);
+    border-color: color-mix(in srgb, var(--signal) 45%, transparent);
+    color: var(--signal);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .lesson-complete.btn-primary:hover {
+      background: color-mix(in srgb, var(--signal) 16%, transparent);
+      border-color: color-mix(in srgb, var(--signal) 60%, transparent);
+      color: var(--signal);
+    }
   }
 
   .lesson-guide {
@@ -785,9 +1056,34 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
   }
 
   .lesson-nav__card {
-    padding: 0.9rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.28rem;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: transparent;
     color: inherit;
     text-decoration: none;
+    transition:
+      border-color var(--dur-ui) var(--ease-out),
+      background-color var(--dur-ui) var(--ease-out);
+  }
+
+  .lesson-nav__card--next {
+    border-color: color-mix(in srgb, var(--accent) 28%, var(--line));
+    text-align: right;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .lesson-nav__card:hover {
+      border-color: var(--line-strong);
+      background: var(--bg-card);
+    }
+
+    .lesson-nav__card--next:hover {
+      border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+    }
   }
 
   .lesson-nav__label {
@@ -805,15 +1101,10 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
 
   .lesson-nav__title {
     display: block;
-    margin-top: 0.3rem;
     color: var(--ink);
     font-size: 0.9rem;
     font-weight: 600;
     line-height: 1.35;
-  }
-
-  .lesson-nav__card--next {
-    text-align: right;
   }
 
   .temario-sheet {
@@ -865,28 +1156,7 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
     text-decoration: none;
   }
 
-  /* ===== Temario: sticky block on desktop ===== */
-  @media (min-width: 1024px) {
-    .player-aside {
-      align-self: start;
-    }
-
-    .player-aside__inner {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      align-items: stretch;
-    }
-
-    .temario {
-      position: sticky;
-      top: 8rem;
-    }
-
-    .temario__close {
-      display: none;
-    }
-  }
+  /* ===== Temario: drawer flotante en todas las vistas (estilos base en syllabus.css) ===== */
 
   /* ===== TOC drawer (left side, floating) ===== */
   .toc-overlay {
@@ -1043,13 +1313,9 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
         transform: translateY(-50%);
       }
     }
-
-    .fab-temario {
-      display: none;
-    }
   }
 
-  /* ===== Mobile: Temario becomes drawer ===== */
+  /* ===== Mobile: el CTA cae tras el contenido; el temario ya es drawer ===== */
   @media (max-width: 1023.98px) {
     .player-layout {
       grid-template-columns: minmax(0, 1fr);
@@ -1060,53 +1326,28 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
       grid-column: 1 / -1;
     }
 
-    .player-aside {
-      position: fixed;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      z-index: var(--z-drawer);
-      width: min(320px, 85vw);
-      background: var(--bg);
-      border-left: 1px solid var(--line);
-      box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
-      transform: translateX(100%);
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      overflow-y: auto;
-      padding: 1rem;
-      grid-column: auto;
-    }
-
-    .player-aside.is-open {
-      transform: translateX(0);
-    }
-
-    /* The aside is the drawer here, not the inner temario block */
-    .temario {
-      position: static;
-      inset: auto;
-      width: auto;
-      max-height: none;
-      padding: 0;
-      border: 0;
-      background: transparent;
-      box-shadow: none;
-      transform: none;
-      overflow: visible;
-    }
-
-    .temario-sheet {
-      padding: 1rem;
-    }
-
     .player-bar__crumb {
       max-width: 100%;
     }
   }
 
   @media (max-width: 640px) {
-    .player-bar__track {
+    .player-bar__module {
       display: none;
+    }
+
+    .player-bar__crumb {
+      mask-image: linear-gradient(to right, #000 82%, transparent 100%);
+    }
+
+    .player-bar__track {
+      width: 100%;
+      flex-basis: 100%;
+      order: 3;
+    }
+
+    .player-bar__tools {
+      width: 100%;
     }
 
     .player-frame__state {
@@ -1122,19 +1363,12 @@ const numero = esNivel ? String(entry.data.orden) : String(entry.data.orden + 1)
     }
 
     .lesson-head__arrows {
-      width: 100%;
+      justify-content: flex-end;
     }
 
     .lesson-head__top {
-      grid-template-columns: minmax(0, 1fr);
-    }
-
-    .lesson-head__arrows .btn {
-      flex: 1;
-    }
-
-    .lesson-head__arrows .btn:first-child:not(:only-child) {
-      flex: 0 0 auto;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: start;
     }
   }
 </style>

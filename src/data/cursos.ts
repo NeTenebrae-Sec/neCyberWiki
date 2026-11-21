@@ -2,6 +2,7 @@
 // los conteos se derivan en `src/lib/catalog.ts`. Aquí solo se declara lo que
 // el curso promete, a quién sirve y qué necesita el lector.
 
+import type { CursoRuta } from "../lib/tracks"
 import type { CategoriaInfo } from "./categorias"
 
 export interface CursoModulo {
@@ -15,6 +16,13 @@ export interface CursoFuente {
   url: string
 }
 
+// Banner común de un curso adaptable: copy editorial y CTA/video opcionales.
+export interface CursoHero {
+  copy: string[]
+  cta?: string
+  video?: string
+}
+
 export interface CursoInfo {
   slug: string
   titulo: string
@@ -26,47 +34,145 @@ export interface CursoInfo {
   requisitos: string[]
   resultados: string[]
   modulos: CursoModulo[]
+  rutas?: CursoRuta[] // Rutas adaptables; su orden manda sobre `orden`.
+  // Progreso por lección: si true, las lecciones comunes comparten estado entre
+  // dificultades y solo las especiales se califican con la ruta activa.
+  progreso?: { compartirVariante: boolean }
+  hero?: CursoHero // Banner común del curso adaptable.
+  videoPendiente?: boolean // true = videos aún sin publicar; no inventar IDs.
   fuente?: CursoFuente
 }
 
+const comunFinal = ["3.1", "3.2", "3.3", "3.4", "3.5", "3.6"]
+
 export const cursos: CursoInfo[] = [
   {
-    slug: "arch-linux-facil",
-    titulo: "Arch Linux fácil",
+    slug: "arch-linux",
+    titulo: "Cómo instalar Arch Linux",
     descripcion:
-      "Ocho lecciones para pasar de cero a un Arch Linux con GNOME, seguro y usable. Sin asumir nada: desde descargar la ISO hasta entender pacman, el AUR y ZRAM.",
-    promesa: "De cero a un Arch con GNOME, seguro y usable, entendiendo lo que haces.",
+      "Curso adaptable: elige dificultad, entorno y arranque, y el temario se reorganiza. Veintidós lecciones únicas, de la ISO al primer update, con archinstall o instalación manual.",
+    promesa:
+      "Instala Arch Linux a tu manera: fácil con archinstall o manual, en VM o hardware, solo Linux o dual boot.",
     nivel: "principiante",
     categoria: "linux-y-sistemas",
     unidad: "clase",
     requisitos: [
-      "Un PC o una máquina virtual (recomendada)",
-      "USB de 8 GB o más",
-      "Conexión a internet",
+      "Un PC o una máquina virtual con al menos 4 GB de RAM y 20 GB de disco",
+      "USB de 8 GB o más si instalas en hardware real",
+      "Conexión a internet durante la instalación",
       "Respaldo de lo importante",
+      "Para dual boot: Windows en UEFI/GPT y la clave de BitLocker a mano",
     ],
     resultados: [
-      "Instalar Arch Linux con GNOME en una máquina virtual o en hardware propio.",
-      "Moverte con pacman y entender cuándo conviene el AUR.",
-      "Dejar el sistema actualizable y respaldar tus dotfiles.",
+      "Instalar Arch Linux con archinstall o a mano, en VM o hardware.",
+      "Elegir y dejar funcionando un escritorio (GNOME o BSPWM).",
+      "Moverte con pacman, el AUR y ZRAM sin miedo.",
+      "Dejar el sistema actualizado, con firewall y backups.",
     ],
     modulos: [
       {
-        id: "fundamentos-y-preparacion",
-        titulo: "Fundamentos y preparación",
-        objetivo: "Entender qué es Arch y dejar el equipo listo antes de tocar el disco.",
+        id: "preparacion",
+        titulo: "Preparación",
+        objetivo: "Entender qué es Arch y preparar ISO, medio de arranque, firmware y disco.",
       },
       {
-        id: "instalacion-archinstall",
-        titulo: "Instalación con archinstall",
-        objetivo: "Instalar el sistema base y el escritorio sin saltarse pasos.",
+        id: "instalacion",
+        titulo: "Instalación",
+        objetivo:
+          "Instalar el sistema base y el escritorio por la ruta elegida, incluido dual boot.",
       },
       {
-        id: "tu-arch-usable",
-        titulo: "Tu Arch, usable y seguro",
-        objetivo: "Actualizar, instalar software y proteger una configuración que ya funciona.",
+        id: "configuracion",
+        titulo: "Configuración",
+        objetivo: "Dejar el sistema actualizado, seguro y mantenible.",
       },
     ],
+    rutas: [
+      {
+        dificultad: "facil",
+        entorno: "hardware",
+        arranque: "solo",
+        lecciones: ["1.1", "1.2", "1.3", "1.5", "1.7", "2.1", "2.2", "2.3", ...comunFinal],
+      },
+      {
+        dificultad: "facil",
+        entorno: "vm",
+        arranque: "solo",
+        lecciones: ["1.1", "1.2", "1.4", "1.7", "2.1", "2.2", "2.3", ...comunFinal],
+      },
+      {
+        dificultad: "facil",
+        entorno: "hardware",
+        arranque: "dualboot",
+        lecciones: [
+          "1.1",
+          "1.2",
+          "1.3",
+          "1.5",
+          "1.6",
+          "1.7",
+          "2.1",
+          "2.2",
+          "2.4",
+          "2.3",
+          ...comunFinal,
+        ],
+      },
+      {
+        dificultad: "avanzada",
+        entorno: "hardware",
+        arranque: "solo",
+        lecciones: [
+          "1.1",
+          "1.2",
+          "1.3",
+          "1.5",
+          "1.7",
+          "2.1",
+          "2.5",
+          "2.6",
+          "2.7",
+          "2.9",
+          ...comunFinal,
+        ],
+      },
+      {
+        dificultad: "avanzada",
+        entorno: "vm",
+        arranque: "solo",
+        lecciones: ["1.1", "1.2", "1.4", "1.7", "2.1", "2.5", "2.6", "2.7", "2.9", ...comunFinal],
+      },
+      {
+        dificultad: "avanzada",
+        entorno: "hardware",
+        arranque: "dualboot",
+        lecciones: [
+          "1.1",
+          "1.2",
+          "1.3",
+          "1.5",
+          "1.6",
+          "1.7",
+          "2.1",
+          "2.5",
+          "2.6",
+          "2.7",
+          "2.8",
+          "2.9",
+          ...comunFinal,
+        ],
+      },
+    ] satisfies CursoRuta[],
+    progreso: { compartirVariante: true },
+    hero: {
+      copy: [
+        "En este curso aprenderás a instalar Arch Linux desde cero y dejarlo funcional, seguro y usable. ¡El temario se reorganizará automáticamente!",
+        "Elige la dificultad y el tipo de entorno que deseas instalar",
+      ],
+      cta: "Elige tu ruta y empieza por la lección 1.1",
+      video: "",
+    },
+    videoPendiente: true,
   },
   {
     slug: "bandit",
