@@ -2,7 +2,7 @@ import { defineConfig } from "astro/config"
 import tailwindcss from "@tailwindcss/vite"
 import rehypeLazyImages from "./src/lib/rehype-lazy-images.mjs"
 
-const base = "/neCyberWiki/"
+const base = process.env.PUBLIC_NCW_BASE || "/neCyberWiki/"
 
 // Mapa de slugs antiguos (curso `arch-linux-facil`) a los nuevos del curso adaptable.
 const archLecciones = {
