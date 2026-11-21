@@ -1,0 +1,34 @@
+name: Error de contenido
+description: Algo en una lección, la bitácora o el roadmap es incorrecto o no se entiende.
+title: "[Contenido] Descripción corta"
+labels: ["contenido"]
+body:
+  - type: input
+    id: pagina
+    attributes:
+      label: ¿Qué página o lección?
+      placeholder: "cursos/linux-y-sistemas/arch-linux/archiso-terminal-teclado-red"
+    validations:
+      required: true
+  - type: textarea
+    id: problema
+    attributes:
+      label: ¿Qué está mal o no se entiende?
+      description: Cita la frase o indica el apartado concreto.
+    validations:
+      required: true
+  - type: textarea
+    id: correccion
+    attributes:
+      label: ¿Qué debería decir?
+      description: Un enlace a una fuente ayuda mucho.
+  - type: dropdown
+    id: donde
+    attributes:
+      label: ¿Dónde lo viste?
+      options:
+        - Web publicada
+        - Repositorio GitHub
+        - Vídeo de YouTube
+    validations:
+      required: true

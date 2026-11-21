@@ -1,11 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Discussions — dudas, ideas y comunidad
+  - name: Hacer una pregunta
     url: https://github.com/NeTenebrae-Sec/neCyberWiki/discussions
-    about: Para preguntas, propuestas y debate general usa Discussions, no los issues.
-  - name: Seguridad — reporte privado
-    url: https://github.com/NeTenebrae-Sec/neCyberWiki/security/advisories/new
-    about: Para vulnerabilidades usa el reporte privado (ver SECURITY.md). No abras un issue público.
-  - name: Comunidad de YouTube
-    url: https://www.youtube.com/@netenebrae
-    about: Vídeos y comunidad en el canal de YouTube.
+    about: Las preguntas sobre una lección van en Discussions, para que todos aprendan de la respuesta.
+  - name: Mostrar tu trabajo
+    url: https://github.com/NeTenebrae-Sec/neCyberWiki/discussions
+    about: Comparte aquí tus resultados y dudas de los laboratorios.
