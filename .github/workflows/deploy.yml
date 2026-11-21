@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
   workflow_dispatch:
 
 permissions:
@@ -12,26 +12,56 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout main (producción)
         uses: actions/checkout@v4
+        with:
+          ref: main
+          path: site-main
+          persist-credentials: false
+
+      - name: Checkout dev (staging)
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          path: site-dev
+          persist-credentials: false
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: site-main/package-lock.json
 
-      - name: Install dependencies
+      - name: Install dependencies (main)
+        working-directory: site-main
         run: npm ci
 
-      - name: Build
+      - name: Build main
+        working-directory: site-main
         run: npm run build
+
+      - name: Install dependencies (dev)
+        working-directory: site-dev
+        run: npm ci
+
+      - name: Build dev (staging)
+        working-directory: site-dev
+        env:
+          PUBLIC_NCW_BASE: /neCyberWiki/dev/
+        run: npm run build
+
+      - name: Assemble site (main at /, dev at /dev/)
+        run: |
+          mkdir -p _site/dev
+          cp -r site-main/dist/. _site/
+          cp -r site-dev/dist/. _site/dev/
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -39,7 +69,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: _site
 
   deploy:
     needs: build

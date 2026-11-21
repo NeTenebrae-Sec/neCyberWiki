@@ -263,6 +263,11 @@
     --pf-input-height: 44px;
     --pf-input-font-size: 16px;
     --pf-searchbox-dropdown-max-height: min(55vh, 380px);
+    visibility: hidden;
+  }
+
+  .site-header.is-search-open .header-search pagefind-searchbox {
+    visibility: visible;
   }
 }
 

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Hacer una pregunta
+    url: https://github.com/NeTenebrae-Sec/neCyberWiki/discussions
+    about: Las preguntas sobre una lección van en Discussions, para que todos aprendan de la respuesta.
+  - name: Proponer una idea
+    url: https://github.com/NeTenebrae-Sec/neCyberWiki/discussions
+    about: Las ideas y propuestas generales van en Discussions, antes de convertirlas en un PR.

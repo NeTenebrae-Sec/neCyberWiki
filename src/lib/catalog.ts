@@ -5,6 +5,7 @@ import { getCollection } from "astro:content"
 import { CATEGORIAS, type CategoriaInfo } from "../data/categorias"
 import { cursos, type CursoInfo } from "../data/cursos"
 import { site } from "../data/site"
+import { buscarRuta, normalizarConfig, type CursoConfig, type CursoRuta } from "./tracks"
 import {
   formatTotalMin,
   groupSyllabus,
@@ -93,6 +94,22 @@ export async function getCategoriasConContenido(): Promise<CategoriaConContenido
       totalLecciones: propios.reduce((total, curso) => total + curso.lecciones.length, 0),
     }
   })
+}
+
+// Lecciones visibles de una configuración, en el orden de la ruta declarada.
+// Sin rutas o sin ruta encontrada, devuelve las lecciones en su orden global.
+export function leccionesDeRuta(
+  curso: Pick<CursoPublicado, "rutas" | "lecciones">,
+  config: Partial<CursoConfig> = {},
+): SyllabusLesson[] {
+  const rutas: CursoRuta[] = curso.rutas ?? []
+  const ruta = rutas.length ? buscarRuta(rutas, normalizarConfig(config)) : undefined
+  if (!ruta) return [...curso.lecciones]
+
+  const porNumero = new Map(curso.lecciones.map((l) => [l.numero, l]))
+  return ruta.lecciones
+    .map((id) => porNumero.get(id))
+    .filter((l): l is SyllabusLesson => Boolean(l))
 }
 
 export function cursoUrl(

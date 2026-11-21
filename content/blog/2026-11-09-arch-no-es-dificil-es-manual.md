@@ -16,6 +16,6 @@ Cuando tu Ubuntu se rompe, hay un foro con la solución a un clic. Cuando tu Arc
 
 ## La serie: de cero a un Arch usable
 
-Estoy grabando **«Arch Linux fácil»**, una serie de 8 episodios: desde descargar la ISO hasta ZRAM, AUR y dotfiles. El curso ya está en este sitio: **[Cómo instalar Arch Linux](../../cursos/arch-linux-facil/)** — video + guía escrita + ejercicios, gratis y sin registros.
+Estoy preparando **«Cómo instalar Arch Linux»**, un curso adaptable en este sitio: eliges dificultad (Fácil con archinstall o Avanzada manual), entorno (VM o hardware) y arranque (solo Linux o dual boot), y el temario se reorganiza a tu ruta. **[El curso ya está aquí](../../cursos/linux-y-sistemas/arch-linux/)** — guía escrita gratuita y sin registros.
 
 No necesitas autorización de nadie. Solo backup, ganas y una VM.

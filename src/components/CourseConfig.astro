@@ -1,0 +1,897 @@
+---
+import { CONFIG_POR_DEFECTO } from "../lib/tracks"
+import type { CursoPublicado } from "../lib/catalog"
+
+interface Props {
+  curso: Pick<CursoPublicado, "slug" | "rutas" | "progreso">
+  variant?: "hero" | "lesson" | "top-difficulty"
+  leccion?: { numero: string; variante: string; entorno: string; arranque: string }
+}
+
+const { curso, variant = "hero", leccion } = Astro.props
+const rutas = curso.rutas
+const compartirVariante = Boolean(curso.progreso?.compartirVariante)
+const uid = (eje: string) => `${curso.slug}-${eje}`
+// Solo la lección emite data-lesson-*: sin ellos no hay atenuación (la ficha no pasa el prop).
+const leccionAttrs = leccion
+  ? {
+      "data-lesson-numero": leccion.numero,
+      "data-lesson-variante": leccion.variante,
+      "data-lesson-entorno": leccion.entorno,
+      "data-lesson-arranque": leccion.arranque,
+    }
+  : {}
+---
+
+{rutas && variant === "top-difficulty" && (
+  <div
+    class:list={["top-diff-toggle", leccion && "top-diff-toggle--lesson"]}
+    data-course-config
+    data-slug={curso.slug}
+    data-rutas={JSON.stringify(rutas)}
+    data-default={JSON.stringify(CONFIG_POR_DEFECTO)}
+    data-compartir-variante={String(compartirVariante)}
+    {...leccionAttrs}
+  >
+    <span class="top-diff-toggle__label">DIFICULTAD:</span>
+    <fieldset class="top-diff-toggle__group" data-config-difficulty>
+      <legend class="sr-only">Dificultad</legend>
+      <label class="config-option top-diff-toggle__option" data-diff-option="facil">
+        <input type="radio" name={uid("dificultad")} value="facil" checked />
+        <span class="top-diff-toggle__btn">
+          <span class="status-dot status-dot--signal" aria-hidden="true"></span>
+          <span>FÁCIL</span>
+        </span>
+      </label>
+      <label class="config-option top-diff-toggle__option" data-diff-option="avanzada">
+        <input type="radio" name={uid("dificultad")} value="avanzada" />
+        <span class="top-diff-toggle__btn">
+          <span class="status-dot status-dot--signal" aria-hidden="true"></span>
+          <span>AVANZADA</span>
+        </span>
+      </label>
+    </fieldset>
+  </div>
+)}
+
+{rutas && variant === "hero" && (
+  <div
+    class="course-config-hud"
+    data-course-config
+    data-slug={curso.slug}
+    data-rutas={JSON.stringify(rutas)}
+    data-default={JSON.stringify(CONFIG_POR_DEFECTO)}
+    data-compartir-variante={String(compartirVariante)}
+    {...leccionAttrs}
+  >
+    <div class="course-config-hud__head">
+      <div class="course-config-hud__title-wrap">
+        <span class="status-dot status-dot--cyan" aria-hidden="true"></span>
+        <span class="course-config-hud__title">CONFIGURADOR DE ENTORNO Y ARRANQUE</span>
+      </div>
+      <div class="course-config-hud__diff-toggle">
+        <span class="top-diff-toggle__label">DIFICULTAD:</span>
+        <fieldset class="top-diff-toggle__group" data-config-difficulty>
+          <legend class="sr-only">Dificultad</legend>
+          <label class="config-option top-diff-toggle__option" data-diff-option="facil">
+            <input type="radio" name={uid("dificultad")} value="facil" checked />
+            <span class="top-diff-toggle__btn">
+              <span class="status-dot status-dot--signal" aria-hidden="true"></span>
+              <span>FÁCIL</span>
+            </span>
+          </label>
+          <label class="config-option top-diff-toggle__option" data-diff-option="avanzada">
+            <input type="radio" name={uid("dificultad")} value="avanzada" />
+            <span class="top-diff-toggle__btn">
+              <span class="status-dot status-dot--signal" aria-hidden="true"></span>
+              <span>AVANZADA</span>
+            </span>
+          </label>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="course-config-hud__body">
+      <div class="course-config-hud__subhead">
+        <span class="course-config-hud__subtitle">SISTEMA DESTINO // ARRANQUE</span>
+        <span class="course-config-hud__dep">[DEPENDIENTE DE HARDWARE]</span>
+      </div>
+
+      <div class="course-config-hud__grid">
+        <fieldset class="course-config-hud__fieldset" data-config-environment>
+          <legend class="sr-only">Entorno</legend>
+          <label class="config-option config-card">
+            <input type="radio" name={uid("entorno")} value="vm" />
+            <span class="config-card__body">
+              <span class="config-card__header">
+                <span class="config-card__title-wrap">
+                  <span class="config-card__dot" aria-hidden="true"></span>
+                  <strong class="config-card__title">Máquina virtual</strong>
+                </span>
+                <span class="config-card__badge">Virtualbox</span>
+              </span>
+              <small class="config-card__desc">Sin riesgo de tocar tu PC</small>
+            </span>
+          </label>
+
+          <div class="config-hw-block">
+            <label class="config-option config-card">
+              <input type="radio" name={uid("entorno")} value="hardware" checked />
+              <span class="config-card__body">
+                <span class="config-card__header">
+                  <span class="config-card__title-wrap">
+                    <span class="config-card__dot" aria-hidden="true"></span>
+                    <strong class="config-card__title">Hardware real</strong>
+                  </span>
+                  <span class="config-card__badge config-card__badge--accent">BARE-METAL</span>
+                </span>
+                <small class="config-card__desc">Tu PC · instalación de verdad</small>
+              </span>
+            </label>
+
+            <!-- BOOT SUB-OPTIONS -->
+            <div class="config-boot-branch" data-config-boot>
+              <div class="config-boot-branch__line" aria-hidden="true"></div>
+              <fieldset class="config-boot-group">
+                <legend class="config-boot-group__label">ARRANQUE:</legend>
+                <div class="config-boot-group__options">
+                  <label class="config-option config-boot-pill">
+                    <input type="radio" name={uid("arranque")} value="solo" checked />
+                    <span class="config-boot-pill__body">
+                      <span class="status-dot status-dot--cyan" aria-hidden="true"></span>
+                      <span>Solo Linux</span>
+                    </span>
+                  </label>
+                  <label class="config-option config-boot-pill">
+                    <input type="radio" name={uid("arranque")} value="dualboot" />
+                    <span class="config-boot-pill__body">
+                      <span class="status-dot status-dot--cyan" aria-hidden="true"></span>
+                      <span>Dual boot</span>
+                    </span>
+                  </label>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="course-config-hud__foot">
+      <div class="course-config-hud__summary-wrap">
+        <span>RUTA SELECCIONADA:</span>
+        <strong class="course-config-hud__summary" data-config-summary aria-live="polite">
+          Fácil · Hardware · Solo Linux
+        </strong>
+      </div>
+      <span class="course-config-hud__total" data-config-total-lessons>
+        14 lecciones
+      </span>
+    </div>
+  </div>
+)}
+
+{rutas && variant === "lesson" && (
+  <div
+    class="course-config-lesson-hud"
+    data-course-config
+    data-slug={curso.slug}
+    data-rutas={JSON.stringify(rutas)}
+    data-default={JSON.stringify(CONFIG_POR_DEFECTO)}
+    data-compartir-variante={String(compartirVariante)}
+    {...leccionAttrs}
+  >
+    <h2 class="lesson-hud__title">Adaptar el curso</h2>
+
+    <div class="lesson-hud__controls">
+      <fieldset class="lesson-hud__group" data-config-difficulty>
+        <legend class="lesson-hud__label">DIFICULTAD:</legend>
+        <label class="config-option lesson-hud__pill">
+          <input type="radio" name={uid("dificultad")} value="facil" checked />
+          <span class="lesson-hud__pill-body">Fácil</span>
+        </label>
+        <label class="config-option lesson-hud__pill">
+          <input type="radio" name={uid("dificultad")} value="avanzada" />
+          <span class="lesson-hud__pill-body">Avanzada</span>
+        </label>
+      </fieldset>
+
+      <fieldset class="lesson-hud__group" data-config-environment>
+        <legend class="lesson-hud__label">ENTORNO:</legend>
+        <label class="config-option lesson-hud__pill">
+          <input type="radio" name={uid("entorno")} value="vm" />
+          <span class="lesson-hud__pill-body">VM</span>
+        </label>
+        <label class="config-option lesson-hud__pill">
+          <input type="radio" name={uid("entorno")} value="hardware" checked />
+          <span class="lesson-hud__pill-body">Hardware</span>
+        </label>
+      </fieldset>
+
+      <fieldset class="lesson-hud__group" data-config-boot>
+        <legend class="lesson-hud__label">ARRANQUE:</legend>
+        <label class="config-option lesson-hud__pill">
+          <input type="radio" name={uid("arranque")} value="solo" checked />
+          <span class="lesson-hud__pill-body">Solo</span>
+        </label>
+        <label class="config-option lesson-hud__pill">
+          <input type="radio" name={uid("arranque")} value="dualboot" />
+          <span class="lesson-hud__pill-body">Dual</span>
+        </label>
+      </fieldset>
+    </div>
+  </div>
+)}
+
+<style>
+  /* -------------------------------------------------------------
+       Variant: top-difficulty (Top bar toggle)
+       ------------------------------------------------------------- */
+  .top-diff-toggle {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.35rem 0.2rem 0.6rem;
+    border: 1px solid var(--line);
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    justify-content: space-between;
+  }
+
+  .top-diff-toggle__label {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .top-diff-toggle__group {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0.15rem;
+    border: 1px solid var(--line);
+    background: var(--bg-deep);
+    border-radius: var(--radius-sm);
+  }
+
+  .top-diff-toggle__option {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    margin: 0;
+  }
+
+  .top-diff-toggle__option input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .top-diff-toggle__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.22rem 0.55rem;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    transition: all 0.15s ease;
+  }
+
+  .top-diff-toggle__option:not(.is-locked):hover .top-diff-toggle__btn {
+    color: var(--ink);
+    background: var(--bg-raised);
+  }
+
+  .top-diff-toggle__option input:not(:disabled):checked + .top-diff-toggle__btn {
+    border-color: var(--signal);
+    background: color-mix(in srgb, var(--signal) 15%, transparent);
+    color: var(--signal);
+    font-weight: 700;
+    box-shadow: 0 0 10px color-mix(in srgb, var(--signal) 20%, transparent);
+  }
+
+  .top-diff-toggle__option input:focus-visible + .top-diff-toggle__btn {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
+  }
+
+  .top-diff-toggle__option.is-locked {
+    opacity: 1;
+    cursor: not-allowed;
+  }
+
+  .top-diff-toggle__option.is-locked .top-diff-toggle__btn {
+    border-color: color-mix(in srgb, var(--danger) 55%, transparent);
+    background: color-mix(in srgb, var(--danger) 10%, transparent);
+    color: var(--danger);
+  }
+
+  /* -------------------------------------------------------------
+       Variant: hero (HUD Environment & Boot Configurator)
+       ------------------------------------------------------------- */
+  .course-config-hud {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    margin-top: 1.25rem;
+    padding: 1.1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+  }
+
+  .course-config-hud__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .course-config-hud__title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .course-config-hud__title {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .course-config-hud__diff-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .course-config-hud__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .course-config-hud__subhead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    color: var(--ink-muted);
+    letter-spacing: 0.08em;
+  }
+
+  .course-config-hud__dep {
+    color: var(--accent);
+    opacity: 0.85;
+  }
+
+  .course-config-hud__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+    align-items: start;
+  }
+
+  @media (max-width: 640px) {
+    .course-config-hud__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .course-config-hud__fieldset {
+    display: contents;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .config-card {
+    position: relative;
+    display: block;
+    cursor: pointer;
+  }
+
+  .config-card input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .config-card__body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.75rem 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--bg-deep);
+    transition: all 0.15s ease;
+  }
+
+  .config-card:not(.is-locked):hover .config-card__body {
+    border-color: var(--line-strong);
+    background: var(--bg-raised);
+  }
+
+  .config-card input:not(:disabled):checked + .config-card__body {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, var(--bg-deep));
+  }
+
+  .config-card input:focus-visible + .config-card__body {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .config-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .config-card__title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .config-card__dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--line-strong);
+    transition:
+      background 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .config-card input:not(:disabled):checked + .config-card__body .config-card__dot {
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+  }
+
+  .config-card__title {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ink-dim);
+  }
+
+  .config-card input:not(:disabled):checked + .config-card__body .config-card__title {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .config-card__badge {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    color: var(--ink-muted);
+  }
+
+  .config-card__badge--accent {
+    color: var(--accent);
+  }
+
+  .config-card__desc {
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+    color: var(--ink-muted);
+    padding-left: 0.9rem;
+    line-height: 1.35;
+  }
+
+  /* Branching boot options under Hardware Real */
+  .config-hw-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .config-boot-branch {
+    position: relative;
+    padding-left: 1rem;
+    transition: opacity 0.2s ease;
+  }
+
+  .config-boot-branch[hidden] {
+    display: none;
+  }
+
+  .config-boot-branch__line {
+    position: absolute;
+    left: 0.45rem;
+    top: 0;
+    bottom: 0.75rem;
+    width: 2px;
+    border-left: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+
+  .config-boot-group {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--bg-deep);
+  }
+
+  .config-boot-group__label {
+    float: left;
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.1em;
+    color: var(--ink-muted);
+    padding-right: 0.4rem;
+  }
+
+  .config-boot-group__options {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex: 1;
+  }
+
+  .config-boot-pill {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin: 0;
+  }
+
+  .config-boot-pill input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .config-boot-pill__body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    width: 100%;
+    padding: 0.25rem 0.45rem;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--ink-muted);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease,
+      background 0.15s ease;
+  }
+
+  .config-boot-pill__body .status-dot {
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 640px) {
+    .config-boot-group {
+      flex-wrap: wrap;
+    }
+
+    .config-boot-pill {
+      flex: 1 1 auto;
+      min-width: max-content;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .config-boot-group__options {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  .config-boot-pill:not(.is-locked):hover .config-boot-pill__body {
+    color: var(--ink);
+    border-color: var(--line-strong);
+    background: var(--bg-raised);
+  }
+
+  .config-boot-pill input:not(:disabled):checked + .config-boot-pill__body {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .config-boot-pill input:focus-visible + .config-boot-pill__body {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .config-option.is-locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .config-boot-pill.is-locked {
+    opacity: 1;
+  }
+
+  .config-boot-pill.is-locked .config-boot-pill__body {
+    border-color: var(--line);
+    background: var(--bg-deep);
+    color: var(--ink-muted);
+    font-weight: 600;
+  }
+
+  .config-boot-pill.is-locked .status-dot {
+    opacity: 0.35;
+  }
+
+  /* Footer bar */
+  .course-config-hud__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+  }
+
+  .course-config-hud__summary-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--ink-muted);
+  }
+
+  .course-config-hud__summary {
+    color: var(--signal);
+    font-weight: 700;
+  }
+
+  .course-config-hud__total {
+    color: var(--ink-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* -------------------------------------------------------------
+       Variant: lesson (Compact inline route bar)
+       ------------------------------------------------------------- */
+  .course-config-lesson-hud {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin-bottom: 1.25rem;
+    padding: 0.55rem 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+  }
+
+  .lesson-hud__title {
+    flex: 0 0 100%;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .lesson-hud__head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+  }
+
+  .lesson-hud__kicker {
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+  }
+
+  .lesson-hud__summary {
+    color: var(--signal);
+    font-weight: 700;
+  }
+
+  .lesson-hud__controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+  }
+
+  @media (max-width: 640px) {
+    .lesson-hud__controls {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.6rem;
+    }
+
+    .lesson-hud__group {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+
+  /* Entrada suave de los grupos del HUD (T10): fade + slide desde abajo,
+     ease-out, <300ms, solo transform/opacity, respetando reduced motion. */
+  @keyframes ncw-lesson-hud-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .lesson-hud__controls > .lesson-hud__group {
+    animation: ncw-lesson-hud-in 180ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  }
+
+  .lesson-hud__controls > .lesson-hud__group:nth-child(1) {
+    animation-delay: 0ms;
+  }
+
+  .lesson-hud__controls > .lesson-hud__group:nth-child(2) {
+    animation-delay: 60ms;
+  }
+
+  .lesson-hud__controls > .lesson-hud__group:nth-child(3) {
+    animation-delay: 120ms;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lesson-hud__controls > .lesson-hud__group {
+      animation: none;
+    }
+  }
+
+  .lesson-hud__group {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .lesson-hud__group[hidden] {
+    display: none;
+  }
+
+  .lesson-hud__label {
+    float: left;
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--ink-muted);
+    padding-right: 0.35rem;
+  }
+
+  .lesson-hud__pill {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    margin: 0;
+  }
+
+  .lesson-hud__pill input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .lesson-hud__pill-body {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.22rem 0.55rem;
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    font-weight: 600;
+    color: var(--ink-muted);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--bg-deep);
+    transition: all 0.15s ease;
+  }
+
+  .lesson-hud__pill:active .lesson-hud__pill-body {
+    transform: scale(0.95);
+  }
+
+  .lesson-hud__pill:not(.is-locked):hover .lesson-hud__pill-body {
+    color: var(--ink);
+    border-color: var(--line-strong);
+    background: var(--bg-raised);
+  }
+
+  .lesson-hud__pill input:not(:disabled):checked + .lesson-hud__pill-body {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 15%, transparent);
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* Dificultad: eje con acento propio (T8g) y estado bloqueado en rojo (T10).
+     Activa = verde (signal); excluida por la ruta de la lección = bloqueada/roja. */
+  .lesson-hud__group[data-config-difficulty]
+    .lesson-hud__pill
+    input:not(:disabled):checked
+    + .lesson-hud__pill-body {
+    border-color: var(--signal);
+    background: color-mix(in srgb, var(--signal) 15%, transparent);
+    color: var(--signal);
+    font-weight: 700;
+  }
+
+  .lesson-hud__group[data-config-difficulty]
+    .lesson-hud__pill
+    input:focus-visible
+    + .lesson-hud__pill-body {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
+  }
+
+  .lesson-hud__pill input:focus-visible + .lesson-hud__pill-body {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .lesson-hud__pill.is-locked {
+    opacity: 1;
+    cursor: not-allowed;
+  }
+
+  .lesson-hud__pill.is-locked .lesson-hud__pill-body {
+    border-color: color-mix(in srgb, var(--danger) 55%, transparent);
+    background: color-mix(in srgb, var(--danger) 10%, transparent);
+    color: var(--danger);
+  }
+</style>

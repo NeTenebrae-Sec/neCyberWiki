@@ -2,10 +2,82 @@
 import BaseLayout from "../layouts/BaseLayout.astro"
 import { site } from "../data/site"
 import { cursoUrl, getCursosPublicados } from "../lib/catalog"
+import { DIFICULTADES, idProgreso } from "../lib/tracks"
+import type { Dificultad } from "../lib/tracks"
 
 const base = site.base
 const cursos = await getCursosPublicados()
-const totalLecciones = cursos.reduce((total, curso) => total + curso.lecciones.length, 0)
+
+const DIFICULTAD_LABEL: Record<Dificultad, string> = { facil: "Fácil", avanzada: "Avanzada" }
+
+interface FilaProgreso {
+  curso: (typeof cursos)[number]
+  track?: Dificultad
+  titulo: string
+  total: number
+  lessons: string
+}
+
+// Cursos que comparten el estado de las lecciones comunes entre dificultades.
+// El cliente los usa para expandir/plegar el perfil exportado.
+const compartidos = cursos
+  .filter((curso) => curso.progreso?.compartirVariante && curso.rutas?.length)
+  .map((curso) => curso.slug)
+
+// IDs de una fila de dificultad: comunes planas; especiales calificadas con la
+// ruta completa de cada combinación que las incluye.
+const idsDeFila = (curso: (typeof cursos)[number], dificultad: Dificultad) => {
+  const rutasDificultad = curso.rutas?.filter((ruta) => ruta.dificultad === dificultad) ?? []
+  const numeros = new Set(rutasDificultad.flatMap((ruta) => ruta.lecciones))
+  const lecciones = curso.lecciones.filter((leccion) => numeros.has(leccion.numero))
+  const compartir = Boolean(curso.progreso?.compartirVariante)
+  const ids = new Set<string>()
+
+  for (const leccion of lecciones) {
+    if (!compartir || leccion.variante === "comun") {
+      ids.add(leccion.slug)
+      continue
+    }
+    for (const ruta of rutasDificultad) {
+      if (ruta.lecciones.includes(leccion.numero)) ids.add(idProgreso(leccion, ruta, true))
+    }
+  }
+
+  return { lecciones, ids: [...ids] }
+}
+
+// Una fila por dificultad en los cursos con rutas. El resto: una fila sin track.
+const filas: FilaProgreso[] = []
+for (const curso of cursos) {
+  if (curso.rutas?.length) {
+    for (const dificultad of DIFICULTADES) {
+      const { lecciones, ids } = idsDeFila(curso, dificultad)
+      filas.push({
+        curso,
+        track: dificultad,
+        titulo: `${curso.titulo} — ${DIFICULTAD_LABEL[dificultad]}`,
+        total: lecciones.length,
+        lessons: ids.join(" "),
+      })
+    }
+  } else {
+    filas.push({
+      curso,
+      titulo: curso.titulo,
+      total: curso.lecciones.length,
+      lessons: curso.lecciones.map((leccion) => leccion.slug).join(" "),
+    })
+  }
+}
+
+// Unión por curso base: lo que muestra el contador global (22 para Arch).
+const totalUnionPorCurso = new Map<string, Set<string>>()
+for (const fila of filas) {
+  const set = totalUnionPorCurso.get(fila.curso.slug) ?? new Set<string>()
+  for (const id of fila.lessons.split(/\s+/).filter(Boolean)) set.add(id.split("@")[0])
+  totalUnionPorCurso.set(fila.curso.slug, set)
+}
+const totalLecciones = [...totalUnionPorCurso.values()].reduce((total, set) => total + set.size, 0)
 ---
 
 <BaseLayout
@@ -13,6 +85,7 @@ const totalLecciones = cursos.reduce((total, curso) => total + curso.lecciones.l
   descripcion="Tu alias, tu tema y tu progreso guardados solo en este navegador. Exporta, importa o borra tus datos cuando quieras."
   noindex
 >
+  <script type="application/json" id="perfil-compartidos" set:html={JSON.stringify(compartidos)} />
   <div class="container-page profile">
     <header class="profile__head">
       <div class="profile__docket">
@@ -96,30 +169,31 @@ const totalLecciones = cursos.reduce((total, curso) => total + curso.lecciones.l
           </span>
         </header>
 
-        {cursos.length ? (
+        {filas.length ? (
           <ul class="profile-courses">
-            {cursos.map((curso) => (
+            {filas.map((fila) => (
               <li
                 class="profile-course"
                 data-profile-course
-                data-course={curso.slug}
-                data-total={curso.lecciones.length}
-                data-lessons={curso.lecciones.map((leccion) => leccion.slug).join(" ")}
+                data-course={fila.curso.slug}
+                data-track={fila.track}
+                data-total={fila.total}
+                data-lessons={fila.lessons}
               >
                 <div class="profile-course__head">
-                  <a href={cursoUrl(curso, base)} class="profile-course__name">
-                    {curso.titulo}
+                  <a href={cursoUrl(fila.curso, base)} class="profile-course__name">
+                    {fila.titulo}
                   </a>
                   <span class="profile-course__count" data-course-count>
-                    0 / {curso.lecciones.length}
+                    0 / {fila.total}
                   </span>
                 </div>
                 <div
                   class="progress-track"
                   role="progressbar"
-                  aria-label={`Progreso del curso ${curso.titulo}`}
+                  aria-label={`Progreso del curso ${fila.titulo}`}
                   aria-valuemin="0"
-                  aria-valuemax={curso.lecciones.length}
+                  aria-valuemax={fila.total}
                   aria-valuenow="0"
                 >
                   <div class="progress-fill progress-fill--accent" data-course-fill></div>
@@ -203,7 +277,10 @@ const totalLecciones = cursos.reduce((total, curso) => total + curso.lecciones.l
     clearProfile,
     collectProfile,
     emptyProfile,
+    expandirProgresoCompartido,
     parseProfile,
+    plegarProgresoCompartido,
+    purgeLegacyProgress,
     serializeProfile,
   } from "../lib/profile"
 
@@ -224,9 +301,21 @@ const totalLecciones = cursos.reduce((total, curso) => total + curso.lecciones.l
   const totalValue = document.getElementById("profile-total")
   const globalValue = document.getElementById("profile-global")
   const courseNodes = Array.from(document.querySelectorAll<HTMLElement>("[data-profile-course]"))
-  const courseSlugs = courseNodes
-    .map((node) => node.dataset.course)
-    .filter((slug): slug is string => Boolean(slug))
+  const courseSlugs = [
+    ...new Set(
+      courseNodes
+        .map((node) => node.dataset.course)
+        .filter((slug): slug is string => Boolean(slug)),
+    ),
+  ]
+  const compartidosEl = document.getElementById("perfil-compartidos")
+  let compartidos: string[] = []
+  try {
+    const parsed = JSON.parse(compartidosEl?.textContent ?? "[]")
+    if (Array.isArray(parsed)) {
+      compartidos = parsed.filter((slug): slug is string => typeof slug === "string")
+    }
+  } catch {}
 
   const setStatus = (message: string, tone: "ok" | "error" = "ok") => {
     if (!status) return
@@ -243,13 +332,30 @@ const totalLecciones = cursos.reduce((total, curso) => total + curso.lecciones.l
     }).format(date)
   }
 
+  const purgeLegacy = (): string[] => {
+    if (!storage) return []
+    try {
+      return purgeLegacyProgress(storage)
+    } catch {
+      return []
+    }
+  }
+
+  const purgedNote = (removed: string[]): string | null =>
+    removed.length
+      ? ` Se eliminaron ${removed.length} clave(s) de progreso del formato anterior.`
+      : null
+
+  // Purga las claves legacy antes de leer/colectar. Devuelve el perfil y lo borrado.
   const readProfile = () => {
-    if (!storage) return emptyProfile()
-    return collectProfile(storage, courseSlugs)
+    if (!storage) return { profile: emptyProfile(), purged: [] as string[] }
+    const purged = purgeLegacy()
+    const profile = expandirProgresoCompartido(collectProfile(storage, courseSlugs), compartidos)
+    return { profile, purged }
   }
 
   const render = () => {
-    const profile = readProfile()
+    const { profile, purged } = readProfile()
 
     if (aliasInput && document.activeElement !== aliasInput) {
       aliasInput.value = profile.alias
@@ -266,28 +372,42 @@ const totalLecciones = cursos.reduce((total, curso) => total + curso.lecciones.l
 
     let completed = 0
     let total = 0
+    // Unión por curso base para el header «completadas/totales» (22 en Arch).
+    const porCurso = new Map<string, { lessons: Set<string>; done: Set<string> }>()
 
     for (const node of courseNodes) {
       const slug = node.dataset.course || ""
-      const courseTotal = Number(node.dataset.total || 0)
-      const lessons = new Set(
-        (node.dataset.lessons || "").split(/\s+/).filter((lesson) => lesson.length > 0),
-      )
-      const done = (profile.courses[slug] || []).filter(
-        (lesson) => lessons.size === 0 || lessons.has(lesson),
-      )
-      const count = done.length
+      const track = node.dataset.track || ""
+      const profileKey = track ? `${slug}:${track}` : slug
+      const lessonIds = (node.dataset.lessons || "").split(/\s+/).filter(Boolean)
+      // `data-lessons` lleva IDs calificados; el conteo es por slug único.
+      const lessons = new Set(lessonIds.map((id) => id.split("@")[0]))
+      const courseTotal = lessons.size || Number(node.dataset.total || 0)
+      const marks = profile.courses[profileKey] || []
+      const doneSlugs = new Set<string>()
+      for (const mark of marks) {
+        const lessonSlug = mark.split("@")[0]
+        if (lessons.size === 0 || lessons.has(lessonSlug)) doneSlugs.add(lessonSlug)
+      }
+      const count = doneSlugs.size
       const pct = courseTotal > 0 ? Math.min(100, Math.round((count / courseTotal) * 100)) : 0
 
-      completed += count
-      total += courseTotal
+      const grupo = porCurso.get(slug) ?? { lessons: new Set<string>(), done: new Set<string>() }
+      for (const lesson of lessons) grupo.lessons.add(lesson)
+      for (const lesson of doneSlugs) grupo.done.add(lesson)
+      porCurso.set(slug, grupo)
 
       const countLabel = node.querySelector<HTMLElement>("[data-course-count]")
       const fill = node.querySelector<HTMLElement>("[data-course-fill]")
-      const track = fill?.closest<HTMLElement>('[role="progressbar"]')
+      const trackEl = fill?.closest<HTMLElement>('[role="progressbar"]')
       if (countLabel) countLabel.textContent = `${count} / ${courseTotal}`
       if (fill) fill.style.width = `${pct}%`
-      track?.setAttribute("aria-valuenow", String(count))
+      trackEl?.setAttribute("aria-valuenow", String(count))
+    }
+
+    for (const grupo of porCurso.values()) {
+      completed += grupo.done.size
+      total += grupo.lessons.size
     }
 
     if (totalValue) totalValue.textContent = `${completed} / ${total}`
@@ -298,6 +418,8 @@ const totalLecciones = cursos.reduce((total, curso) => total + curso.lecciones.l
         "Este navegador bloquea el almacenamiento local. El perfil no se puede guardar.",
         "error",
       )
+    } else if (purged.length) {
+      setStatus(`Se eliminaron ${purged.length} clave(s) de progreso del formato anterior.`)
     } else if (status?.dataset.tone === "error") {
       setStatus("")
     }
@@ -325,7 +447,8 @@ const totalLecciones = cursos.reduce((total, curso) => total + curso.lecciones.l
     }
 
     try {
-      const profile = collectProfile(storage, courseSlugs)
+      const purged = purgeLegacy()
+      const profile = expandirProgresoCompartido(collectProfile(storage, courseSlugs), compartidos)
       const blob = new Blob([serializeProfile(profile)], { type: "application/json" })
       const url = URL.createObjectURL(blob)
       const link = document.createElement("a")
@@ -335,7 +458,7 @@ const totalLecciones = cursos.reduce((total, curso) => total + curso.lecciones.l
       link.click()
       link.remove()
       window.setTimeout(() => URL.revokeObjectURL(url), 1000)
-      setStatus("Perfil exportado. Guárdalo en un lugar seguro.")
+      setStatus(`Perfil exportado.${purgedNote(purged) ?? ""} Guárdalo en un lugar seguro.`)
     } catch {
       setStatus("No se pudo exportar el perfil.", "error")
     }
@@ -350,13 +473,14 @@ const totalLecciones = cursos.reduce((total, curso) => total + curso.lecciones.l
 
     try {
       if (!storage) throw new Error("sin almacenamiento")
+      const purged = purgeLegacy()
       const result = parseProfile(await file.text())
       if (!result.ok) {
         setStatus(result.error, "error")
         return
       }
-      applyProfile(storage, result.profile)
-      setStatus("Perfil importado. Recargando…")
+      applyProfile(storage, plegarProgresoCompartido(result.profile, compartidos))
+      setStatus(`Perfil importado.${purgedNote(purged) ?? ""} Recargando…`)
       window.setTimeout(() => window.location.reload(), 600)
     } catch {
       setStatus("No se pudo leer el archivo o guardar los datos.", "error")

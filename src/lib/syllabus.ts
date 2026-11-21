@@ -17,6 +17,12 @@ export interface SyllabusLesson {
   moduloTitulo: string
   submodulo: string // "" = la lección cuelga directo del módulo
   submoduloTitulo: string
+  numero: string // Número visible ("1.1"); "" = derivar de `orden`
+  variante: "comun" | "facil" | "avanzada"
+  entorno: "ambos" | "hardware" | "vm"
+  arranque: "ambos" | "solo" | "dualboot"
+  prerrequisitos: string[] // IDs de lección ("1.1"), no slugs
+  estado: "publicada" | "en-construccion"
   capitulos: Capitulo[]
 }
 
@@ -63,6 +69,12 @@ export function normalizeLesson(
     modulo_titulo?: string
     submodulo?: string
     submodulo_titulo?: string
+    numero?: string
+    variante?: "comun" | "facil" | "avanzada"
+    entorno?: "ambos" | "hardware" | "vm"
+    arranque?: "ambos" | "solo" | "dualboot"
+    prerrequisitos?: string[]
+    estado?: "publicada" | "en-construccion"
     capitulos?: Capitulo[]
   },
 ): SyllabusLesson {
@@ -76,6 +88,12 @@ export function normalizeLesson(
     moduloTitulo: data.modulo_titulo ?? "",
     submodulo: data.submodulo ?? "",
     submoduloTitulo: data.submodulo_titulo ?? "",
+    numero: data.numero ?? "",
+    variante: data.variante ?? "comun",
+    entorno: data.entorno ?? "ambos",
+    arranque: data.arranque ?? "ambos",
+    prerrequisitos: Array.isArray(data.prerrequisitos) ? data.prerrequisitos : [],
+    estado: data.estado ?? "publicada",
     capitulos: Array.isArray(data.capitulos) ? data.capitulos : [],
   }
 }

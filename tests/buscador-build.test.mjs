@@ -120,7 +120,7 @@ test("la portada usa el CTA de perfil y el acordeón de rutas", { skip }, async 
 })
 
 test("las lecciones sin video reservan el bloque multimedia", { skip }, async () => {
-  const html = await read("cursos/linux-y-sistemas/arch-linux-facil/02-usb-y-arranque/index.html")
+  const html = await read("cursos/linux-y-sistemas/arch-linux/crear-usb-instalacion/index.html")
   assert.match(html, /class="player-frame"/)
   assert.match(html, /class="video-embed video-embed--empty"/)
   assert.match(html, /Video en preparación/)

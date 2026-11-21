@@ -135,20 +135,29 @@ const unidad = curso.unidad === "nivel" ? "niveles" : "lecciones"
 )}
 
 <script>
+  // Lee solo el bucket exacto `ncw:progress:<slug>` y cuenta slugs únicos:
+  // las claves `:<tag>` son legacy y no se leen; los IDs especiales
+  // (`slug@ruta`) se normalizan a su slug para no inflar el total.
+  const progressUnion = (slug: string): number => {
+    const union = new Set<string>()
+    try {
+      const parsed = JSON.parse(localStorage.getItem(`ncw:progress:${slug}`) || "[]")
+      if (Array.isArray(parsed)) {
+        for (const item of parsed) {
+          if (typeof item === "string") union.add(item.split("@")[0])
+        }
+      }
+    } catch {}
+    return union.size
+  }
+
   const syncCourseProgress = () => {
     for (const root of document.querySelectorAll<HTMLElement>("[data-course-progress]")) {
       const slug = root.getAttribute("data-course-progress")
       const total = Number(root.getAttribute("data-total") || 0)
       if (!slug || !total) continue
 
-      let done: unknown
-      try {
-        done = JSON.parse(localStorage.getItem(`ncw:progress:${slug}`) || "[]")
-      } catch {
-        done = []
-      }
-
-      const count = Array.isArray(done) ? done.length : 0
+      const count = progressUnion(slug)
       const pct = Math.min(100, Math.round((count / total) * 100))
       const label = root.querySelector("[data-course-progress-label]")
       const fill = root.querySelector<HTMLElement>("[data-course-progress-fill]")

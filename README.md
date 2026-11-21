@@ -1,93 +1,45 @@
 # neCyberWiki
 
-Archivo personal de aprendizaje sobre Linux, redes y ciberseguridad, en español. Cursos guiados,
-notas de laboratorio, bitácora y un roadmap público. Sin cuentas, sin backend y con el progreso
-guardado en el navegador.
+![Astro](https://img.shields.io/badge/Astro-BC52EE?style=for-the-badge&logo=astro&logoColor=white)
+![Estado: Activo](https://img.shields.io/badge/ESTADO-ACTIVO-00C853?style=for-the-badge&labelColor=30363D)
+![Idioma: Español](https://img.shields.io/badge/IDIOMA-ESPA%C3%91OL-00B8D9?style=for-the-badge&labelColor=30363D)
+![Privacidad: Sin registros](https://img.shields.io/badge/PRIVACIDAD-SIN_REGISTROS-8E44AD?style=for-the-badge&labelColor=30363D)
 
-- **Sitio:** <https://netenebrae-sec.github.io/neCyberWiki/>
-- **Stack:** Astro 7, Tailwind CSS 4, TypeScript y JavaScript vanilla.
-- **Contenido:** Markdown validado en build con Content Collections.
-- **Buscador:** Pagefind con el componente oficial en la barra del header; el índice se genera al
-  arrancar el desarrollo y en el `postbuild`.
-- **Perfil:** Almacén local con exportar, importar y borrar.
+## TL;DR
 
-## Aviso legal
+Una bitácora de aprendizaje técnico en español sobre sistemas, redes, programación y ciberseguridad. Encuentra cursos adaptables, rutas de aprendizaje, prácticas documentadas y recursos gratuitos para aprender a tu ritmo.
 
-Todo el contenido de este repositorio tiene fines **educativos y formativos**. Las técnicas,
-conceptos y ejemplos descritos deben practicarse **únicamente** en entornos controlados,
-laboratorios personales o escenarios autorizados o diseñados para este propósito. El uso indebido
-de la información contenida fuera de un contexto ético o legal es responsabilidad exclusiva del
-usuario; los autores y contribuidores no se hacen responsables de daños, sanciones o consecuencias
-derivadas de ese uso.
+<img width="1322" height="519" alt="image" src="https://github.com/user-attachments/assets/5e2204cc-5064-4481-97c7-17e0f8d569b9" />
 
-## Arranque
+### ¡Visita la web!
 
-```bash
-npm install
-npm run dev
-```
+[![🌐 Producción](https://img.shields.io/badge/🌐-Producción-00C853?style=for-the-badge&labelColor=30363D)](https://netenebrae-sec.github.io/neCyberWiki/)
+[![🧪 Staging](https://img.shields.io/badge/🧪-Staging%20(dev)-FFB300?style=for-the-badge&labelColor=30363D)](https://netenebrae-sec.github.io/neCyberWiki/dev/)
 
-El buscador funciona también en `npm run dev`: el `predev` construye el sitio y regenera el índice
-en `public/pagefind/` (ignorado por git) antes de arrancar Astro. El índice refleja el último
-arranque del servidor; si añades contenido, reinicia `npm run dev`. `Ctrl/Cmd+K` enfoca la barra
-del header.
+## Qué encontrarás
 
-`npm run build` ejecuta `astro build` y después el `postbuild` con Pagefind sobre `dist/pagefind/`.
-No hay que lanzar `pagefind` a mano ni versionar el índice.
+- **Cursos y rutas guiadas:** contenidos organizados paso a paso, desde los fundamentos hasta temas avanzados.
+- **Notas de laboratorio:** prácticas, resoluciones y apuntes técnicos para consultar y repasar.
+- **Roadmap público:** próximos temas, mejoras y contenidos en desarrollo.
+- **Progreso en tu navegador:** sin cuentas ni registros; tu progreso se guarda localmente en el navegador.
 
-## Scripts
+## Filosofía
 
-| Script                  | Qué hace                                                 |
-| ----------------------- | -------------------------------------------------------- |
-| `npm run dev`           | Construye el índice y arranca el servidor de desarrollo. |
-| `npm run build`         | Genera el sitio estático y el índice Pagefind.           |
-| `npm run preview`       | Sirve `dist/` para probar el build real.                 |
-| `npm run check`         | Comprueba tipos y contenido de Astro.                    |
-| `npm run lint`          | ESLint sobre Astro, TS y JS.                             |
-| `npm test`              | Tests unitarios con el runner de Node.                   |
-| `npm run import:bandit` | Regenera el curso Bandit desde el archivo fuente.        |
-| `npm run format`        | Prettier sobre todo el proyecto.                         |
+La informática me ha apasionado desde siempre, **pero siempre tuve dificultades para acceder a una educación de pago**, casi todo lo que sé lo aprendí como muchos, por mi cuenta, sin rumbo claro y a base de prueba y error.
 
-Los tests de navegador automatizados aún no están integrados; la verificación manual con Playwright
-es parte del flujo local.
+La neCyberWiki es está construyendo desde esas notas personales, con una idea clara desde el primer día: **compartir lo aprendido y hacer el conocimiento técnico accesible para cualquiera que lo necesite**. Por eso es gratuito, sin publicidad ni rastreadores. 
 
-## Estructura
+Buscamos un lugar donde cualquiera pueda encontrar una ruta para empezar, profundizar en lo que más le interesa y no sentirse solo en el proceso. **La web está mantenida al 100% con donaciones y no requiere registros**.
 
-```text
-content/
-  cursos/          Cursos y lecciones en Markdown
-  blog/            Entradas de la bitácora
-public/
-  cursos/          Imágenes de los cursos
-src/
-  components/      Componentes de interfaz
-  data/            Categorías, cursos y roadmap
-  layouts/         Shell del sitio
-  lib/             Lógica pura y utilidades de build
-  pages/           Rutas de Astro
-  styles/          Tokens, base, patrones y shell
-```
+[![Apoya el proyecto en Ko-fi](https://img.shields.io/badge/APOYA-KO--FI-FF5E5B?style=for-the-badge&labelColor=30363D&logo=ko-fi&logoColor=white)](https://ko-fi.com/netenebrae)
 
-## Contribuciones
 
-Las contribuciones son bienvenidas: corrigiendo errores, mejorando redacción, añadiendo contenido
-relevante, proponiendo mejoras en estructura y navegación o reportando problemas en la pestaña
-_Issues_.
+## Documentación y enlaces
 
-Para contribuir:
-
-```bash
-git clone https://github.com/NeTenebrae-Sec/neCyberWiki.git
-cd neCyberWiki
-git checkout -b mejora-o-nueva-guia
-```
-
-Después, abre un [Pull Request](https://github.com/NeTenebrae-Sec/neCyberWiki/pulls) con la
-descripción de tu aporte. Ten en cuenta el aviso legal:
-todo el contenido es educativo y la práctica debe ocurrir en entornos propios o autorizados.
-
-## Licencia
-
-El código se distribuye bajo la licencia MIT incluida en `LICENSE.txt`. El contenido editorial es
-gratuito para estudio y práctica educativa. Si el proyecto te sirve, puedes apoyarlo en
-[Ko-fi](https://ko-fi.com/netenebrae).
+- **Índice de desarrollo:** [`docs/desarrollo.md`](docs/desarrollo.md)
+- **Guía de contribución:** [`CONTRIBUTING.md`](CONTRIBUTING.md)
+- **Política de seguridad:** [`SECURITY.md`](SECURITY.md)
+- **Licencias:** [`LICENSE.txt`](LICENSE.txt), [`LICENSE-CONTENT.md`](LICENSE-CONTENT.md)
+- **Marca:** [`TRADEMARK.md`](TRADEMARK.md)
+- **Créditos y fuentes:** [`CREDITS.md`](CREDITS.md)
+- **Atribuciones de terceros:** [`NOTICE.md`](NOTICE.md)
