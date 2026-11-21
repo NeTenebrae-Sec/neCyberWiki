@@ -1,32 +1,35 @@
 ---
-name: Bug report
-about: Algo en neCyberWiki no funciona como esperas
+name: Error de funcionamiento
+about: Algo en neCyberWiki no funciona como debería
 title: ""
 labels: bug
 assignees: ""
 ---
 
-**Describe el bug**
+## Qué pasa
 
-Qué esperabas y qué pasó en su lugar.
+<Cuenta qué esperabas que ocurriera y qué ocurrió en su lugar.>
 
-**Dónde**
+## Dónde
 
-- URL del sitio (página concreta) o `npm run dev` local
-- Navegador y versión
-- Sistema operativo
+- Página o ruta concreta: <URL o `npm run dev` local>
+- Navegador y versión:
+- Sistema operativo y tamaño de pantalla:
 
-**Pasos para reproducir**
+## Cómo reproducirlo
 
-1. …
-2. …
-3.
+1. <Paso 1>
+2. <Paso 2>
+3. <Paso 3>
 
-**Comportamiento esperado**
+## Comportamiento esperado
 
-**Comportamiento actual**
+<Lo que debería pasar.>
 
-**Capturas o contexto adicional**
+## Comportamiento actual
 
-<!-- Si hay un error en consola, incluye el mensaje. Si es de seguridad,
-no lo publiques aquí: usa SECURITY.md. -->
+<Lo que pasa realmente.>
+
+## Evidencia
+
+<Capturas, mensaje de la consola o cualquier dato que ayude. Si es un problema de seguridad, no lo publiques aquí: usa `SECURITY.md`.>

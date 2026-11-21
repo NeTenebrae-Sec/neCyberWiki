@@ -1,25 +1,28 @@
 ---
-name: Feature request
-about: Sugiere una mejora o una idea para neCyberWiki
+name: Propuesta de mejora
+about: Sugiere algo que haría neCyberWiki más útil
 title: ""
 labels: enhancement
 assignees: ""
 ---
 
-**¿Qué problema resuelve?**
+## Qué problema resuelve
 
-Como …, quiero …, para … (o describe la situación actual y el dolor).
+<Describe la situación actual y a quién afecta. No hace falta escribir "como usuario quiero".>
 
-**Solución propuesta**
+## Solución propuesta
 
-**Alternativas consideradas**
+<Qué te gustaría que pasara.>
 
-**Área**
+## Alternativas consideradas
+
+<Otras formas de resolverlo que hayas pensado, si las hay.>
+
+## Área
 
 - [ ] Sitio (navegación, buscador, perfil, tema)
-- [ ] Contenido (cursos, bitácora, roadmap)
-- [ ] Comunidad / contribución
+- [ ] Contenido (cursos, lecciones, bitácora, roadmap)
+- [ ] Comunidad o contribución
 - [ ] Otro
 
-<!-- Las preguntas generales y el debate van en Discussions; los issues son para
-tareas concretas. Si tu idea es sobre una pieza grande, proponla primero ahí. -->
+<!-- Para ideas generales o debates, usa Discussions. Los issues son para propuestas concretas. -->

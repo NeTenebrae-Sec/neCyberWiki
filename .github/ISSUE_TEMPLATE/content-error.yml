@@ -14,7 +14,7 @@ body:
     id: problema
     attributes:
       label: ¿Qué está mal o no se entiende?
-      description: Cita la frase o indica el apartado concreto.
+      description: Cita la frase concreta o indica el apartado.
     validations:
       required: true
   - type: textarea
@@ -32,3 +32,10 @@ body:
         - Vídeo de YouTube
     validations:
       required: true
+  - type: checkboxes
+    id: origen
+    attributes:
+      label: Si propones texto nuevo
+      options:
+        - label: Es mío o tengo derecho a aportarlo, y no copio material de terceros
+          required: false
