@@ -15,7 +15,7 @@ const lessonNumber = (orden: number) =>
   String(unidad === "nivel" ? orden : orden + 1).padStart(2, "0")
 ---
 
-<div class={`sy-list sy-list--${variant}`} data-sy-list>
+<div class={`sy-list sy-list--${variant}`} data-sy-list data-syllabus>
   {modules.map((mod) => (
     <details class="sy-module" open data-module-key={mod.key} data-module-count={mod.count}>
       <summary class="sy-module__trigger">
@@ -24,7 +24,7 @@ const lessonNumber = (orden: number) =>
             <span class="sy-module__kicker">
               <span class="sy-module__num">MÓDULO {mod.numero}</span>
               <span class="sy-module__sep">·</span>
-              <span>{mod.count} lecciones</span>
+              <span data-module-count-label>{mod.count} lecciones</span>
               <span class="sy-module__done" data-module-done>
                 0/{mod.count}
               </span>
@@ -38,7 +38,7 @@ const lessonNumber = (orden: number) =>
               <span class="sy-module__kicker">
                 <span class="sy-module__num">MÓDULO {mod.numero}</span>
                 <span class="sy-module__sep">·</span>
-                <span>{mod.count} lecciones</span>
+                <span data-module-count-label>{mod.count} lecciones</span>
                 {mod.totalMin > 0 && mod.lecciones.some((leccion) => leccion.video) && (
                   <>
                     <span class="sy-module__sep">·</span>
@@ -88,9 +88,16 @@ const lessonNumber = (orden: number) =>
             <ol class="sy-lessons">
               {sub.lecciones.map((l) => {
                 const isCurrent = current === l.slug
-                const num = lessonNumber(l.orden)
+                const num = l.numero || lessonNumber(l.orden)
                 return (
-                  <li class={`sy-item${isCurrent ? " is-current" : ""}`} data-lesson-item={l.slug}>
+                  <li
+                    class={`sy-item${isCurrent ? " is-current" : ""}`}
+                    data-lesson-item={l.slug}
+                    data-variante={l.variante}
+                    data-entorno={l.entorno}
+                    data-arranque={l.arranque}
+                    data-numero={l.numero || ""}
+                  >
                     <a
                       href={`${cursoBase}${l.slug}/`}
                       class={`sy-lesson sy-lesson--${variant}${isCurrent ? " is-current" : ""}`}

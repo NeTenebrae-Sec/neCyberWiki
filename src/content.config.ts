@@ -18,6 +18,14 @@ const cursos = defineCollection({
     submodulo_titulo: z.string().default(""),
     capitulos: z.array(z.object({ t: z.number().int().min(0), titulo: z.string() })).default([]),
     orden: z.number().int().min(0),
+    // Metadatos del curso adaptable: todos con default para no romper las
+    // lecciones antiguas de Bandit ni el Arch monolítico.
+    numero: z.string().default(""), // Número visible ("1.1"); vacío = derivar de `orden`.
+    variante: z.enum(["comun", "facil", "avanzada"]).default("comun"),
+    entorno: z.enum(["ambos", "hardware", "vm"]).default("ambos"),
+    arranque: z.enum(["ambos", "solo", "dualboot"]).default("ambos"),
+    prerrequisitos: z.array(z.string()).default([]), // IDs de lección ("1.1"), no slugs.
+    estado: z.enum(["publicada", "en-construccion"]).default("publicada"),
     duracion: z.string().default(""),
     nivel: z.enum(["principiante", "intermedio", "avanzado"]).default("principiante"),
     video: z.string().default(""), // ID o URL de YouTube; vacío = guía escrita.

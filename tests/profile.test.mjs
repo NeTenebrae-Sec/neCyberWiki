@@ -12,6 +12,7 @@ import {
   collectProfile,
   emptyProfile,
   parseProfile,
+  purgeLegacyProgress,
   serializeProfile,
   totalLessons,
   validateProfile,
@@ -169,4 +170,131 @@ test("clearProfile borra solo las claves ncw y devuelve la lista", () => {
   ])
   assert.equal(storage.getItem("otra-app"), "no tocar")
   assert.equal(storage.length, 1)
+})
+
+test("validateProfile acepta filas con :tag y hace round-trip", () => {
+  const result = validateProfile({
+    version: 1,
+    courses: {
+      "arch-linux:facil": ["1-1", "2-2"],
+      "arch-linux:avanzada": ["2-5"],
+    },
+  })
+  assert.equal(result.ok, true)
+  if (!result.ok) return
+  assert.deepEqual(result.profile.courses["arch-linux:facil"], ["1-1", "2-2"])
+  assert.deepEqual(result.profile.courses["arch-linux:avanzada"], ["2-5"])
+
+  const round = parseProfile(serializeProfile(result.profile))
+  assert.equal(round.ok, true)
+  if (!round.ok) return
+  assert.deepEqual(round.profile.courses, result.profile.courses)
+})
+
+test("validateProfile rechaza claves con : inválido", () => {
+  for (const key of [
+    ":facil",
+    "a:b:c",
+    "arch:BAD!",
+    "",
+    "arch:",
+    ":",
+    "arch:-facil",
+    "arch:A",
+    "a b:facil",
+  ]) {
+    const result = validateProfile({ version: 1, courses: { [key]: ["0"] } })
+    assert.equal(result.ok, false, `clave rechazada: «${key}»`)
+  }
+})
+
+test("collectProfile con ambas filas devuelve dos entradas ordenadas", () => {
+  const storage = new MemoryStorage()
+  storage.setItem(`${PROGRESS_PREFIX}arch-linux:facil`, JSON.stringify(["1-1"]))
+  storage.setItem(`${PROGRESS_PREFIX}arch-linux:avanzada`, JSON.stringify(["2-5"]))
+  const profile = collectProfile(storage)
+  assert.deepEqual(Object.keys(profile.courses), ["arch-linux:avanzada", "arch-linux:facil"])
+  assert.deepEqual(profile.courses["arch-linux:facil"], ["1-1"])
+  assert.deepEqual(profile.courses["arch-linux:avanzada"], ["2-5"])
+})
+
+test("purgeLegacyProgress borra las claves legacy e ignora las nuevas", () => {
+  const storage = new MemoryStorage()
+  storage.setItem(`${PROGRESS_PREFIX}arch-linux-facil`, JSON.stringify(["01"]))
+  storage.setItem(`${PROGRESS_PREFIX}arch-linux`, JSON.stringify(["02"]))
+  storage.setItem(`${PROGRESS_PREFIX}arch-linux:facil`, JSON.stringify(["1-1"]))
+  storage.setItem(`${PROGRESS_PREFIX}arch-linux:avanzada`, JSON.stringify(["2-5"]))
+  storage.setItem("otra-app", "no tocar")
+
+  const removed = purgeLegacyProgress(storage)
+  assert.deepEqual(removed.sort(), [
+    `${PROGRESS_PREFIX}arch-linux`,
+    `${PROGRESS_PREFIX}arch-linux-facil`,
+  ])
+  assert.equal(storage.getItem(`${PROGRESS_PREFIX}arch-linux-facil`), null)
+  assert.equal(storage.getItem(`${PROGRESS_PREFIX}arch-linux`), null)
+  assert.deepEqual(JSON.parse(storage.getItem(`${PROGRESS_PREFIX}arch-linux:facil`)), ["1-1"])
+  assert.deepEqual(JSON.parse(storage.getItem(`${PROGRESS_PREFIX}arch-linux:avanzada`)), ["2-5"])
+  assert.equal(storage.getItem("otra-app"), "no tocar")
+
+  // Segunda pasada: nada que borrar.
+  assert.deepEqual(purgeLegacyProgress(storage), [])
+})
+
+test("applyProfile round-trip con ambas filas", () => {
+  const storage = seeded()
+  const profile = {
+    version: 1,
+    alias: "Ada",
+    theme: "dark",
+    legalAcceptedAt: null,
+    courses: {
+      "arch-linux:facil": ["1-1", "1-2"],
+      "arch-linux:avanzada": ["2-5"],
+    },
+  }
+  applyProfile(storage, profile)
+
+  assert.deepEqual(JSON.parse(storage.getItem(`${PROGRESS_PREFIX}arch-linux:facil`)), [
+    "1-1",
+    "1-2",
+  ])
+  assert.deepEqual(JSON.parse(storage.getItem(`${PROGRESS_PREFIX}arch-linux:avanzada`)), ["2-5"])
+  // Las legacy no reaparecen.
+  assert.equal(storage.getItem(`${PROGRESS_PREFIX}arch-linux-facil`), null)
+  assert.equal(storage.getItem(`${PROGRESS_PREFIX}arch-linux`), null)
+
+  const exported = collectProfile(storage)
+  assert.deepEqual(exported.courses, profile.courses)
+})
+
+test("totalLessons suma marcas de ambas filas", () => {
+  const profile = {
+    version: 1,
+    alias: "",
+    theme: "dark",
+    legalAcceptedAt: null,
+    courses: {
+      "arch-linux:facil": ["1-1", "1-2"],
+      "arch-linux:avanzada": ["2-5"],
+      bandit: ["0"],
+    },
+  }
+  assert.equal(totalLessons(profile), 4)
+})
+
+test("las dos filas no comparten marcas (aislamiento via apply/collect)", () => {
+  const storage = new MemoryStorage()
+  applyProfile(storage, {
+    version: 1,
+    alias: "",
+    theme: "dark",
+    legalAcceptedAt: null,
+    courses: { "arch-linux:facil": ["1-1", "2-3"] },
+  })
+  // Marcar solo en Fácil no marca en Avanzada.
+  assert.equal(storage.getItem(`${PROGRESS_PREFIX}arch-linux:avanzada`), null)
+  const profile = collectProfile(storage)
+  assert.deepEqual(profile.courses["arch-linux:facil"], ["1-1", "2-3"])
+  assert.equal(profile.courses["arch-linux:avanzada"], undefined)
 })

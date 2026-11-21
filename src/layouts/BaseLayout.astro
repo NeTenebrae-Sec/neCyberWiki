@@ -537,23 +537,42 @@ const nav = [
       })
 
       const drawerProgress = document.querySelector("[data-drawer-progress]")
+      // Une marcas de `ncw:progress:<slug>` y `ncw:progress:<slug>:<tag>` (tag válido).
+      const progressUnion = (slug) => {
+        const union = new Set()
+        const tagPattern = /^:[a-z][a-z0-9-]{0,20}$/
+        const prefix = `ncw:progress:${slug}`
+        try {
+          for (let index = 0; index < localStorage.length; index += 1) {
+            const key = localStorage.key(index)
+            if (!key || !key.startsWith(prefix)) continue
+            const rest = key.slice(prefix.length)
+            if (rest !== "" && !tagPattern.test(rest)) continue
+            try {
+              const parsed = JSON.parse(localStorage.getItem(key) || "[]")
+              if (Array.isArray(parsed)) {
+                for (const item of parsed) if (typeof item === "string") union.add(item)
+              }
+            } catch {}
+          }
+        } catch {}
+        return union.size
+      }
+
       const syncGlobalProgress = () => {
         if (!(drawerProgress instanceof HTMLElement)) return
         const slug = drawerProgress.getAttribute("data-course-slug")
         const total = Number(drawerProgress.getAttribute("data-total") || 0)
         if (!slug || !total) return
 
-        try {
-          const done = JSON.parse(localStorage.getItem(`ncw:progress:${slug}`) || "[]")
-          const count = Array.isArray(done) ? done.length : 0
-          const pct = Math.min(100, Math.round((count / total) * 100))
-          const label = document.getElementById("mobile-progress-label")
-          const fill = document.getElementById("mobile-progress-fill")
-          const track = fill?.closest('[role="progressbar"]')
-          if (label) label.textContent = `${count} / ${total}`
-          if (fill) fill.style.width = `${pct}%`
-          track?.setAttribute("aria-valuenow", String(count))
-        } catch {}
+        const count = progressUnion(slug)
+        const pct = Math.min(100, Math.round((count / total) * 100))
+        const label = document.getElementById("mobile-progress-label")
+        const fill = document.getElementById("mobile-progress-fill")
+        const track = fill?.closest('[role="progressbar"]')
+        if (label) label.textContent = `${count} / ${total}`
+        if (fill) fill.style.width = `${pct}%`
+        track?.setAttribute("aria-valuenow", String(count))
       }
 
       syncGlobalProgress()

@@ -1,0 +1,248 @@
+---
+import { CONFIG_POR_DEFECTO } from "../lib/tracks"
+import type { CursoPublicado } from "../lib/catalog"
+
+interface Props {
+  curso: Pick<CursoPublicado, "slug" | "rutas">
+  variant?: "hero" | "lesson"
+}
+
+const { curso, variant = "hero" } = Astro.props
+const rutas = curso.rutas
+const uid = (eje: string) => `${curso.slug}-${eje}`
+---
+
+{rutas && (
+  <div
+    class:list={["course-config", `course-config--${variant}`]}
+    data-course-config
+    data-slug={curso.slug}
+    data-rutas={JSON.stringify(rutas)}
+    data-default={JSON.stringify(CONFIG_POR_DEFECTO)}
+  >
+    <div class="course-config__head">
+      <p class="course-config__kicker">Tu ruta</p>
+      <p class="course-config__summary" data-config-summary aria-live="polite">
+        Fácil · Hardware · Solo Linux
+      </p>
+    </div>
+
+    <fieldset class="course-config__group" data-config-difficulty>
+      <legend>Dificultad</legend>
+      <label class="config-option">
+        <input type="radio" name={uid("dificultad")} value="facil" checked />
+        <span class="config-option__body">
+          <span class="config-option__title">Fácil</span>
+          <small>archinstall · instalador guiado</small>
+        </span>
+      </label>
+      <label class="config-option">
+        <input type="radio" name={uid("dificultad")} value="avanzada" />
+        <span class="config-option__body">
+          <span class="config-option__title">Avanzada</span>
+          <small>Instalación manual paso a paso</small>
+        </span>
+      </label>
+    </fieldset>
+
+    <fieldset class="course-config__group" data-config-environment>
+      <legend>Entorno</legend>
+      <label class="config-option">
+        <input type="radio" name={uid("entorno")} value="vm" />
+        <span class="config-option__body">
+          <span class="config-option__title">Máquina virtual</span>
+          <small>Sin riesgo, sin tocar tu PC</small>
+        </span>
+      </label>
+      <label class="config-option">
+        <input type="radio" name={uid("entorno")} value="hardware" checked />
+        <span class="config-option__body">
+          <span class="config-option__title">Hardware real</span>
+          <small>Tu PC · instalación de verdad</small>
+        </span>
+      </label>
+    </fieldset>
+
+    <fieldset class="course-config__group" data-config-boot>
+      <legend>Arranque</legend>
+      <label class="config-option">
+        <input type="radio" name={uid("arranque")} value="solo" checked />
+        <span class="config-option__body">
+          <span class="config-option__title">Solo Linux</span>
+          <small>Arch es el único sistema</small>
+        </span>
+      </label>
+      <label class="config-option">
+        <input type="radio" name={uid("arranque")} value="dualboot" />
+        <span class="config-option__body">
+          <span class="config-option__title">Dual boot</span>
+          <small>Conserva Windows junto a Arch</small>
+        </span>
+      </label>
+    </fieldset>
+  </div>
+)}
+
+<style>
+  .course-config {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.85rem 1rem;
+    align-items: start;
+    margin-top: 1.25rem;
+    padding: 1rem;
+    border: 1px solid var(--line);
+    background: var(--bg-raised);
+  }
+
+  .course-config__head {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.35rem 1rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .course-config__kicker {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .course-config__summary {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--signal);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .course-config__group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+
+  .course-config__group legend {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    padding: 0;
+    margin-bottom: 0.35rem;
+  }
+
+  .course-config__group[hidden] {
+    display: none;
+  }
+
+  .config-option {
+    display: block;
+    cursor: pointer;
+  }
+
+  .config-option input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+  }
+
+  .config-option__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    height: 100%;
+    padding: 0.55rem 0.65rem;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease;
+  }
+
+  .config-option__title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .config-option__body small {
+    font-size: 0.68rem;
+    line-height: 1.4;
+    color: var(--ink-muted);
+  }
+
+  .config-option:hover .config-option__body {
+    border-color: var(--ink-muted);
+  }
+
+  .config-option input:checked + .config-option__body {
+    border-color: var(--signal);
+    background: color-mix(in srgb, var(--signal) 10%, transparent);
+  }
+
+  .config-option input:checked + .config-option__body .config-option__title {
+    color: var(--signal);
+  }
+
+  .config-option input:focus-visible + .config-option__body {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
+  }
+
+  .course-config--lesson {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.35rem 0.5rem;
+    margin-top: 0;
+    padding: 0.55rem;
+  }
+
+  .course-config--lesson .course-config__head {
+    padding-bottom: 0.35rem;
+  }
+
+  .course-config--lesson .course-config__group {
+    gap: 0.25rem;
+  }
+
+  .course-config--lesson .course-config__group legend {
+    margin-bottom: 0.2rem;
+  }
+
+  .course-config--lesson .config-option__body {
+    padding: 0.3rem 0.4rem;
+  }
+
+  .course-config--lesson .config-option__title {
+    font-size: 0.72rem;
+  }
+
+  .course-config--lesson .config-option__body small {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    .course-config--lesson {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .course-config {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>
