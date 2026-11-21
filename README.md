@@ -13,8 +13,8 @@ Una bitácora de aprendizaje técnico en español sobre sistemas, redes, program
 
 ### ¡Visita la web!
 
-[![🌐 Producción](https://img.shields.io/badge/🌐-Producción-00C853?style=for-the-badge&labelColor=30363D)](https://netenebrae-sec.github.io/neCyberWiki/)
-[![🧪 Staging](https://img.shields.io/badge/🧪-Staging%20(dev)-FFB300?style=for-the-badge&labelColor=30363D)](https://netenebrae-sec.github.io/neCyberWiki/dev/)
+[![🌐 Producción v1.1.0](https://img.shields.io/badge/🌐-Producción%20v1.1.0-00C853?style=for-the-badge&labelColor=30363D)](https://netenebrae-sec.github.io/neCyberWiki/)
+[![🧪 Staging v1.1.1 (dev)](https://img.shields.io/badge/🧪-Staging%20v1.1.1%20(dev)-FFB300?style=for-the-badge&labelColor=30363D)](https://netenebrae-sec.github.io/neCyberWiki/dev/)
 
 ## Qué encontrarás
 
