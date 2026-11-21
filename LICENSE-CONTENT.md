@@ -9,13 +9,13 @@ Puedes libremente:
 - **Compartir:** copiar y redistribuir el material en cualquier medio o formato.
 - **Adaptar:** traducir, remezclar y construir a partir del material.
 
-neCyberWiki existe para que aprender informática no cueste nada y siga siendo así. Estas condiciones están aquí para que el contenido sea ligre y, al mismo tiempo, no acabe en manos de quien cerrarlo bajo un muro de pago. Quien lo reutilice, que lo comparta.
+neCyberWiki existe para que aprender informática no cueste nada y siga siendo así. Estas condiciones están aquí para que el contenido circule y no acabe cerrado tras un muro de pago. Quien lo reutilice, que lo comparta igual.
 
 Bajo estas condiciones:
 
 - **Reconocimiento:** acreditar «neCyberWiki — NeTenebrae», enlazar a la web original y decir si has cambiado algo.
 - **No comercial:** no usar el material para fines comerciales.
-- **CompartirIgual:** si adaptas el material, DEBES publicar tu versión bajo la misma licencia.
+- **CompartirIgual:** si adaptas el material, publica tu versión bajo la misma licencia.
 
 Texto legal completo: <https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode>
 

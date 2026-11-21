@@ -1,6 +1,6 @@
 # El nombre no es el código
 
-El código de este repositorio es libre y puedes hacer con él lo que quieras.
+El código de este repositorio es software libre bajo GPL-3.0-or-later. Puedes usarlo, modificarlo y compartirlo con las condiciones de esa licencia.
 
 **«neCyberWiki» y «NeTenebrae» no forman parte de esa cesión.**
 
@@ -27,7 +27,7 @@ Es el acuerdo habitual en los proyectos que hacen una promesa sobre su contenido
 
 ## Si quieres pedirlo
 
-DISCUSSIONES O AL CORREO DE DUCK. La respuesta a una petición razonable suele ser igual de razonable CAMBIAR ESA VERSIPON. La que no lo será es una versión que cobre por el curso o que recoja datos de quienes lo usan.
+Abre un issue o una discusión y pregunta. La respuesta a una petición razonable suele ser razonable también. La que no lo será es una versión que cobre por el curso o que recoja datos de quienes lo usan.
 
 ---
 

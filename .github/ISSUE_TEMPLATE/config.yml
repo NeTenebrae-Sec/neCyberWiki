@@ -3,6 +3,6 @@ contact_links:
   - name: Hacer una pregunta
     url: https://github.com/NeTenebrae-Sec/neCyberWiki/discussions
     about: Las preguntas sobre una lección van en Discussions, para que todos aprendan de la respuesta.
-  - name: Mostrar tu trabajo
+  - name: Proponer una idea
     url: https://github.com/NeTenebrae-Sec/neCyberWiki/discussions
-    about: Comparte aquí tus resultados y dudas de los laboratorios.
+    about: Las ideas y propuestas generales van en Discussions, antes de convertirlas en un PR.
