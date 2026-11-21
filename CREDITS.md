@@ -2,8 +2,7 @@
 
 ## Fuentes que enlazamos, no copiamos
 
-neCyberWiki enseña ciberseguridad con entornos propios o autorizados. Estas plataformas son
-donde se practica; sus nombres, enunciados, imágenes y máquinas pertenecen a sus titulares y
+neCyberWiki enseña ciberseguridad con entornos propios o autorizados. Estas plataformas son donde se practica. Sus nombres, enunciados, imágenes y máquinas pertenecen a sus titulares y
 **no quedan cubiertos por las licencias de este repositorio**.
 
 | Fuente | Uso en el sitio | Enlace |
