@@ -54,12 +54,24 @@ Para inspeccionar el DOM o el `localStorage` desde la consola del navegador con 
 
 ## Comprobación de enlaces
 
-El workflow `link-check.yml` ejecuta lychee sobre los Markdown del proyecto en cada PR. Comprueba enlaces HTTP y archivos locales. Las imágenes referenciadas con rutas absolutas (`/neCyberWiki/...`) se resuelven con `--root-dir .` contra `public/`.
+El workflow `link-check.yml` ejecuta lychee sobre el **sitio construido** (`dist/**/*.html`) en cada PR, no sobre los Markdown fuente: así se evitan falsos positivos de sintaxis Obsidian y de rutas relativas al source. Antes de chequear se prepara un árbol temporal:
 
-Los artefactos generados (`dist/`, `public/pagefind/`) están excluidos. YouTube se excluye porque bloquea a los checkers automatizados con 403.
+1. copia de `dist/`;
+2. los canonicals absolutos `https://netenebrae-sec.github.io/neCyberWiki/...` se reescriben a `/neCyberWiki/...` para resolverlos contra el build, no contra el sitio desplegado (que puede no tener aún las rutas de la rama);
+3. symlink `neCyberWiki -> site` como directorio **hermano**, para resolver `/neCyberWiki/...` con `--root-dir` sin recursar.
 
-Para ejecutarlo en local:
+YouTube se excluye porque bloquea a los checkers con 403; el 429 se acepta porque es rate limiting, no un enlace muerto. Un enlace realmente roto se corrige, nunca se ignora ni se desactiva el gate.
+
+Para reproducirlo en local con la misma versión de lychee que CI (v0.24.2):
 
 ```bash
-npx lychee --no-progress --root-dir . './**/*.md'
+CHECK_ROOT=/tmp/ncw-linkcheck
+rm -rf "$CHECK_ROOT" && mkdir -p "$CHECK_ROOT"
+cp -R dist "$CHECK_ROOT/site"
+ln -s "$CHECK_ROOT/site" "$CHECK_ROOT/neCyberWiki"
+find "$CHECK_ROOT/site" -name '*.html' -print0 \
+  | xargs -0 sed -i 's#https://netenebrae-sec\.github\.io/neCyberWiki#/neCyberWiki#g'
+lychee --no-progress --root-dir "$CHECK_ROOT" --index-files index.html \
+  --exclude 'youtube\.com' --accept '100..=103, 200..=299, 429' \
+  "$CHECK_ROOT/site/**/*.html"
 ```

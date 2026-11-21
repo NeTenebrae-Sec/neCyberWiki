@@ -7,7 +7,7 @@ El repositorio tiene tres workflows en `.github/workflows/`. Todos se ejecutan c
 | Workflow | Cuándo | Objetivo |
 | --- | --- | --- |
 | `ci.yml` | PR y push a `dev`/`main` | Ejecutar los gates del proyecto |
-| `link-check.yml` | PR y disparo manual | Comprobar enlaces de los Markdown |
+| `link-check.yml` | PR y disparo manual | Comprobar enlaces del sitio construido |
 | `deploy.yml` | Push a `main`/`dev` y disparo manual | Publicar producción y staging en GitHub Pages |
 
 ## CI — gates
@@ -26,11 +26,12 @@ Cualquier gate que falle bloquea el PR. No se desactivan gates: si falla un chec
 
 ## Comprobación de enlaces
 
-`link-check.yml` usa `lycheeverse/lychee-action@v2` sobre `./**/*.md`, con `fail: true`. Opciones relevantes:
+`link-check.yml` usa `lycheeverse/lychee-action@v2` (v0.24.2) sobre el sitio construido, con `fail: true`. Antes de chequear, un step prepara un árbol temporal con `dist/` copiado, canonicals propios reescritos a rutas root-relative y un symlink hermano `neCyberWiki -> site`. Opciones relevantes:
 
-- `--root-dir .` para resolver rutas absolutas `/neCyberWiki/...` contra `public/`.
-- `--exclude-path dist` y `--exclude-path public/pagefind` para ignorar artefactos generados.
+- `--root-dir <temporal>` para resolver `/neCyberWiki/...` contra el symlink.
+- `--index-files index.html` para que las rutas con `/` final encuentren el `index.html`.
 - `--exclude youtube\.com` porque YouTube devuelve 403 a los checkers automatizados.
+- `--accept '100..=103, 200..=299, 429'` porque un 429 es rate limiting, no un enlace muerto.
 
 Los errores se revisan en el resumen del run; un enlace muerto se corrige o se elimina, no se ignora.
 
