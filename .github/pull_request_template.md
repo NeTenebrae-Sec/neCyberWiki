@@ -27,19 +27,9 @@
 
 ## Verificación
 
-- `npm run build`: <resultado observado>
-- `npm run check`: <resultado observado>
-- `npm run lint`: <resultado observado>
-- `npm test`: <resultado observado>
-- `npx prettier --check .`: <resultado observado>
-- <Prueba manual o Playwright, con valores concretos>
+- [ ] Gates en verde: `npm run build`, `npm run check`, `npm run lint`, `npm test`, `npx prettier --check .`
+- [ ] Comprobado a mano: <qué revisaste y qué viste, con valores concretos>
 
-## Rama base y commits
+## Notas para quien revisa
 
-<Por qué esta base y el orden respecto a otras PRs.>
-
-Commits incluidos:
-
-- `<hash>` — <qué hace>
-
-<!-- Un solo tipo de contribución por PR: código, contenido o corrección. -->
+<Base, orden respecto a otras PRs, commits heredados o cualquier detalle que ayude. Si no hay nada, borra esta sección.>
