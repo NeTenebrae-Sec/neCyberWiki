@@ -33,3 +33,8 @@
 ## Notas para quien revisa
 
 <Base, orden respecto a otras PRs, commits heredados o cualquier detalle que ayude. Si no hay nada, borra esta sección.>
+
+## Aceptación
+
+- [ ] He leído y acepto las [reglas de contribución y la cláusula inbound](CONTRIBUTING.md#cláusula-inbound-para-contribuciones).
+- [ ] Esta PR contiene un solo tipo de contribución: código, contenido o corrección.
