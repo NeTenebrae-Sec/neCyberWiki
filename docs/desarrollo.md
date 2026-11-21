@@ -36,4 +36,4 @@ npm run build && npm run preview
 | `npm run import:bandit` | Regenera el curso Bandit desde el archivo fuente. |
 | `npm run format` | Prettier sobre todo el proyecto. |
 
-Las reglas de contribución y la cláusula inbound están en [`CONTRIBUTING.md`](../CONTRIBUTING.md).
+Las reglas de contribución y la cláusula están en [`CONTRIBUTING.md`](../CONTRIBUTING.md).
