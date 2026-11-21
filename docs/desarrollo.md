@@ -1,10 +1,27 @@
 # Desarrollo
 
-Guía rápida para trabajar en neCyberWiki. Para las reglas de contribución y la cláusula inbound, consulta [`CONTRIBUTING.md`](../CONTRIBUTING.md).
+Índice de la documentación técnica de neCyberWiki.
+
+- **[Arquitectura](arquitectura.md)** — stack, estructura de fuentes, modelo de datos, rutas, búsqueda y estado local.
+- **[Pruebas](testing.md)** — tests unitarios, gates, verificación manual con Playwright y comprobación de enlaces.
+- **[CI y despliegue](ci-cd.md)** — workflows, producción y staging en GitHub Pages.
 
 ## Requisitos
 
 Node 22.16 o superior. Sin backend y sin base de datos.
+
+## Arranque rápido
+
+```bash
+npm install
+npm run dev
+```
+
+El buscador se genera antes de arrancar. Para ver el build real:
+
+```bash
+npm run build && npm run preview
+```
 
 ## Scripts
 
@@ -19,40 +36,4 @@ Node 22.16 o superior. Sin backend y sin base de datos.
 | `npm run import:bandit` | Regenera el curso Bandit desde el archivo fuente. |
 | `npm run format` | Prettier sobre todo el proyecto. |
 
-## Gates
-
-Antes de abrir un PR, ejecuta y haz pasar:
-
-```bash
-npm run build
-npm run check
-npm run lint
-npm test
-npx prettier --check .
-```
-
-Los mismos gates corren en CI para los PRs a `dev` y `main`.
-
-## Pruebas
-
-Los tests unitarios viven en `tests/` y usan el runner de Node. No hay tests de navegador automatizados integrados. La verificación con Playwright es parte del flujo local.
-
-El buscador depende del build: `npm run dev` ejecuta un `predev` que genera el índice en `public/pagefind/`. Ese directorio está ignorado por git y refleja el último arranque. Si añades contenido, reinicia el servidor.
-
-## Estructura
-
-```text
-content/
-  cursos/          Cursos y lecciones en Markdown
-  blog/            Entradas de la bitácora
-public/
-  cursos/          Imágenes de los cursos
-src/
-  components/      Componentes de interfaz
-  data/            Categorías, cursos y roadmap
-  layouts/         Shell del sitio
-  lib/             Lógica pura y utilidades de build
-  pages/           Rutas de Astro
-  styles/          Tokens, base, patrones y shell
-tests/             Tests unitarios
-```
+Las reglas de contribución y la cláusula inbound están en [`CONTRIBUTING.md`](../CONTRIBUTING.md).

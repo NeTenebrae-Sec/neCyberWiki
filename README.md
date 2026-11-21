@@ -7,7 +7,7 @@
 
 Una bitácora de aprendizaje técnico en español sobre sistemas, redes, programación y ciberseguridad. Encuentra cursos adaptables, rutas de aprendizaje, prácticas documentadas y recursos gratuitos para aprender a tu ritmo.
 
-**[Explora neCyberWiki](https://netenebrae-sec.github.io/neCyberWiki/)**
+**[Producción](https://netenebrae-sec.github.io/neCyberWiki/)** · **[Staging (`dev`)](https://netenebrae-sec.github.io/neCyberWiki/dev/)**
 
 ## Filosofía
 
@@ -24,7 +24,10 @@ El contenido y el código se distribuyen con licencias abiertas para que el proy
 
 ## Documentación y enlaces
 
-- **Desarrollo y pruebas:** [`docs/desarrollo.md`](docs/desarrollo.md)
+- **Índice de desarrollo:** [`docs/desarrollo.md`](docs/desarrollo.md)
+- **Arquitectura:** [`docs/arquitectura.md`](docs/arquitectura.md)
+- **Pruebas:** [`docs/testing.md`](docs/testing.md)
+- **CI y despliegue:** [`docs/ci-cd.md`](docs/ci-cd.md)
 - **Guía de contribución:** [`CONTRIBUTING.md`](CONTRIBUTING.md)
 - **Política de seguridad:** [`SECURITY.md`](SECURITY.md)
 - **Licencias:** [`LICENSE.txt`](LICENSE.txt), [`LICENSE-CONTENT.md`](LICENSE-CONTENT.md)

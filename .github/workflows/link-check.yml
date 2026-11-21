@@ -16,5 +16,5 @@ jobs:
         uses: lycheeverse/lychee-action@v2
         with:
           # Los artefactos generados no son Markdown de origen y Youtube bloquea a los checkers con 403.
-          args: --no-progress --exclude-path dist --exclude-path public/pagefind --exclude 'youtube\.com' './**/*.md'
+          args: --no-progress --root-dir . --exclude-path dist --exclude-path public/pagefind --exclude 'youtube\.com' './**/*.md'
           fail: true
