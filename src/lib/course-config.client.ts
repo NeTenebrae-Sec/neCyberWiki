@@ -5,6 +5,7 @@
 import {
   buscarRuta,
   combinarConfig,
+  idProgreso,
   leccionEnRuta,
   normalizarConfig,
   numerosVisiblesPorRuta,
@@ -172,12 +173,49 @@ const arranqueAlRestaurarHardware = (slug: string): CursoConfig["arranque"] => {
     .arranque
 }
 
+const TITULO_BLOQUEO_RUTA = "Esta clase no está en esa ruta"
+const TITULO_BLOQUEO_VM = "No disponible en máquina virtual"
+
+function setBloqueo(
+  input: HTMLInputElement,
+  label: Element | null,
+  bloqueado: boolean,
+  motivo: "ruta" | "vm" | null,
+): void {
+  input.disabled = bloqueado
+  if (!label) return
+  label.classList.toggle("is-locked", bloqueado)
+  if (bloqueado) {
+    label.setAttribute("aria-disabled", "true")
+    label.setAttribute("title", motivo === "vm" ? TITULO_BLOQUEO_VM : TITULO_BLOQUEO_RUTA)
+    label.setAttribute("data-lock", motivo ?? "ruta")
+  } else {
+    label.removeAttribute("aria-disabled")
+    label.removeAttribute("title")
+    label.removeAttribute("data-lock")
+  }
+}
+
+// En VM el arranque es irrelevante (siempre "solo"): se bloquea, nunca se oculta.
+// El bloqueo por ruta se re-aplica después en la lección, así que al volver a
+// Hardware solo liberamos el que pusimos aquí (marcado con data-lock="vm").
+function bloquearArranqueVM(root: HTMLElement, config: CursoConfig): void {
+  const vm = config.entorno === "vm"
+  for (const input of root.querySelectorAll<HTMLInputElement>('input[name$="-arranque"][value]')) {
+    const label = input.closest(".config-option")
+    if (vm) {
+      setBloqueo(input, label, true, "vm")
+    } else if (label?.getAttribute("data-lock") === "vm") {
+      setBloqueo(input, label, false, null)
+    }
+  }
+}
+
 // Candado: en la lección (root con data-lesson-numero), las opciones del
 // configurador cuya ruta excluiría la clase actual quedan deshabilitadas.
 // Candidato = config vigente con ese eje pisado por el valor del radio,
-// normalizado (VM fuerza arranque "solo"); si la ruta resultante no incluye
-// el número de lección, la opción no es elegible. Se re-aplica en cada
-// repintado (cada toggle), así la atenuación sigue a la config vigente.
+// normalizado; si la ruta resultante no incluye el número de lección, la opción
+// no es elegible. VM manda en el eje arranque y se gestiona arriba.
 function bloquearFueraDeRuta(
   root: HTMLElement,
   config: CursoConfig,
@@ -185,24 +223,14 @@ function bloquearFueraDeRuta(
   numero: string,
 ): void {
   for (const eje of ["dificultad", "entorno", "arranque"] as const) {
+    if (eje === "arranque" && config.entorno === "vm") continue
     for (const input of root.querySelectorAll<HTMLInputElement>(`input[name$="-${eje}"][value]`)) {
       const capa: Record<string, string> = { ...config }
       capa[eje] = input.value
       const candidate = normalizarConfig(capa as Partial<CursoConfig>)
       const ruta = rutas.length ? buscarRuta(rutas, candidate) : undefined
       const habilitado = Boolean(ruta && ruta.lecciones.includes(numero))
-      const label = input.closest(".config-option")
-      if (habilitado) {
-        input.disabled = false
-        label?.classList.remove("is-locked")
-        label?.removeAttribute("title")
-        label?.removeAttribute("aria-disabled")
-      } else {
-        input.disabled = true
-        label?.classList.add("is-locked")
-        label?.setAttribute("title", "Esta clase no está en esa ruta")
-        label?.setAttribute("aria-disabled", "true")
-      }
+      setBloqueo(input, input.closest(".config-option"), !habilitado, "ruta")
     }
   }
 }
@@ -216,14 +244,8 @@ function pintarConfigurador(root: HTMLElement, config: CursoConfig, rutas: Curso
         : "arranque"
     radio.checked = radio.value === config[eje]
   })
-  const boot = root.querySelector<HTMLElement>("[data-config-boot]")
-  if (boot) boot.hidden = config.entorno === "vm"
-  const resumen = root.querySelector<HTMLElement>("[data-config-summary]")
-  if (resumen) resumen.textContent = resumirConfig(config)
-  const diffBadge = root.querySelector<HTMLElement>("[data-diff-badge]")
-  if (diffBadge)
-    diffBadge.textContent =
-      DIFICULTAD_LABEL[config.dificultad]?.toUpperCase() ?? config.dificultad.toUpperCase()
+  // El arranque nunca se oculta: en VM queda bloqueado para no mover el layout.
+  bloquearArranqueVM(root, config)
   const numero = root.getAttribute("data-lesson-numero")
   if (numero !== null) bloquearFueraDeRuta(root, config, rutas, numero)
 }
@@ -248,10 +270,10 @@ function aplicarAlTemario(
   slug: string,
   ruta: CursoRuta | undefined,
   config: CursoConfig,
-  tieneRutas: boolean,
+  compartirVariante: boolean,
 ): string[] {
   const visiblesSlug: string[] = []
-  const claveProgreso = tieneRutas ? progresoKey(slug, config.dificultad) : progresoKey(slug)
+  const claveProgreso = progresoKey(slug)
   const numerosVisibles = numerosVisiblesPorRuta(ruta)
 
   for (const mod of doc.querySelectorAll<HTMLElement>("[data-syllabus] details[data-module-key]")) {
@@ -281,7 +303,7 @@ function aplicarAlTemario(
       item.el.hidden = !visible
       if (visible) {
         visibles += 1
-        if (progreso.includes(item.slug)) done += 1
+        if (progreso.includes(idProgreso(item, config, compartirVariante))) done += 1
         visiblesSlug.push(item.slug)
       }
       const visibleNumber = numerosVisibles[item.numero] || item.numero
@@ -395,6 +417,14 @@ export function initCourseConfig(
       } catch {}
     }
 
+    let compartirVariante = false
+    for (const r of roots) {
+      if (r.getAttribute("data-compartir-variante") === "true") {
+        compartirVariante = true
+        break
+      }
+    }
+
     const search = window.location.search
     // Query válida gana y se persiste.
     persistirConfig(slug, configDesdeLayers(slug, search))
@@ -416,7 +446,7 @@ export function initCourseConfig(
           b.textContent =
             DIFICULTAD_LABEL[config.dificultad]?.toUpperCase() ?? config.dificultad.toUpperCase()
         }
-        const visibles = aplicarAlTemario(document, slug, ruta, config, rutas.length > 0)
+        const visibles = aplicarAlTemario(document, slug, ruta, config, compartirVariante)
         const state: CourseConfigState = { slug, config, ruta, visibles }
         emitir(document, state)
         onChange?.(state)

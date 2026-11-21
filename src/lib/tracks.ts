@@ -124,6 +124,20 @@ export function ordenarPorRuta<T extends { numero?: string }>(
   })
 }
 
-export function progresoKey(curso: string, dificultad?: Dificultad): string {
-  return dificultad ? `ncw:progress:${curso}:${dificultad}` : `ncw:progress:${curso}`
+// Un único bucket por curso base. Las variantes no fragmentan la clave: el ID
+// de la lección es quien decide si comparte estado entre dificultades.
+export function progresoKey(curso: string): string {
+  return `ncw:progress:${curso}`
+}
+
+// ID de progreso de una lección. Las comunes (y todos los cursos que no
+// declaran `progreso.compartirVariante`) usan el slug plano; las especiales se
+// califican con la ruta completa (dificultad-entorno-arranque).
+export function idProgreso(
+  leccion: { slug: string; variante: string },
+  config: Partial<CursoConfig>,
+  compartirVariante: boolean,
+): string {
+  if (!compartirVariante || leccion.variante === "comun") return leccion.slug
+  return `${leccion.slug}@${rutaKey(config)}`
 }

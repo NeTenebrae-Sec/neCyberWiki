@@ -135,24 +135,17 @@ const unidad = curso.unidad === "nivel" ? "niveles" : "lecciones"
 )}
 
 <script>
-  // Une marcas de `ncw:progress:<slug>` y `ncw:progress:<slug>:<tag>` (tag válido),
-  // evitando colisiones tipo `arch-linux` vs `arch-linux-facil`.
+  // Lee solo el bucket exacto `ncw:progress:<slug>` y cuenta slugs únicos:
+  // las claves `:<tag>` son legacy y no se leen; los IDs especiales
+  // (`slug@ruta`) se normalizan a su slug para no inflar el total.
   const progressUnion = (slug: string): number => {
     const union = new Set<string>()
-    const tagPattern = /^:[a-z][a-z0-9-]{0,20}$/
-    const prefix = `ncw:progress:${slug}`
     try {
-      for (let index = 0; index < localStorage.length; index += 1) {
-        const key = localStorage.key(index)
-        if (!key || !key.startsWith(prefix)) continue
-        const rest = key.slice(prefix.length)
-        if (rest !== "" && !tagPattern.test(rest)) continue
-        try {
-          const parsed = JSON.parse(localStorage.getItem(key) || "[]")
-          if (Array.isArray(parsed)) {
-            for (const item of parsed) if (typeof item === "string") union.add(item)
-          }
-        } catch {}
+      const parsed = JSON.parse(localStorage.getItem(`ncw:progress:${slug}`) || "[]")
+      if (Array.isArray(parsed)) {
+        for (const item of parsed) {
+          if (typeof item === "string") union.add(item.split("@")[0])
+        }
       }
     } catch {}
     return union.size

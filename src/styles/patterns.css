@@ -925,6 +925,10 @@ html.ncw-route-pending .lesson-hud__controls::after {
   animation: ncw-route-skeleton 1.4s linear infinite;
 }
 
+html.ncw-route-pending .lesson-hud__title {
+  visibility: hidden;
+}
+
 html.ncw-route-pending [data-syllabus] .sy-module__body > :not(.sy-lessons--route-skeleton) {
   display: none;
 }

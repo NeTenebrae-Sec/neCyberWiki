@@ -8,10 +8,13 @@ import {
   THEME_KEY,
   PROGRESS_PREFIX,
   applyProfile,
+  cleanLessonSlug,
   clearProfile,
   collectProfile,
   emptyProfile,
+  expandirProgresoCompartido,
   parseProfile,
+  plegarProgresoCompartido,
   purgeLegacyProgress,
   serializeProfile,
   totalLessons,
@@ -47,19 +50,22 @@ const seeded = () => {
   storage.setItem(PROFILE_NAME_KEY, "  Tenebrae  ")
   storage.setItem(THEME_KEY, "light")
   storage.setItem(LEGAL_KEY, "2026-11-15T10:00:00.000Z")
-  storage.setItem(`${PROGRESS_PREFIX}arch-linux-facil`, JSON.stringify(["01", "02", "02"]))
+  storage.setItem(
+    `${PROGRESS_PREFIX}arch-linux`,
+    JSON.stringify(["1-1", "1-1@facil-hardware-solo", "1-1"]),
+  )
   storage.setItem(`${PROGRESS_PREFIX}bandit`, JSON.stringify(["0", "1", 3]))
   storage.setItem("otra-app", "no tocar")
   return storage
 }
 
 test("collectProfile reúne alias, tema, aceptación y progreso", () => {
-  const profile = collectProfile(seeded(), ["arch-linux-facil"])
+  const profile = collectProfile(seeded(), ["arch-linux"])
   assert.equal(profile.version, 1)
   assert.equal(profile.alias, "Tenebrae")
   assert.equal(profile.theme, "light")
   assert.equal(profile.legalAcceptedAt, "2026-11-15T10:00:00.000Z")
-  assert.deepEqual(profile.courses["arch-linux-facil"], ["01", "02"])
+  assert.deepEqual(profile.courses["arch-linux"], ["1-1", "1-1@facil-hardware-solo"])
   assert.deepEqual(profile.courses.bandit, ["0", "1"])
   assert.equal(totalLessons(profile), 4)
 })
@@ -69,7 +75,7 @@ test("collectProfile ignora datos corruptos y cursos sin progreso", () => {
   storage.setItem(PROGRESS_PREFIX + "bandit", "{roto")
   storage.setItem(THEME_KEY, "sepia")
   storage.setItem(LEGAL_KEY, "ayer")
-  const profile = collectProfile(storage, ["bandit", "arch-linux-facil"])
+  const profile = collectProfile(storage, ["bandit", "arch-linux"])
   assert.deepEqual(profile.courses, {})
   assert.equal(profile.theme, "dark")
   assert.equal(profile.legalAcceptedAt, null)
@@ -77,7 +83,7 @@ test("collectProfile ignora datos corruptos y cursos sin progreso", () => {
 })
 
 test("serializeProfile y parseProfile hacen ida y vuelta", () => {
-  const original = collectProfile(seeded(), ["arch-linux-facil"])
+  const original = collectProfile(seeded(), ["arch-linux"])
   const raw = serializeProfile(original)
   assert.ok(raw.endsWith("\n"))
   const result = parseProfile(raw)
@@ -142,7 +148,7 @@ test("applyProfile reemplaza el progreso anterior y respeta otras claves", () =>
   }
   applyProfile(storage, profile)
 
-  assert.equal(storage.getItem(PROGRESS_PREFIX + "arch-linux-facil"), null)
+  assert.equal(storage.getItem(PROGRESS_PREFIX + "arch-linux"), null)
   assert.deepEqual(JSON.parse(storage.getItem(PROGRESS_PREFIX + "bandit")), ["5"])
   assert.equal(storage.getItem(PROFILE_NAME_KEY), "Nueva")
   assert.equal(storage.getItem(THEME_KEY), "dark")
@@ -165,7 +171,7 @@ test("clearProfile borra solo las claves ncw y devuelve la lista", () => {
     "ncw-theme",
     "ncw:legal:v1",
     "ncw:profile:name",
-    "ncw:progress:arch-linux-facil",
+    "ncw:progress:arch-linux",
     "ncw:progress:bandit",
   ])
   assert.equal(storage.getItem("otra-app"), "no tocar")
@@ -208,31 +214,46 @@ test("validateProfile rechaza claves con : inválido", () => {
   }
 })
 
-test("collectProfile con ambas filas devuelve dos entradas ordenadas", () => {
+test("collectProfile + expandir derivan dos filas desde el bucket base", () => {
   const storage = new MemoryStorage()
-  storage.setItem(`${PROGRESS_PREFIX}arch-linux:facil`, JSON.stringify(["1-1"]))
-  storage.setItem(`${PROGRESS_PREFIX}arch-linux:avanzada`, JSON.stringify(["2-5"]))
-  const profile = collectProfile(storage)
-  assert.deepEqual(Object.keys(profile.courses), ["arch-linux:avanzada", "arch-linux:facil"])
-  assert.deepEqual(profile.courses["arch-linux:facil"], ["1-1"])
-  assert.deepEqual(profile.courses["arch-linux:avanzada"], ["2-5"])
+  storage.setItem(
+    `${PROGRESS_PREFIX}arch-linux`,
+    JSON.stringify([
+      "1-1",
+      "1-1@facil-hardware-solo",
+      "2-5@avanzada-hardware-solo",
+      "2-5@avanzada-hardware-dualboot",
+      "3-1",
+    ]),
+  )
+  const profile = expandirProgresoCompartido(collectProfile(storage), ["arch-linux"])
+  assert.deepEqual(Object.keys(profile.courses).sort(), ["arch-linux:avanzada", "arch-linux:facil"])
+  assert.deepEqual(profile.courses["arch-linux:facil"], ["1-1", "1-1@facil-hardware-solo", "3-1"])
+  assert.deepEqual(profile.courses["arch-linux:avanzada"], [
+    "1-1",
+    "2-5@avanzada-hardware-solo",
+    "2-5@avanzada-hardware-dualboot",
+    "3-1",
+  ])
+  assert.equal(profile.courses["arch-linux"], undefined)
 })
 
-test("purgeLegacyProgress borra las claves legacy e ignora las nuevas", () => {
+test("purgeLegacyProgress borra la clave vieja y conserva el bucket base", () => {
   const storage = new MemoryStorage()
   storage.setItem(`${PROGRESS_PREFIX}arch-linux-facil`, JSON.stringify(["01"]))
-  storage.setItem(`${PROGRESS_PREFIX}arch-linux`, JSON.stringify(["02"]))
+  storage.setItem(`${PROGRESS_PREFIX}arch-linux`, JSON.stringify(["1-1@facil-hardware-solo"]))
   storage.setItem(`${PROGRESS_PREFIX}arch-linux:facil`, JSON.stringify(["1-1"]))
   storage.setItem(`${PROGRESS_PREFIX}arch-linux:avanzada`, JSON.stringify(["2-5"]))
   storage.setItem("otra-app", "no tocar")
 
   const removed = purgeLegacyProgress(storage)
-  assert.deepEqual(removed.sort(), [
-    `${PROGRESS_PREFIX}arch-linux`,
-    `${PROGRESS_PREFIX}arch-linux-facil`,
-  ])
+  assert.deepEqual(removed, [`${PROGRESS_PREFIX}arch-linux-facil`])
   assert.equal(storage.getItem(`${PROGRESS_PREFIX}arch-linux-facil`), null)
-  assert.equal(storage.getItem(`${PROGRESS_PREFIX}arch-linux`), null)
+  // El bucket base es el progreso nuevo: no se purga.
+  assert.deepEqual(JSON.parse(storage.getItem(`${PROGRESS_PREFIX}arch-linux`)), [
+    "1-1@facil-hardware-solo",
+  ])
+  // Las filas viejas por dificultad se conservan (no se leen, no se borran).
   assert.deepEqual(JSON.parse(storage.getItem(`${PROGRESS_PREFIX}arch-linux:facil`)), ["1-1"])
   assert.deepEqual(JSON.parse(storage.getItem(`${PROGRESS_PREFIX}arch-linux:avanzada`)), ["2-5"])
   assert.equal(storage.getItem("otra-app"), "no tocar")
@@ -241,7 +262,7 @@ test("purgeLegacyProgress borra las claves legacy e ignora las nuevas", () => {
   assert.deepEqual(purgeLegacyProgress(storage), [])
 })
 
-test("applyProfile round-trip con ambas filas", () => {
+test("applyProfile + plegar escriben un único bucket base", () => {
   const storage = seeded()
   const profile = {
     version: 1,
@@ -250,22 +271,28 @@ test("applyProfile round-trip con ambas filas", () => {
     legalAcceptedAt: null,
     courses: {
       "arch-linux:facil": ["1-1", "1-2"],
-      "arch-linux:avanzada": ["2-5"],
+      "arch-linux:avanzada": ["2-5@avanzada-hardware-solo"],
     },
   }
-  applyProfile(storage, profile)
+  applyProfile(storage, plegarProgresoCompartido(profile, ["arch-linux"]))
 
-  assert.deepEqual(JSON.parse(storage.getItem(`${PROGRESS_PREFIX}arch-linux:facil`)), [
+  assert.deepEqual(JSON.parse(storage.getItem(`${PROGRESS_PREFIX}arch-linux`)), [
     "1-1",
     "1-2",
+    "2-5@avanzada-hardware-solo",
   ])
-  assert.deepEqual(JSON.parse(storage.getItem(`${PROGRESS_PREFIX}arch-linux:avanzada`)), ["2-5"])
+  assert.equal(storage.getItem(`${PROGRESS_PREFIX}arch-linux:facil`), null)
+  assert.equal(storage.getItem(`${PROGRESS_PREFIX}arch-linux:avanzada`), null)
   // Las legacy no reaparecen.
   assert.equal(storage.getItem(`${PROGRESS_PREFIX}arch-linux-facil`), null)
-  assert.equal(storage.getItem(`${PROGRESS_PREFIX}arch-linux`), null)
 
-  const exported = collectProfile(storage)
-  assert.deepEqual(exported.courses, profile.courses)
+  const exported = expandirProgresoCompartido(collectProfile(storage), ["arch-linux"])
+  assert.deepEqual(exported.courses["arch-linux:facil"], ["1-1", "1-2"])
+  assert.deepEqual(exported.courses["arch-linux:avanzada"], [
+    "1-1",
+    "1-2",
+    "2-5@avanzada-hardware-solo",
+  ])
 })
 
 test("totalLessons suma marcas de ambas filas", () => {
@@ -283,18 +310,92 @@ test("totalLessons suma marcas de ambas filas", () => {
   assert.equal(totalLessons(profile), 4)
 })
 
-test("las dos filas no comparten marcas (aislamiento via apply/collect)", () => {
-  const storage = new MemoryStorage()
-  applyProfile(storage, {
+test("expandir comparte las comunes y aísla las especiales por dificultad", () => {
+  const profile = {
     version: 1,
     alias: "",
     theme: "dark",
     legalAcceptedAt: null,
-    courses: { "arch-linux:facil": ["1-1", "2-3"] },
+    courses: {
+      "arch-linux": ["1-1", "2-5@avanzada-hardware-solo"],
+      "arch-linux:facil": ["fila-vieja"],
+      "arch-linux:avanzada": ["fila-vieja"],
+    },
+  }
+  const expandido = expandirProgresoCompartido(profile, ["arch-linux"])
+
+  // La común está en ambas filas; la especial solo en Avanzada.
+  assert.deepEqual(expandido.courses["arch-linux:facil"], ["1-1"])
+  assert.deepEqual(expandido.courses["arch-linux:avanzada"], ["1-1", "2-5@avanzada-hardware-solo"])
+  // Las filas viejas se descartan y la entrada no se muta.
+  assert.equal(expandido.courses["arch-linux"], undefined)
+  assert.deepEqual(profile.courses["arch-linux:facil"], ["fila-vieja"])
+})
+
+test("plegarProgresoCompartido une base y filas en un bucket deduplicado", () => {
+  const expandido = expandirProgresoCompartido(
+    {
+      version: 1,
+      alias: "",
+      theme: "dark",
+      legalAcceptedAt: null,
+      courses: {
+        "arch-linux": ["1-1", "1-1@facil-hardware-solo", "2-5@avanzada-hardware-solo", "3-1"],
+      },
+    },
+    ["arch-linux"],
+  )
+  const plegado = plegarProgresoCompartido(expandido, ["arch-linux"])
+
+  assert.deepEqual(plegado.courses["arch-linux"], [
+    "1-1",
+    "1-1@facil-hardware-solo",
+    "3-1",
+    "2-5@avanzada-hardware-solo",
+  ])
+  assert.equal(plegado.courses["arch-linux:facil"], undefined)
+  assert.equal(plegado.courses["arch-linux:avanzada"], undefined)
+})
+
+test("expandir y plegar conservan el mismo conjunto de marcas", () => {
+  const original = {
+    version: 1,
+    alias: "",
+    theme: "dark",
+    legalAcceptedAt: null,
+    courses: {
+      "arch-linux": [
+        "1-1",
+        "1-1@facil-hardware-solo",
+        "2-5@avanzada-hardware-solo",
+        "2-5@avanzada-hardware-dualboot",
+        "3-1",
+      ],
+    },
+  }
+  const plegado = plegarProgresoCompartido(expandirProgresoCompartido(original, ["arch-linux"]), [
+    "arch-linux",
+  ])
+  assert.deepEqual(
+    [...plegado.courses["arch-linux"]].sort(),
+    [...original.courses["arch-linux"]].sort(),
+  )
+})
+
+test("cleanLessonSlug acepta un único @ y el slug de curso sigue estricto", () => {
+  assert.equal(
+    cleanLessonSlug("particionado-manual@avanzada-hardware-dualboot", 120),
+    "particionado-manual@avanzada-hardware-dualboot",
+  )
+  assert.equal(cleanLessonSlug("1-1", 120), "1-1")
+  for (const invalid of ["@ruta", "slug@", "a@b@c", "slug@../fuera", "a b@ruta"]) {
+    assert.equal(cleanLessonSlug(invalid, 120), null, `ID rechazado: «${invalid}»`)
+  }
+  const profile = validateProfile({
+    version: 1,
+    courses: { "arch-linux": ["1-1", "2-5@avanzada-hardware-solo"] },
   })
-  // Marcar solo en Fácil no marca en Avanzada.
-  assert.equal(storage.getItem(`${PROGRESS_PREFIX}arch-linux:avanzada`), null)
-  const profile = collectProfile(storage)
-  assert.deepEqual(profile.courses["arch-linux:facil"], ["1-1", "2-3"])
-  assert.equal(profile.courses["arch-linux:avanzada"], undefined)
+  assert.equal(profile.ok, true)
+  if (!profile.ok) return
+  assert.deepEqual(profile.profile.courses["arch-linux"], ["1-1", "2-5@avanzada-hardware-solo"])
 })

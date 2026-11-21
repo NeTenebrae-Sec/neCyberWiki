@@ -10,8 +10,9 @@ export const PROGRESS_PREFIX = "ncw:progress:"
 
 // Claves de progreso del curso adaptable antes de las rutas por dificultad.
 // Son residuos de la interfaz T3/T4 (el curso ya no guarda ahí); se borran,
-// nunca se migran.
-const LEGACY_PROGRESS_KEYS = [`${PROGRESS_PREFIX}arch-linux-facil`, `${PROGRESS_PREFIX}arch-linux`]
+// nunca se migran. `ncw:progress:arch-linux` NO es legacy: es el bucket base
+// que usa el progreso compartido y el purgado no debe tocarlo.
+const LEGACY_PROGRESS_KEYS = [`${PROGRESS_PREFIX}arch-linux-facil`]
 
 export type Theme = "dark" | "light"
 
@@ -55,6 +56,17 @@ const cleanSlug = (value: unknown, maxLength: number): string | null => {
   return slug
 }
 
+// Los IDs de lección pueden llevar una única `@` con la ruta que aísla una
+// variante (p. ej. `particionado-manual@avanzada-hardware-dualboot`). El slug de
+// curso mantiene la regex estricta de `cleanSlug`.
+export function cleanLessonSlug(value: unknown, maxLength: number): string | null {
+  if (typeof value !== "string") return null
+  const slug = value.trim()
+  if (!slug || slug.length > maxLength) return null
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]*(@[a-zA-Z0-9][a-zA-Z0-9._-]*)?$/.test(slug)) return null
+  return slug
+}
+
 // Clave de curso del perfil: slug base válido + opcional `:tag` con un solo `:`
 // y tag `/^[a-z][a-z0-9-]{0,20}$/` (p. ej. `arch-linux:facil`).
 const cleanCourseKey = (value: string): string | null => {
@@ -80,7 +92,7 @@ const uniqueLessons = (value: unknown): string[] | null => {
   if (!Array.isArray(value)) return null
   const lessons: string[] = []
   for (const item of value) {
-    const slug = cleanSlug(item, MAX_LESSON_SLUG)
+    const slug = cleanLessonSlug(item, MAX_LESSON_SLUG)
     if (!slug) return null
     if (!lessons.includes(slug)) lessons.push(slug)
     if (lessons.length > MAX_LESSONS_PER_COURSE) return null
@@ -96,7 +108,7 @@ const readLessons = (storage: StorageLike, course: string): string[] => {
     if (!Array.isArray(parsed)) return []
     const lessons: string[] = []
     for (const item of parsed) {
-      const slug = cleanSlug(item, MAX_LESSON_SLUG)
+      const slug = cleanLessonSlug(item, MAX_LESSON_SLUG)
       if (slug && !lessons.includes(slug)) lessons.push(slug)
     }
     return lessons
@@ -230,12 +242,74 @@ export function validateProfile(value: unknown): ProfileParseResult {
   }
 }
 
+// Expande el bucket base de los cursos que comparten variante en las dos filas
+// lógicas `<base>:facil` y `<base>:avanzada`. Descarta las filas viejas (si las
+// hubiera), pone las comunes en ambas y reparte las especiales por el prefijo
+// de ruta que sigue a `@` (`facil-…` / `avanzada-…`). No muta la entrada.
+export function expandirProgresoCompartido(
+  profile: ProfileData,
+  compartidos: string[],
+): ProfileData {
+  const courses: Record<string, string[]> = { ...profile.courses }
+
+  for (const base of compartidos) {
+    const lessons = profile.courses[base] ?? []
+    delete courses[base]
+    delete courses[`${base}:facil`]
+    delete courses[`${base}:avanzada`]
+
+    const facil: string[] = []
+    const avanzada: string[] = []
+    for (const id of lessons) {
+      const at = id.indexOf("@")
+      if (at === -1) {
+        facil.push(id)
+        avanzada.push(id)
+        continue
+      }
+      const ruta = id.slice(at + 1)
+      if (ruta.startsWith("facil-")) facil.push(id)
+      else if (ruta.startsWith("avanzada-")) avanzada.push(id)
+    }
+
+    if (facil.length) courses[`${base}:facil`] = facil
+    if (avanzada.length) courses[`${base}:avanzada`] = avanzada
+  }
+
+  return { ...profile, courses }
+}
+
+// Inverso de `expandirProgresoCompartido`: une el bucket base con las dos filas
+// lógicas, deduplica y elimina las filas. No muta la entrada.
+export function plegarProgresoCompartido(profile: ProfileData, compartidos: string[]): ProfileData {
+  const courses: Record<string, string[]> = { ...profile.courses }
+
+  for (const base of compartidos) {
+    const union: string[] = []
+    const fuentes = [
+      ...(profile.courses[base] ?? []),
+      ...(profile.courses[`${base}:facil`] ?? []),
+      ...(profile.courses[`${base}:avanzada`] ?? []),
+    ]
+    for (const id of fuentes) {
+      if (!union.includes(id)) union.push(id)
+    }
+
+    delete courses[`${base}:facil`]
+    delete courses[`${base}:avanzada`]
+    if (union.length) courses[base] = union
+    else delete courses[base]
+  }
+
+  return { ...profile, courses }
+}
+
 // Reemplaza por completo el estado local relacionado con el perfil. Los
 // módulos abiertos del temario son estado de interfaz y no se importan.
 // El barrido inicial borra TODAS las filas `ncw:progress:*` — incluidas las
-// legacy `arch-linux-facil`/`arch-linux` — y después escribe solo las filas del
-// JSON, así que las legacy no reaparecen (salvo que el JSON las trajera, lo cual
-// `validateProfile` permite para `arch-linux-facil` como clave base válida).
+// legacy `arch-linux-facil` — y después escribe solo las filas del JSON. Quien
+// llama debe plegar antes los cursos compartidos para que el bucket base
+// (`ncw:progress:arch-linux`) sea el único destino.
 export function applyProfile(storage: StorageLike, profile: ProfileData): void {
   for (const key of storageKeys(storage)) {
     if (key.startsWith(PROGRESS_PREFIX)) storage.removeItem(key)
@@ -280,10 +354,10 @@ export function clearProfile(storage: StorageLike): string[] {
   return removed
 }
 
-// Suma de marcas por fila. Las filas `<slug>:<dificultad>` del mismo curso base
-// cuentan por separado: no hay dedup entre dificultades a propósito (el aislamiento
-// Fácil/Avanzada es por clave). El "totales del perfil" del header de /perfil sí
-// deduplica por unión de file-slugs en el cliente.
+// Suma de marcas por fila. Las filas `<slug>:<dificultad>` expandidas repiten
+// las lecciones comunes a propósito: cada dificultad conserva su propio conteo.
+// El "totales del perfil" del header de /perfil sí deduplica por unión de
+// file-slugs en el cliente.
 export function totalLessons(profile: ProfileData): number {
   return Object.values(profile.courses).reduce((total, lessons) => total + lessons.length, 0)
 }

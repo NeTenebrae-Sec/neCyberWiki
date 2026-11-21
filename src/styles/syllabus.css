@@ -523,29 +523,6 @@
   color: var(--ink-muted);
 }
 
-@media (min-width: 1024px) {
-  .temario {
-    position: sticky;
-    z-index: auto;
-    width: auto;
-    padding: 0;
-    border-left: 0;
-    background: transparent;
-    box-shadow: none;
-    overflow-y: auto;
-    transform: none;
-  }
-
-  .temario-overlay,
-  .temario__close {
-    display: none;
-  }
-
-  #temario-open {
-    display: none;
-  }
-}
-
 @media (max-width: 1023.98px) {
   .temario__close {
     display: inline-flex;
