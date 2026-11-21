@@ -1,0 +1,52 @@
+name: Check links
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      # El sitio se publica bajo /neCyberWiki/, pero dist/ no incluye ese prefijo
+      # y los HTML de redirect tienen canonicals absolutos. Preparamos un árbol
+      # donde TODOS los enlaces propios se resuelven como archivos locales:
+      #   1. copia del build, sin tocar dist/;
+      #   2. canonicals absolutos -> root-relative, para no consultar el sitio
+      #      desplegado (que puede no tener aún las rutas de esta rama);
+      #   3. symlink HERMANO neCyberWiki -> site, nunca dentro de site/ (un
+      #      `ln -s . dist/neCyberWiki` recursaba y generaba 155k URLs falsas).
+      - name: Prepare local link-check tree
+        run: |
+          set -euo pipefail
+          CHECK_ROOT="$RUNNER_TEMP/ncw-linkcheck"
+          rm -rf "$CHECK_ROOT"
+          mkdir -p "$CHECK_ROOT"
+          cp -R dist "$CHECK_ROOT/site"
+          ln -s "$CHECK_ROOT/site" "$CHECK_ROOT/neCyberWiki"
+          find "$CHECK_ROOT/site" -name '*.html' -print0 \
+            | xargs -0 sed -i 's#https://netenebrae-sec\.github\.io/neCyberWiki#/neCyberWiki#g'
+      # gnu.org responde 429 o timeout a los runners de GitHub de forma
+      # sostenida (bandit 17 y 18); no es un enlace roto y hace fallar el job.
+      - name: Check links in the built site
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --no-progress
+            --root-dir ${{ runner.temp }}/ncw-linkcheck
+            --index-files index.html
+            --exclude 'youtube\.com'
+            --exclude 'www\.gnu\.org'
+            --accept '100..=103, 200..=299, 429'
+            '${{ runner.temp }}/ncw-linkcheck/site/**/*.html'
+          fail: true
