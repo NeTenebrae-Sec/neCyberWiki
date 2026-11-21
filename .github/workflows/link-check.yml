@@ -12,9 +12,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Check links in Markdown files
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      # El sitio se publica bajo /neCyberWiki/ pero dist/ no tiene ese prefijo.
+      # Un symlink mapea el base path a la raíz del build para que lychee
+      # resuelva /neCyberWiki/cursos/... contra dist/cursos/...
+      - name: Map Pages base path
+        run: ln -s . dist/neCyberWiki
+      - name: Check links in the built site
         uses: lycheeverse/lychee-action@v2
         with:
-          # Los artefactos generados no son Markdown de origen y Youtube bloquea a los checkers con 403.
-          args: --no-progress --root-dir . --exclude-path dist --exclude-path public/pagefind --exclude 'youtube\.com' './**/*.md'
+          args: >-
+            --no-progress
+            --root-dir ${{ github.workspace }}/dist
+            --index-files index.html
+            --exclude 'youtube\.com'
+            'dist/**/*.html'
           fail: true
