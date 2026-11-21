@@ -35,6 +35,9 @@ export interface CursoInfo {
   resultados: string[]
   modulos: CursoModulo[]
   rutas?: CursoRuta[] // Rutas adaptables; su orden manda sobre `orden`.
+  // Progreso por lección: si true, las lecciones comunes comparten estado entre
+  // dificultades y solo las especiales se califican con la ruta activa.
+  progreso?: { compartirVariante: boolean }
   hero?: CursoHero // Banner común del curso adaptable.
   videoPendiente?: boolean // true = videos aún sin publicar; no inventar IDs.
   fuente?: CursoFuente
@@ -160,6 +163,7 @@ export const cursos: CursoInfo[] = [
         ],
       },
     ] satisfies CursoRuta[],
+    progreso: { compartirVariante: true },
     hero: {
       copy: [
         "En este curso aprenderás a instalar Arch Linux desde cero y dejarlo funcional, seguro y usable. ¡El temario se reorganizará automáticamente!",

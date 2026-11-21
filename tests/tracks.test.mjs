@@ -7,6 +7,7 @@ import {
   ENTORNOS,
   buscarRuta,
   combinarConfig,
+  idProgreso,
   leccionEnRuta,
   normalizarConfig,
   numerosVisiblesPorRuta,
@@ -169,10 +170,40 @@ test("numerosVisiblesPorRuta renumera cada módulo dentro de la ruta", () => {
   })
 })
 
-test("progresoKey separa la dificultad y conserva la clave base", () => {
+test("progresoKey usa un único bucket base por curso", () => {
   assert.equal(progresoKey("arch-linux"), "ncw:progress:arch-linux")
-  assert.equal(progresoKey("arch-linux", "facil"), "ncw:progress:arch-linux:facil")
-  assert.equal(progresoKey("arch-linux", "avanzada"), "ncw:progress:arch-linux:avanzada")
+  assert.equal(progresoKey("bandit"), "ncw:progress:bandit")
+})
+
+test("idProgreso comparte las comunes y califica solo las especiales", () => {
+  const comun = { slug: "archiso-terminal-teclado-red", variante: "comun" }
+  const especial = { slug: "particionado-manual", variante: "avanzada" }
+
+  assert.equal(idProgreso(comun, { dificultad: "facil" }, true), "archiso-terminal-teclado-red")
+  assert.equal(
+    idProgreso(comun, { dificultad: "avanzada", entorno: "vm" }, true),
+    "archiso-terminal-teclado-red",
+  )
+  assert.equal(
+    idProgreso(
+      especial,
+      { dificultad: "avanzada", entorno: "hardware", arranque: "dualboot" },
+      true,
+    ),
+    "particionado-manual@avanzada-hardware-dualboot",
+  )
+  assert.equal(
+    idProgreso(especial, { dificultad: "avanzada", entorno: "vm", arranque: "dualboot" }, true),
+    "particionado-manual@avanzada-vm-solo",
+  )
+})
+
+test("idProgreso deja el slug plano si el curso no comparte variante", () => {
+  assert.equal(idProgreso({ slug: "nivel-0", variante: "facil" }, {}, false), "nivel-0")
+  assert.equal(
+    idProgreso({ slug: "nivel-0", variante: "avanzada" }, { dificultad: "avanzada" }, false),
+    "nivel-0",
+  )
 })
 
 test("combinarConfig: la query gana a storage; storage gana al default", () => {

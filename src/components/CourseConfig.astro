@@ -3,13 +3,14 @@ import { CONFIG_POR_DEFECTO } from "../lib/tracks"
 import type { CursoPublicado } from "../lib/catalog"
 
 interface Props {
-  curso: Pick<CursoPublicado, "slug" | "rutas">
+  curso: Pick<CursoPublicado, "slug" | "rutas" | "progreso">
   variant?: "hero" | "lesson" | "top-difficulty"
   leccion?: { numero: string; variante: string; entorno: string; arranque: string }
 }
 
 const { curso, variant = "hero", leccion } = Astro.props
 const rutas = curso.rutas
+const compartirVariante = Boolean(curso.progreso?.compartirVariante)
 const uid = (eje: string) => `${curso.slug}-${eje}`
 // Solo la lección emite data-lesson-*: sin ellos no hay atenuación (la ficha no pasa el prop).
 const leccionAttrs = leccion
@@ -29,6 +30,7 @@ const leccionAttrs = leccion
     data-slug={curso.slug}
     data-rutas={JSON.stringify(rutas)}
     data-default={JSON.stringify(CONFIG_POR_DEFECTO)}
+    data-compartir-variante={String(compartirVariante)}
     {...leccionAttrs}
   >
     <span class="top-diff-toggle__label">DIFICULTAD:</span>
@@ -59,6 +61,7 @@ const leccionAttrs = leccion
     data-slug={curso.slug}
     data-rutas={JSON.stringify(rutas)}
     data-default={JSON.stringify(CONFIG_POR_DEFECTO)}
+    data-compartir-variante={String(compartirVariante)}
     {...leccionAttrs}
   >
     <div class="course-config-hud__head">
@@ -66,11 +69,25 @@ const leccionAttrs = leccion
         <span class="status-dot status-dot--cyan" aria-hidden="true"></span>
         <span class="course-config-hud__title">CONFIGURADOR DE ENTORNO Y ARRANQUE</span>
       </div>
-      <div class="course-config-hud__diff-indicator">
-        MODO DIFICULTAD ACTIVO:{" "}
-        <strong data-diff-badge class="course-config-hud__diff-val">
-          FÁCIL
-        </strong>
+      <div class="course-config-hud__diff-toggle">
+        <span class="top-diff-toggle__label">DIFICULTAD:</span>
+        <fieldset class="top-diff-toggle__group" data-config-difficulty>
+          <legend class="sr-only">Dificultad</legend>
+          <label class="config-option top-diff-toggle__option" data-diff-option="facil">
+            <input type="radio" name={uid("dificultad")} value="facil" checked />
+            <span class="top-diff-toggle__btn">
+              <span class="status-dot status-dot--signal" aria-hidden="true"></span>
+              <span>FÁCIL</span>
+            </span>
+          </label>
+          <label class="config-option top-diff-toggle__option" data-diff-option="avanzada">
+            <input type="radio" name={uid("dificultad")} value="avanzada" />
+            <span class="top-diff-toggle__btn">
+              <span class="status-dot status-dot--signal" aria-hidden="true"></span>
+              <span>AVANZADA</span>
+            </span>
+          </label>
+        </fieldset>
       </div>
     </div>
 
@@ -91,7 +108,7 @@ const leccionAttrs = leccion
                   <span class="config-card__dot" aria-hidden="true"></span>
                   <strong class="config-card__title">Máquina virtual</strong>
                 </span>
-                <span class="config-card__badge">VMware / KVM</span>
+                <span class="config-card__badge">Virtualbox</span>
               </span>
               <small class="config-card__desc">Sin riesgo de tocar tu PC</small>
             </span>
@@ -161,16 +178,24 @@ const leccionAttrs = leccion
     data-slug={curso.slug}
     data-rutas={JSON.stringify(rutas)}
     data-default={JSON.stringify(CONFIG_POR_DEFECTO)}
+    data-compartir-variante={String(compartirVariante)}
     {...leccionAttrs}
   >
-    <div class="lesson-hud__head">
-      <span class="lesson-hud__kicker">RUTA ACTIVA</span>
-      <strong class="lesson-hud__summary" data-config-summary aria-live="polite">
-        Fácil · Hardware · Solo Linux
-      </strong>
-    </div>
+    <h2 class="lesson-hud__title">Adaptar el curso</h2>
 
     <div class="lesson-hud__controls">
+      <fieldset class="lesson-hud__group" data-config-difficulty>
+        <legend class="lesson-hud__label">DIFICULTAD:</legend>
+        <label class="config-option lesson-hud__pill">
+          <input type="radio" name={uid("dificultad")} value="facil" checked />
+          <span class="lesson-hud__pill-body">Fácil</span>
+        </label>
+        <label class="config-option lesson-hud__pill">
+          <input type="radio" name={uid("dificultad")} value="avanzada" />
+          <span class="lesson-hud__pill-body">Avanzada</span>
+        </label>
+      </fieldset>
+
       <fieldset class="lesson-hud__group" data-config-environment>
         <legend class="lesson-hud__label">ENTORNO:</legend>
         <label class="config-option lesson-hud__pill">
@@ -264,12 +289,12 @@ const leccionAttrs = leccion
     transition: all 0.15s ease;
   }
 
-  .top-diff-toggle__option:hover .top-diff-toggle__btn {
+  .top-diff-toggle__option:not(.is-locked):hover .top-diff-toggle__btn {
     color: var(--ink);
     background: var(--bg-raised);
   }
 
-  .top-diff-toggle__option input:checked + .top-diff-toggle__btn {
+  .top-diff-toggle__option input:not(:disabled):checked + .top-diff-toggle__btn {
     border-color: var(--signal);
     background: color-mix(in srgb, var(--signal) 15%, transparent);
     color: var(--signal);
@@ -283,14 +308,14 @@ const leccionAttrs = leccion
   }
 
   .top-diff-toggle__option.is-locked {
-    opacity: 0.35;
+    opacity: 1;
     cursor: not-allowed;
   }
 
-  .top-diff-toggle__option.is-locked .top-diff-toggle__btn::after {
-    content: "🔒";
-    font-size: 0.6rem;
-    margin-left: 0.2rem;
+  .top-diff-toggle__option.is-locked .top-diff-toggle__btn {
+    border-color: color-mix(in srgb, var(--danger) 55%, transparent);
+    background: color-mix(in srgb, var(--danger) 10%, transparent);
+    color: var(--danger);
   }
 
   /* -------------------------------------------------------------
@@ -332,16 +357,10 @@ const leccionAttrs = leccion
     color: var(--ink);
   }
 
-  .course-config-hud__diff-indicator {
-    font-family: var(--font-mono);
-    font-size: 0.65rem;
-    color: var(--ink-muted);
-    letter-spacing: 0.05em;
-  }
-
-  .course-config-hud__diff-val {
-    color: var(--signal);
-    font-weight: 700;
+  .course-config-hud__diff-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
   }
 
   .course-config-hud__body {
@@ -411,12 +430,12 @@ const leccionAttrs = leccion
     transition: all 0.15s ease;
   }
 
-  .config-card:hover .config-card__body {
+  .config-card:not(.is-locked):hover .config-card__body {
     border-color: var(--line-strong);
     background: var(--bg-raised);
   }
 
-  .config-card input:checked + .config-card__body {
+  .config-card input:not(:disabled):checked + .config-card__body {
     border-color: var(--accent);
     background: color-mix(in srgb, var(--accent) 8%, var(--bg-deep));
   }
@@ -449,7 +468,7 @@ const leccionAttrs = leccion
       box-shadow 0.15s ease;
   }
 
-  .config-card input:checked + .config-card__body .config-card__dot {
+  .config-card input:not(:disabled):checked + .config-card__body .config-card__dot {
     background: var(--accent);
     box-shadow: 0 0 6px var(--accent);
   }
@@ -461,7 +480,7 @@ const leccionAttrs = leccion
     color: var(--ink-dim);
   }
 
-  .config-card input:checked + .config-card__body .config-card__title {
+  .config-card input:not(:disabled):checked + .config-card__body .config-card__title {
     color: var(--accent);
     font-weight: 700;
   }
@@ -567,20 +586,46 @@ const leccionAttrs = leccion
     font-family: var(--font-mono);
     font-size: 0.65rem;
     font-weight: 600;
+    white-space: nowrap;
     color: var(--ink-muted);
     border: 1px solid var(--line);
     border-radius: var(--radius-sm);
     background: var(--bg-card);
-    transition: all 0.15s ease;
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease,
+      background 0.15s ease;
   }
 
-  .config-boot-pill:hover .config-boot-pill__body {
+  .config-boot-pill__body .status-dot {
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 640px) {
+    .config-boot-group {
+      flex-wrap: wrap;
+    }
+
+    .config-boot-pill {
+      flex: 1 1 auto;
+      min-width: max-content;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .config-boot-group__options {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  .config-boot-pill:not(.is-locked):hover .config-boot-pill__body {
     color: var(--ink);
     border-color: var(--line-strong);
     background: var(--bg-raised);
   }
 
-  .config-boot-pill input:checked + .config-boot-pill__body {
+  .config-boot-pill input:not(:disabled):checked + .config-boot-pill__body {
     border-color: var(--accent);
     background: color-mix(in srgb, var(--accent) 12%, transparent);
     color: var(--accent);
@@ -597,18 +642,19 @@ const leccionAttrs = leccion
     cursor: not-allowed;
   }
 
-  .config-card.is-locked .config-card__body::after {
-    content: "🔒";
-    position: absolute;
-    top: 0.45rem;
-    right: 0.5rem;
-    font-size: 0.65rem;
+  .config-boot-pill.is-locked {
+    opacity: 1;
   }
 
-  .config-boot-pill.is-locked .config-boot-pill__body::after {
-    content: "🔒";
-    font-size: 0.55rem;
-    margin-left: 0.2rem;
+  .config-boot-pill.is-locked .config-boot-pill__body {
+    border-color: var(--line);
+    background: var(--bg-deep);
+    color: var(--ink-muted);
+    font-weight: 600;
+  }
+
+  .config-boot-pill.is-locked .status-dot {
+    opacity: 0.35;
   }
 
   /* Footer bar */
@@ -657,6 +703,17 @@ const leccionAttrs = leccion
     background: var(--bg-card);
   }
 
+  .lesson-hud__title {
+    flex: 0 0 100%;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
   .lesson-hud__head {
     display: flex;
     align-items: center;
@@ -679,8 +736,57 @@ const leccionAttrs = leccion
 
   .lesson-hud__controls {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.5rem 0.75rem;
+  }
+
+  @media (max-width: 640px) {
+    .lesson-hud__controls {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.6rem;
+    }
+
+    .lesson-hud__group {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+
+  /* Entrada suave de los grupos del HUD (T10): fade + slide desde abajo,
+     ease-out, <300ms, solo transform/opacity, respetando reduced motion. */
+  @keyframes ncw-lesson-hud-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .lesson-hud__controls > .lesson-hud__group {
+    animation: ncw-lesson-hud-in 180ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  }
+
+  .lesson-hud__controls > .lesson-hud__group:nth-child(1) {
+    animation-delay: 0ms;
+  }
+
+  .lesson-hud__controls > .lesson-hud__group:nth-child(2) {
+    animation-delay: 60ms;
+  }
+
+  .lesson-hud__controls > .lesson-hud__group:nth-child(3) {
+    animation-delay: 120ms;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lesson-hud__controls > .lesson-hud__group {
+      animation: none;
+    }
   }
 
   .lesson-hud__group {
@@ -725,9 +831,9 @@ const leccionAttrs = leccion
   .lesson-hud__pill-body {
     display: inline-flex;
     align-items: center;
-    padding: 0.18rem 0.48rem;
+    padding: 0.22rem 0.55rem;
     font-family: var(--font-mono);
-    font-size: 0.62rem;
+    font-size: 0.64rem;
     font-weight: 600;
     color: var(--ink-muted);
     border: 1px solid var(--line);
@@ -736,17 +842,41 @@ const leccionAttrs = leccion
     transition: all 0.15s ease;
   }
 
-  .lesson-hud__pill:hover .lesson-hud__pill-body {
+  .lesson-hud__pill:active .lesson-hud__pill-body {
+    transform: scale(0.95);
+  }
+
+  .lesson-hud__pill:not(.is-locked):hover .lesson-hud__pill-body {
     color: var(--ink);
     border-color: var(--line-strong);
     background: var(--bg-raised);
   }
 
-  .lesson-hud__pill input:checked + .lesson-hud__pill-body {
+  .lesson-hud__pill input:not(:disabled):checked + .lesson-hud__pill-body {
     border-color: var(--accent);
     background: color-mix(in srgb, var(--accent) 15%, transparent);
     color: var(--accent);
     font-weight: 700;
+  }
+
+  /* Dificultad: eje con acento propio (T8g) y estado bloqueado en rojo (T10).
+     Activa = verde (signal); excluida por la ruta de la lección = bloqueada/roja. */
+  .lesson-hud__group[data-config-difficulty]
+    .lesson-hud__pill
+    input:not(:disabled):checked
+    + .lesson-hud__pill-body {
+    border-color: var(--signal);
+    background: color-mix(in srgb, var(--signal) 15%, transparent);
+    color: var(--signal);
+    font-weight: 700;
+  }
+
+  .lesson-hud__group[data-config-difficulty]
+    .lesson-hud__pill
+    input:focus-visible
+    + .lesson-hud__pill-body {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
   }
 
   .lesson-hud__pill input:focus-visible + .lesson-hud__pill-body {
@@ -755,13 +885,13 @@ const leccionAttrs = leccion
   }
 
   .lesson-hud__pill.is-locked {
-    opacity: 0.35;
+    opacity: 1;
     cursor: not-allowed;
   }
 
-  .lesson-hud__pill.is-locked .lesson-hud__pill-body::after {
-    content: "🔒";
-    font-size: 0.55rem;
-    margin-left: 0.2rem;
+  .lesson-hud__pill.is-locked .lesson-hud__pill-body {
+    border-color: color-mix(in srgb, var(--danger) 55%, transparent);
+    background: color-mix(in srgb, var(--danger) 10%, transparent);
+    color: var(--danger);
   }
 </style>
