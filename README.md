@@ -25,9 +25,6 @@ El contenido y el código se distribuyen con licencias abiertas para que el proy
 ## Documentación y enlaces
 
 - **Índice de desarrollo:** [`docs/desarrollo.md`](docs/desarrollo.md)
-- **Arquitectura:** [`docs/arquitectura.md`](docs/arquitectura.md)
-- **Pruebas:** [`docs/testing.md`](docs/testing.md)
-- **CI y despliegue:** [`docs/ci-cd.md`](docs/ci-cd.md)
 - **Guía de contribución:** [`CONTRIBUTING.md`](CONTRIBUTING.md)
 - **Política de seguridad:** [`SECURITY.md`](SECURITY.md)
 - **Licencias:** [`LICENSE.txt`](LICENSE.txt), [`LICENSE-CONTENT.md`](LICENSE-CONTENT.md)
