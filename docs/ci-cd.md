@@ -31,7 +31,8 @@ Cualquier gate que falle bloquea el PR. No se desactivan gates: si falla un chec
 - `--root-dir <temporal>` para resolver `/neCyberWiki/...` contra el symlink.
 - `--index-files index.html` para que las rutas con `/` final encuentren el `index.html`.
 - `--exclude youtube\.com` porque YouTube devuelve 403 a los checkers automatizados.
-- `--accept '100..=103, 200..=299, 429'` porque un 429 es rate limiting, no un enlace muerto.
+- `--exclude www\.gnu\.org` porque responde 429 o timeout a los runners de forma sostenida (enlaces en `bandit/17.md` y `bandit/18.md`); no son enlaces muertos.
+- `--accept '100..=103, 200..=299, 429'` porque un 429 de otros hosts es rate limiting, no un enlace muerto.
 
 Los errores se revisan en el resumen del run; un enlace muerto se corrige o se elimina, no se ignora.
 
