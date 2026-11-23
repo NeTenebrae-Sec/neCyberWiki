@@ -65,7 +65,7 @@
 
 .brand:hover .brand__mark,
 .brand:focus-visible .brand__mark {
-  filter: drop-shadow(0 3px 8px color-mix(in srgb, var(--accent) 24%, transparent));
+  filter: drop-shadow(0 2px 5px color-mix(in srgb, var(--accent) 24%, transparent));
 }
 
 /* El emblema hereda la superficie: Noche oscura, Archivo clara. */
@@ -137,7 +137,7 @@
   transition: color var(--dur-ui) var(--ease-out);
 }
 
-/* Línea: solo bajo el item activo (aria-current). */
+/* Línea: bajo el item activo y al hover/focus. */
 .site-nav__link::after {
   content: "";
   position: absolute;
@@ -155,6 +155,8 @@
   color: var(--ink);
 }
 
+.site-nav__link:hover::after,
+.site-nav__link:focus-visible::after,
 .site-nav__link[aria-current="page"]::after {
   transform: scaleX(1);
 }
@@ -784,7 +786,7 @@ html:has(dialog[open]) {
    A5  .drawer                 entrada/salida (opacity + translateX)
    A6  .drawer::backdrop       fundido del fondo del drawer
    A7  .header-search (móvil)  entrada/salida del panel de búsqueda (existente)
-   A8  .site-nav__link::after  subrayado del item activo (existente)
+   A8  .site-nav__link::after  subrayado del item activo y al hover/focus
    A9  .drawer__link           color y padding en hover (existente)
    A10 .brand__mark            glow suave al hover/focus del logo
    ========================================================================== */
