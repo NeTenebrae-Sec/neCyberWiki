@@ -37,6 +37,9 @@ body {
   line-height: 1.65;
   overflow-x: hidden;
   overscroll-behavior-y: none;
+  transition:
+    background-color var(--dur-panel) var(--ease-out),
+    color var(--dur-panel) var(--ease-out);
 }
 
 /* Paper grain — a single fixed layer above the page, never interactive. */

@@ -17,6 +17,9 @@
   border-bottom: 1px solid var(--line);
   background: color-mix(in srgb, var(--bg) 86%, transparent);
   backdrop-filter: blur(12px) saturate(115%);
+  transition:
+    background-color var(--dur-panel) var(--ease-out),
+    border-color var(--dur-panel) var(--ease-out);
 }
 
 .site-header::before {
@@ -64,10 +67,14 @@
   fill: var(--bg-card);
   stroke: var(--line-strong);
   stroke-width: 1.5;
+  transition:
+    fill var(--dur-panel) var(--ease-out),
+    stroke var(--dur-panel) var(--ease-out);
 }
 
 .brand__svg-emblem {
   fill: var(--ink);
+  transition: fill var(--dur-panel) var(--ease-out);
 }
 
 .brand__text {
@@ -357,35 +364,46 @@
   background: var(--bg-card);
   color: var(--ink);
   overflow: hidden;
+  opacity: 0;
+  transform: translateX(100%);
+  transition:
+    opacity var(--dur-panel) var(--ease-out),
+    transform var(--dur-panel) var(--ease-out),
+    background-color var(--dur-panel) var(--ease-out),
+    border-color var(--dur-panel) var(--ease-out),
+    overlay var(--dur-panel) allow-discrete,
+    display var(--dur-panel) allow-discrete;
 }
 
 .drawer[open] {
   display: flex;
   flex-direction: column;
-  animation: drawer-in var(--dur-panel) var(--ease-out);
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Entrada animada; la salida la resuelve `allow-discrete` en el transition. */
+@starting-style {
+  .drawer[open] {
+    opacity: 0;
+    transform: translateX(100%);
+  }
 }
 
 .drawer::backdrop {
   background: rgba(2, 4, 3, 0.72);
   backdrop-filter: blur(3px);
-  animation: backdrop-in var(--dur-panel) var(--ease-out);
+  opacity: 0;
+  transition: opacity var(--dur-panel) var(--ease-out);
 }
 
-@keyframes drawer-in {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
+.drawer[open]::backdrop {
+  opacity: 1;
 }
 
-@keyframes backdrop-in {
-  from {
+@starting-style {
+  .drawer[open]::backdrop {
     opacity: 0;
-  }
-  to {
-    opacity: 1;
   }
 }
 
@@ -745,3 +763,21 @@ html:has(dialog[open]) {
     flex-direction: column;
   }
 }
+
+/* ==========================================================================
+   MOTION INVENTORY — animaciones vivas en el shell
+   --------------------------------------------------------------------------
+   Cada entrada dice qué anima y cómo apagarla. Para retirar una, comenta su
+   bloque de CSS y borra su fila aquí. La guarda global de base.css
+   (`prefers-reduced-motion: reduce`) anula todas con transition-duration 0.01ms.
+
+   A1  body                    fondo y color al cambiar de tema
+   A2  .site-header            fondo y borde al cambiar de tema
+   A3  .brand__svg-bg          fill y stroke del sello al cambiar de tema
+   A4  .brand__svg-emblem      fill del emblema al cambiar de tema
+   A5  .drawer                 entrada/salida (opacity + translateX)
+   A6  .drawer::backdrop       fundido del fondo del drawer
+   A7  .header-search (móvil)  entrada/salida del panel de búsqueda (existente)
+   A8  .site-nav__link::after  subrayado del item activo (existente)
+   A9  .drawer__link           color y padding en hover (existente)
+   ========================================================================== */
