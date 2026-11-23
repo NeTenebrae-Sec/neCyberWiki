@@ -60,15 +60,12 @@
   width: 2.125rem;
   height: 2.125rem;
   flex-shrink: 0;
-  transition:
-    transform var(--dur-ui) var(--ease-out),
-    filter var(--dur-ui) var(--ease-out);
+  transition: filter var(--dur-ui) var(--ease-out);
 }
 
 .brand:hover .brand__mark,
 .brand:focus-visible .brand__mark {
-  transform: translateY(-2px);
-  filter: drop-shadow(0 4px 10px color-mix(in srgb, var(--accent) 45%, transparent));
+  filter: drop-shadow(0 3px 8px color-mix(in srgb, var(--accent) 24%, transparent));
 }
 
 /* El emblema hereda la superficie: Noche oscura, Archivo clara. */
@@ -789,5 +786,5 @@ html:has(dialog[open]) {
    A7  .header-search (móvil)  entrada/salida del panel de búsqueda (existente)
    A8  .site-nav__link::after  subrayado del item activo (existente)
    A9  .drawer__link           color y padding en hover (existente)
-   A10 .brand__mark            elevación y glow al hover/focus del logo
+   A10 .brand__mark            glow suave al hover/focus del logo
    ========================================================================== */
