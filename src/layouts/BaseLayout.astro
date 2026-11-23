@@ -2,6 +2,7 @@
 import "../styles/global.css"
 import { site } from "../data/site"
 import { cursoUrl, getCursosPublicados } from "../lib/catalog"
+import BrandMark from "../components/BrandMark.astro"
 
 interface Props {
   titulo: string
@@ -116,14 +117,7 @@ const nav = [
     <header class="site-header">
       <div class="container-page site-header__inner">
         <a href={base} class="brand" aria-label="neCyberWiki — inicio">
-          <img
-            class="brand__mark"
-            src={`${base}brand-mark.svg`}
-            alt=""
-            width="34"
-            height="34"
-            aria-hidden="true"
-          />
+          <BrandMark />
           <span class="brand__text">
             <span class="brand__name">
               ne<span>Cyber</span>Wiki
@@ -269,14 +263,7 @@ const nav = [
     <dialog id="lateral-sidebar" class="drawer" aria-label="Menú de navegación">
       <div class="drawer__head">
         <a href={base} class="brand" aria-label="neCyberWiki — inicio">
-          <img
-            class="brand__mark"
-            src={`${base}brand-mark.svg`}
-            alt=""
-            width="34"
-            height="34"
-            aria-hidden="true"
-          />
+          <BrandMark />
           <span class="brand__text">
             <span class="brand__name">
               ne<span>Cyber</span>Wiki
