@@ -51,7 +51,7 @@ Los errores se revisan en el resumen del run; un enlace muerto se corrige o se e
 1. Hace checkout de `main` en `site-main/` y de `dev` en `site-dev/`.
 2. Instala dependencias y compila cada rama por separado. El build de `dev` recibe `PUBLIC_NCW_BASE=/neCyberWiki/dev/`, que `astro.config.mjs` y `src/data/site.ts` usan como base.
 3. Ensambla un único artifact `_site/`: el build de `main` en la raíz y el de `dev` en `_site/dev/`.
-4. Sube el artifact y lo publica con `actions/deploy-pages@v4` en el environment `github-pages`.
+4. Sube el artifact y lo publica con `actions/deploy-pages@v5` en el environment `github-pages`.
 
 GitHub Pages solo permite un sitio por repositorio y los deployments son atómicos: cada push publica el artifact completo con las dos versiones. Por eso un push a `main` también reconstruye staging, y viceversa.
 
