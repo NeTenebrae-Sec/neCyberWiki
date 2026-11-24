@@ -4,17 +4,15 @@ Todos los cambios notables de este proyecto se documentan en este archivo.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 y el proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
 ## [1.1.2] - 2026-11-24
 
 ### Added
 
-- Integración de la navbar con el emblema de cabra: SVG inline en header y drawer (`BrandMark.astro`), favicon con la marca, tokens `--header-h`, `--header-gap` y `--header-offset`, y animaciones de tema, drawer y navegación (PR #80).
+- Integración de la navbar con el emblema de marca: SVG inline en header y drawer (`BrandMark.astro`), favicon con la marca, tokens `--header-h`, `--header-gap` y `--header-offset`, y animaciones de tema, drawer y navegación (PR #80).
 
 ### Documentation
 
-- Botones de versión del README con las versiones desplegadas: v1.1.0 en producción (`main`) y v1.1.1 en staging (`dev`) (PR #68).
+- Botones de versión del README con las versiones desplegadas: en producción (`main`) en staging (`dev`) PR #68
 
 ## [1.1.1] - 2026-11-21
 
