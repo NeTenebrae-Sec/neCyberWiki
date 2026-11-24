@@ -14,7 +14,7 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 6rem;
+  scroll-padding-top: var(--header-offset);
   background: var(--bg);
   color: var(--ink);
   font-size: 100%;
@@ -37,6 +37,9 @@ body {
   line-height: 1.65;
   overflow-x: hidden;
   overscroll-behavior-y: none;
+  transition:
+    background-color var(--dur-panel) var(--ease-out),
+    color var(--dur-panel) var(--ease-out);
 }
 
 /* Paper grain — a single fixed layer above the page, never interactive. */
@@ -138,7 +141,7 @@ select,
 }
 
 [id] {
-  scroll-margin-top: 6rem;
+  scroll-margin-top: var(--header-offset);
 }
 
 /* --- Typography ---------------------------------------------------------- */
@@ -395,7 +398,7 @@ kbd {
 .prose h3,
 .prose h4 {
   color: var(--ink);
-  scroll-margin-top: 7rem;
+  scroll-margin-top: var(--header-offset);
 }
 
 .prose h2 {
@@ -559,14 +562,14 @@ kbd {
   font-size: clamp(1.45rem, 2.2vw, 1.85rem);
   letter-spacing: -0.03em;
   color: var(--ink);
-  scroll-margin-top: 7rem;
+  scroll-margin-top: var(--header-offset);
 }
 
 .leccion h3 {
   margin-top: 2rem;
   font-size: 1.25rem;
   color: var(--ink);
-  scroll-margin-top: 7rem;
+  scroll-margin-top: var(--header-offset);
 }
 
 .leccion p,

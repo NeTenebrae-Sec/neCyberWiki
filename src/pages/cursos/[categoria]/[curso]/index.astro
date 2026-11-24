@@ -2,6 +2,7 @@
 import BaseLayout from "../../../../layouts/BaseLayout.astro"
 import CourseModuleList from "../../../../components/CourseModuleList.astro"
 import CourseConfig from "../../../../components/CourseConfig.astro"
+import VideoEmbed from "../../../../components/VideoEmbed.astro"
 import {
   cursoUrl,
   getCursoPublicado,
@@ -37,6 +38,9 @@ const categoria = getCategoria(info.categoria)
 const base = site.base
 const url = cursoUrl(info, base)
 const videosEnPreparacion = info.videoPendiente === true
+const videoIntro = info.hero?.video ?? ""
+const videoIntroTitulo = `${info.titulo} · Introducción`
+const mostrarVideoHero = videosEnPreparacion || videoIntro !== ""
 // Render inicial (sin JS): ruta por defecto Fácil · Hardware · Solo.
 const leccionesDefecto = leccionesDeRuta(info, CONFIG_POR_DEFECTO)
 const totalDefecto = leccionesDefecto.length
@@ -87,7 +91,7 @@ const fichaDefecto = fichaDeRuta(CONFIG_POR_DEFECTO)
             <span class="meta-highlight">{modulosDefecto} módulos</span>
           </div>
 
-          {videosEnPreparacion && (
+          {mostrarVideoHero && (
             <div class="course-hero__video-hud" data-pagefind-ignore="all">
               <div class="video-hud__top">
                 <div class="video-hud__status">
@@ -95,23 +99,12 @@ const fichaDefecto = fichaDeRuta(CONFIG_POR_DEFECTO)
                   <span class="video-hud__status-text">INTRODUCCIÓN Y PANORAMA DEL CURSO</span>
                 </div>
                 <div class="video-hud__badges">
-                  <span class="video-hud__badge video-hud__badge--accent">GUÍA DISPONIBLE</span>
-                  <span class="video-hud__badge">INTRO</span>
+                  <span class="video-hud__badge video-hud__badge--accent">INTRO</span>
                 </div>
               </div>
 
               <div class="video-hud__stage">
-                <div class="video-hud__center">
-                  <div class="video-hud__play-btn" aria-hidden="true">
-                    <svg class="video-hud__play-icon" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  </div>
-                  <span class="video-hud__title">Video de introducción en preparación</span>
-                  <span class="video-hud__subtitle">
-                    La guía escrita ya está disponible completa abajo
-                  </span>
-                </div>
+                <VideoEmbed video={videoIntro} titulo={videoIntroTitulo} />
                 <div class="video-hud__timeline" aria-hidden="true">
                   <div class="video-hud__timeline-bar"></div>
                 </div>
@@ -119,10 +112,8 @@ const fichaDefecto = fichaDeRuta(CONFIG_POR_DEFECTO)
 
               <div class="video-hud__bottom">
                 <span class="video-hud__caption">
-                  CAPÍTULO 1:{" "}
-                  <span class="video-hud__caption-highlight">
-                    Qué es Arch Linux y decisiones iniciales
-                  </span>
+                  INTRODUCCIÓN:{" "}
+                  <span class="video-hud__caption-highlight">Como funciona la neCyberWiki</span>
                 </span>
                 <a href="#temario" class="video-hud__bottom-link">
                   [ VER GUÍA ESCRITA ↓ ]

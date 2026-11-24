@@ -2,6 +2,7 @@
 import "../styles/global.css"
 import { site } from "../data/site"
 import { cursoUrl, getCursosPublicados } from "../lib/catalog"
+import BrandMark from "../components/BrandMark.astro"
 
 interface Props {
   titulo: string
@@ -116,9 +117,7 @@ const nav = [
     <header class="site-header">
       <div class="container-page site-header__inner">
         <a href={base} class="brand" aria-label="neCyberWiki — inicio">
-          <span class="brand__mark" aria-hidden="true">
-            N
-          </span>
+          <BrandMark />
           <span class="brand__text">
             <span class="brand__name">
               ne<span>Cyber</span>Wiki
@@ -177,38 +176,40 @@ const nav = [
 
           <button
             id="theme-toggle"
-            class="theme-switch"
+            class="theme-toggle"
             type="button"
             aria-label="Cambiar tema: Noche o Archivo"
             title="Cambiar tema"
           >
-            <span class="theme-switch__opt theme-switch__opt--dark">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                aria-hidden="true"
-              >
-                <path
-                  d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </span>
-            <span class="theme-switch__opt theme-switch__opt--light">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                aria-hidden="true"
-              >
-                <circle cx="12" cy="12" r="4" />
-                <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" />
-              </svg>
-            </span>
+            <svg
+              class="theme-toggle__opt theme-toggle__opt--dark"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path
+                d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <svg
+              class="theme-toggle__opt theme-toggle__opt--light"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" />
+            </svg>
           </button>
           <span id="theme-status" class="sr-only" aria-live="polite"></span>
 
@@ -262,9 +263,7 @@ const nav = [
     <dialog id="lateral-sidebar" class="drawer" aria-label="Menú de navegación">
       <div class="drawer__head">
         <a href={base} class="brand" aria-label="neCyberWiki — inicio">
-          <span class="brand__mark" aria-hidden="true">
-            N
-          </span>
+          <BrandMark />
           <span class="brand__text">
             <span class="brand__name">
               ne<span>Cyber</span>Wiki

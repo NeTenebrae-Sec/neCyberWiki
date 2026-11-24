@@ -5,16 +5,21 @@
 /* --- Header -------------------------------------------------------------- */
 
 .site-main {
-  padding-top: 4rem;
+  padding-top: var(--header-offset);
 }
 
+/* Barra rectangular: ancla full-width al top, contenido centrado en container. */
 .site-header {
   position: fixed;
   inset: 0 0 auto;
   z-index: var(--z-header);
+  height: var(--header-h);
   border-bottom: 1px solid var(--line);
   background: color-mix(in srgb, var(--bg) 86%, transparent);
   backdrop-filter: blur(12px) saturate(115%);
+  transition:
+    background-color var(--dur-panel) var(--ease-out),
+    border-color var(--dur-panel) var(--ease-out);
 }
 
 .site-header::before {
@@ -22,6 +27,8 @@
   position: absolute;
   inset: 0 0 auto;
   height: 2px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
   background: linear-gradient(
     90deg,
     var(--accent) 0 18%,
@@ -36,7 +43,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-5);
-  height: 4rem;
+  height: var(--header-h);
 }
 
 .brand {
@@ -49,34 +56,31 @@
 }
 
 .brand__mark {
-  position: relative;
-  display: inline-grid;
-  place-items: center;
-  width: 2.1rem;
-  height: 2.1rem;
+  display: block;
+  width: 2.125rem;
+  height: 2.125rem;
   flex-shrink: 0;
-  border: 1px solid var(--accent);
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1;
-  font-variation-settings:
-    "SOFT" 30,
-    "WONK" 1;
+  transition: filter var(--dur-ui) var(--ease-out);
 }
 
-.brand__mark::after {
-  content: "";
-  position: absolute;
-  right: -1px;
-  bottom: -1px;
-  width: 5px;
-  height: 5px;
-  background: var(--bg);
-  border-top: 1px solid var(--accent);
-  border-left: 1px solid var(--accent);
+.brand:hover .brand__mark,
+.brand:focus-visible .brand__mark {
+  filter: drop-shadow(0 2px 5px color-mix(in srgb, var(--accent) 24%, transparent));
+}
+
+/* El emblema hereda la superficie: Noche oscura, Archivo clara. */
+.brand__svg-bg {
+  fill: var(--bg-card);
+  stroke: var(--line-strong);
+  stroke-width: 1.5;
+  transition:
+    fill var(--dur-panel) var(--ease-out),
+    stroke var(--dur-panel) var(--ease-out);
+}
+
+.brand__svg-emblem {
+  fill: var(--ink);
+  transition: fill var(--dur-panel) var(--ease-out);
 }
 
 .brand__text {
@@ -122,15 +126,18 @@
 
 .site-nav__link {
   position: relative;
+  display: inline-flex;
+  align-items: center;
   padding-block: 0.3rem;
   color: var(--ink-dim);
-  font-size: 0.82rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   text-decoration: none;
   white-space: nowrap;
   transition: color var(--dur-ui) var(--ease-out);
 }
 
+/* Línea: bajo el item activo y al hover/focus. */
 .site-nav__link::after {
   content: "";
   position: absolute;
@@ -140,7 +147,7 @@
   height: 1px;
   background: var(--accent);
   transform: scaleX(0);
-  transform-origin: right;
+  transform-origin: left;
   transition: transform var(--dur-ui) var(--ease-out);
 }
 
@@ -148,10 +155,8 @@
   color: var(--ink);
 }
 
-.site-nav__link[aria-current="page"] {
-  color: var(--ink);
-}
-
+.site-nav__link:hover::after,
+.site-nav__link:focus-visible::after,
 .site-nav__link[aria-current="page"]::after {
   transform: scaleX(1);
 }
@@ -233,12 +238,16 @@
 @media (max-width: 1099.98px) {
   .header-search {
     position: absolute;
-    inset: 100% 0 auto;
+    top: calc(var(--header-h) + var(--header-gap));
+    left: 0;
+    right: 0;
+    bottom: auto;
     display: block;
     width: 100%;
     min-height: 0;
     padding: 0.6rem var(--gutter) 0.85rem;
     border-bottom: 1px solid var(--line-strong);
+    border-radius: 0 0 999px 999px;
     background: color-mix(in srgb, var(--bg) 97%, transparent);
     box-shadow: var(--shadow-paper);
     backdrop-filter: blur(12px) saturate(115%);
@@ -278,57 +287,72 @@
       opacity var(--dur-ui) linear,
       visibility var(--dur-ui) linear;
   }
+
+  .site-nav__link::after {
+    transition: none;
+  }
 }
 
-/* --- Theme switch -------------------------------------------------------- */
+/* --- Theme toggle -------------------------------------------------------- */
 
-.theme-switch {
+.theme-toggle {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 1px;
-  padding: 2px;
+  width: 2rem;
+  height: 2rem;
   border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  background: var(--bg-sunken);
-  color: var(--ink-muted);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-dim);
   cursor: pointer;
   transition:
     border-color var(--dur-ui) var(--ease-out),
     color var(--dur-ui) var(--ease-out);
 }
 
-.theme-switch:hover {
+.theme-toggle:hover {
   border-color: var(--line-strong);
 }
 
-.theme-switch__opt {
-  display: inline-flex;
+.theme-toggle__opt {
+  display: none;
   align-items: center;
   justify-content: center;
-  width: 1.75rem;
-  height: 1.65rem;
-  border-radius: 1px;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
   line-height: 1;
-  transition:
-    background-color var(--dur-ui) var(--ease-out),
-    color var(--dur-ui) var(--ease-out);
 }
 
-[data-theme="dark"] .theme-switch__opt--dark,
-[data-theme="light"] .theme-switch__opt--light {
-  background: var(--bg-raised);
-  color: var(--accent);
-  box-shadow: 0 0 0 1px var(--line-strong);
-}
-
-.theme-switch svg {
+.theme-toggle svg {
   width: 14px;
   height: 14px;
 }
 
-.theme-switch:focus-visible {
+[data-theme="dark"] .theme-toggle__opt--dark,
+[data-theme="light"] .theme-toggle__opt--light {
+  display: inline-flex;
+}
+
+.theme-toggle:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* Botones de acción del header: 32px */
+.site-actions .icon-btn {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+}
+
+.site-actions .search-toggle {
+  width: 2rem;
+  height: 2rem;
 }
 
 /* --- Mobile drawer ------------------------------------------------------- */
@@ -348,35 +372,46 @@
   background: var(--bg-card);
   color: var(--ink);
   overflow: hidden;
+  opacity: 0;
+  transform: translateX(100%);
+  transition:
+    opacity var(--dur-panel) var(--ease-out),
+    transform var(--dur-panel) var(--ease-out),
+    background-color var(--dur-panel) var(--ease-out),
+    border-color var(--dur-panel) var(--ease-out),
+    overlay var(--dur-panel) allow-discrete,
+    display var(--dur-panel) allow-discrete;
 }
 
 .drawer[open] {
   display: flex;
   flex-direction: column;
-  animation: drawer-in var(--dur-panel) var(--ease-out);
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Entrada animada; la salida la resuelve `allow-discrete` en el transition. */
+@starting-style {
+  .drawer[open] {
+    opacity: 0;
+    transform: translateX(100%);
+  }
 }
 
 .drawer::backdrop {
   background: rgba(2, 4, 3, 0.72);
   backdrop-filter: blur(3px);
-  animation: backdrop-in var(--dur-panel) var(--ease-out);
+  opacity: 0;
+  transition: opacity var(--dur-panel) var(--ease-out);
 }
 
-@keyframes drawer-in {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
+.drawer[open]::backdrop {
+  opacity: 1;
 }
 
-@keyframes backdrop-in {
-  from {
+@starting-style {
+  .drawer[open]::backdrop {
     opacity: 0;
-  }
-  to {
-    opacity: 1;
   }
 }
 
@@ -736,3 +771,22 @@ html:has(dialog[open]) {
     flex-direction: column;
   }
 }
+
+/* ==========================================================================
+   MOTION INVENTORY — animaciones vivas en el shell
+   --------------------------------------------------------------------------
+   Cada entrada dice qué anima y cómo apagarla. Para retirar una, comenta su
+   bloque de CSS y borra su fila aquí. La guarda global de base.css
+   (`prefers-reduced-motion: reduce`) anula todas con transition-duration 0.01ms.
+
+   A1  body                    fondo y color al cambiar de tema
+   A2  .site-header            fondo y borde al cambiar de tema
+   A3  .brand__svg-bg          fill y stroke del sello al cambiar de tema
+   A4  .brand__svg-emblem      fill del emblema al cambiar de tema
+   A5  .drawer                 entrada/salida (opacity + translateX)
+   A6  .drawer::backdrop       fundido del fondo del drawer
+   A7  .header-search (móvil)  entrada/salida del panel de búsqueda (existente)
+   A8  .site-nav__link::after  subrayado del item activo y al hover/focus
+   A9  .drawer__link           color y padding en hover (existente)
+   A10 .brand__mark            glow suave al hover/focus del logo
+   ========================================================================== */

@@ -1,5 +1,9 @@
 # Política de seguridad — neCyberWiki
 
+## Datos en este proyecto
+
+Sin cuentas ni backend: el progreso, el tema y el perfil del lector viven en `localStorage` del navegador de cada visitante. Este proyecto no almacena datos personales y por tanto no puede sufrir fugas de datos de usuarios.
+
 ## Alcance
 
 Esta política cubre neCyberWiki (el sitio estático y este repositorio).
@@ -30,10 +34,6 @@ Proyecto gratuito y voluntario, mantenido por una sola persona:
 - Sin garantía de tiempo de respuesta ni de corrección.
 - Si el reporte se acepta, la corrección se documenta en el changelog del repositorio cuando esté lista.
 - No hay versiones soportadas: solo el despliegue actual de GitHub Pages y la rama `dev`/`main`.
-
-## Datos en este proyecto
-
-Sin cuentas ni backend: el progreso, el tema y el perfil del lector viven en `localStorage` del navegador de cada visitante. Este proyecto no almacena datos personales y por tanto no puede sufrir fugas de datos de usuarios.
 
 ## Divulgación
 
