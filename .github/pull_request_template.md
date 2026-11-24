@@ -36,5 +36,5 @@
 
 ## Aceptación
 
-- [x] He leído y acepto las [reglas de contribución y la cláusula inbound](CONTRIBUTING.md#cláusula-inbound-para-contribuciones).
-- [x] Esta PR contiene un solo tipo de contribución: código, contenido o corrección.
+- [ ] He leído y acepto las [reglas de contribución y la cláusula inbound](CONTRIBUTING.md#cláusula-inbound-para-contribuciones).
+- [ ] Esta PR contiene un solo tipo de contribución: código, contenido o corrección.

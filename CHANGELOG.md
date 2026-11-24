@@ -4,7 +4,41 @@ Todos los cambios notables de este proyecto se documentan en este archivo.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 y el proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.1.3] - 2026-11-24
+
+### Added
+
+- Video de introducción de «Cómo instalar Arch Linux» en el hero del curso, embebido desde YouTube con `VideoEmbed` (reproductor `youtube-nocookie`).
+
+### Changed
+
+- Copy del hero del curso: badge único «INTRO» y rótulo «INTRODUCCIÓN: Como funciona la neCyberWiki».
+
+### Documentation
+
+- Bump de versión a 1.1.3 y badge de staging actualizado en el README.
+
+## [1.1.2] - 2026-11-24
+
+### Added
+
+- Integración de la navbar con el emblema de marca: SVG inline en header y drawer (`BrandMark.astro`), favicon con la marca, tokens `--header-h`, `--header-gap` y `--header-offset`, y animaciones de tema, drawer y navegación (PR #80).
+
+### Documentation
+
+- Botones de versión del README con las versiones desplegadas: en producción (`main`) en staging (`dev`) PR #68
+
+## [1.1.1] - 2026-11-21
+
+### Security
+
+- Añade `.github/CODEOWNERS` para exigir revisión del responsable en los PRs.
+- Activa la protección de `main` y `dev` con checks obligatorios, aprobación y sin force push; restringe las Actions permitidas y activa las actualizaciones de seguridad de Dependabot.
+
+### Fixed
+
+- Corrige el párrafo de writeups de terceros en `NOTICE.md`.
+- Excluye del chequeo de enlaces los hosts que bloquean a los checkers (`gnu.org`, `polimetro.com`).
 
 ## [1.1.0] - 2026-11-21
 

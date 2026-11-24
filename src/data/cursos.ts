@@ -170,9 +170,9 @@ export const cursos: CursoInfo[] = [
         "Elige la dificultad y el tipo de entorno que deseas instalar",
       ],
       cta: "Elige tu ruta y empieza por la lección 1.1",
-      video: "",
+      video: "https://youtu.be/cJ9de_s3XCA",
     },
-    videoPendiente: true,
+    videoPendiente: false,
   },
   {
     slug: "bandit",
