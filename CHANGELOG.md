@@ -6,6 +6,16 @@ y el proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-11-24
+
+### Added
+
+- Integración de la navbar con el emblema de cabra: SVG inline en header y drawer (`BrandMark.astro`), favicon con la marca, tokens `--header-h`, `--header-gap` y `--header-offset`, y animaciones de tema, drawer y navegación (PR #80).
+
+### Documentation
+
+- Botones de versión del README con las versiones desplegadas: v1.1.0 en producción (`main`) y v1.1.1 en staging (`dev`) (PR #68).
+
 ## [1.1.1] - 2026-11-21
 
 ### Security
