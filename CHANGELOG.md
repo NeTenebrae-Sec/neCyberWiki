@@ -4,6 +4,20 @@ Todos los cambios notables de este proyecto se documentan en este archivo.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 y el proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.3] - 2026-11-24
+
+### Added
+
+- Video de introducción de «Cómo instalar Arch Linux» en el hero del curso, embebido desde YouTube con `VideoEmbed` (reproductor `youtube-nocookie`).
+
+### Changed
+
+- Copy del hero del curso: badge único «INTRO» y rótulo «INTRODUCCIÓN: Como funciona la neCyberWiki».
+
+### Documentation
+
+- Bump de versión a 1.1.3 y badge de staging actualizado en el README.
+
 ## [1.1.2] - 2026-11-24
 
 ### Added
