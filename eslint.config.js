@@ -10,6 +10,7 @@ export default tseslint.config(
       "node_modules/",
       ".astro/",
       ".agents/",
+      ".obsidian/",
       ".playwright-mcp/",
       "content/",
       "EJEMPLOS/",
