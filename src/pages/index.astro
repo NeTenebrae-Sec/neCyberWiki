@@ -69,7 +69,7 @@ const fecha = (date: Date) =>
   <section class="home-hero">
     <div class="container-page home-hero__main">
       <div class="home-hero__copy">
-        <p class="kicker">Bitácora de ciberseguridad</p>
+        <p class="kicker home-hero__kicker">Bitácora de ciberseguridad</p>
 
         <h1 class="display home-hero__title">
           Aprende informática y ciberseguridad <em>gratis</em>.
@@ -383,6 +383,15 @@ const fecha = (date: Date) =>
     min-width: 0;
   }
 
+  .home-hero__kicker {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
   .home-hero__title {
     margin-block-start: 1rem;
     max-width: 15.5ch;
@@ -390,6 +399,7 @@ const fecha = (date: Date) =>
     line-height: 1;
     letter-spacing: -0.025em;
     word-spacing: 0.02em;
+    text-wrap: balance;
   }
 
   .home-hero__title em {
@@ -427,6 +437,11 @@ const fecha = (date: Date) =>
     transform: scale(0.96);
   }
 
+  .home-hero__cta:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
   .home-hero__cta-arrow {
     display: inline-block;
     font-size: 1.15em;
@@ -443,8 +458,8 @@ const fecha = (date: Date) =>
     display: flex;
     flex-direction: column;
     gap: 1.75rem;
-    padding-inline-start: clamp(1.5rem, 3vw, 2.5rem);
-    border-inline-start: 1px solid var(--line);
+    padding-block-start: clamp(0.5rem, 1vw, 1rem);
+    padding-inline-start: 0;
   }
 
   .hero-metrics {
@@ -515,6 +530,11 @@ const fecha = (date: Date) =>
     letter-spacing: 0.04em;
     text-decoration: none;
     transition: color 150ms ease-out;
+  }
+
+  .hero-star:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 
   .hero-star__icon {
