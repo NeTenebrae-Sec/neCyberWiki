@@ -74,6 +74,11 @@ const currentModule = info.modulos.find((modulo) =>
 const currentSub = currentModule?.submodulos?.find((sub) =>
   sub.lecciones.some((item) => item.slug === leccionKey),
 )
+const numeroModulo = String(currentModule ? info.modulos.indexOf(currentModule) + 1 : 1).padStart(
+  2,
+  "0",
+)
+const tituloModulo = currentModule?.titulo || entry.data.modulo_titulo || entry.data.modulo
 
 const { Content, headings } = await render(entry)
 const tocItems = headings.filter((heading) => heading.depth === 2 || heading.depth === 3)
@@ -240,44 +245,50 @@ const numeroSecuencia = String(
         </div>
       </section>
 
-      <nav class="lesson-nav" aria-label="Navegación entre lecciones" data-pagefind-ignore="all">
-        <div
-          class="lesson-nav__spacer"
-          data-route-prev-spacer
-          hidden={Boolean(prev)}
-          aria-hidden="true"
-        ></div>
-        <a
-          href={prev ? leccionUrl(info, prev, base) : undefined}
-          class="lesson-nav__card"
-          data-route-prev
-          aria-label="Lección anterior"
-          hidden={!prev}
-        >
-          <span class="lesson-nav__label">← {etiqueta} anterior</span>
-          <span class="lesson-nav__title">{prev?.title ?? ""}</span>
-        </a>
+      <nav
+        class="module-close sheet--raised"
+        aria-label="Navegación del módulo y siguiente clase"
+        data-pagefind-ignore="all"
+      >
+        <div>
+          <p class="module-close__kicker">
+            <span class="status-dot status-dot--cyan" aria-hidden="true"></span>
+            MÓDULO {numeroModulo} · {tituloModulo.toUpperCase()}
+          </p>
+          <h2 class="module-close__title">{info.titulo}</h2>
+        </div>
 
-        <a
-          href={next ? leccionUrl(info, next, base) : undefined}
-          class="lesson-nav__card lesson-nav__card--next"
-          data-route-next
-          data-mark-next
-          aria-label="Lección siguiente"
-          hidden={!next}
-        >
-          <span class="lesson-nav__label">Siguiente {etiqueta.toLowerCase()} →</span>
-          <span class="lesson-nav__title">{next?.title ?? ""}</span>
-        </a>
-        <a
-          href={url}
-          class="lesson-nav__card lesson-nav__card--next"
-          data-route-back
-          hidden={Boolean(next)}
-        >
-          <span class="lesson-nav__label signal">Fin del curso</span>
-          <span class="lesson-nav__title">Volver al temario y repasar →</span>
-        </a>
+        <div class="module-close__progress">
+          <span class="module-close__label" data-module-progress-label>
+            {etiqueta} {numeroSecuencia} de {totalDefecto} · 0%
+          </span>
+          <div class="progress-track module-close__track" aria-hidden="true">
+            <div class="progress-fill module-close__fill" data-module-progress-fill></div>
+          </div>
+        </div>
+
+        <div class="module-close__foot">
+          <a class="module-close__outline" href={`${url}#temario`}>
+            VER TEMARIO COMPLETO
+          </a>
+          <a
+            href={next ? leccionUrl(info, next, base) : undefined}
+            class="module-close__next"
+            data-route-next
+            data-mark-next
+            aria-label="Siguiente clase"
+            hidden={!next}
+          >
+            <span class="module-close__next-label">Siguiente clase →</span>
+            <span class="module-close__next-title" data-module-next-title>
+              {next?.title ?? ""}
+            </span>
+          </a>
+          <a href={url} class="module-close__next" data-route-back hidden={Boolean(next)}>
+            <span class="module-close__next-label">Fin del curso</span>
+            <span class="module-close__next-title">Volver al temario y repasar →</span>
+          </a>
+        </div>
       </nav>
     </article>
 
@@ -463,8 +474,8 @@ const numeroSecuencia = String(
       el.hidden = false
       el.setAttribute("href", `${base}${target.slug}/`)
       el.setAttribute("title", `${tipo === "prev" ? "Anterior" : "Siguiente"}: ${target.title}`)
-      el.setAttribute("aria-label", tipo === "prev" ? "Lección anterior" : "Lección siguiente")
-      const titleEl = el.querySelector(".lesson-nav__title")
+      el.setAttribute("aria-label", tipo === "prev" ? "Lección anterior" : "Siguiente clase")
+      const titleEl = el.querySelector("[data-module-next-title]")
       if (titleEl) titleEl.textContent = target.title
     }
 
@@ -496,8 +507,6 @@ const numeroSecuencia = String(
         aplicarEnlace(el, prev, "prev")
       for (const el of document.querySelectorAll<HTMLElement>("[data-route-next]"))
         aplicarEnlace(el, next, "next")
-      const spacer = document.querySelector<HTMLElement>("[data-route-prev-spacer]")
-      if (spacer) spacer.hidden = Boolean(prev)
       for (const el of document.querySelectorAll<HTMLElement>("[data-route-back]"))
         el.hidden = Boolean(next)
     })
@@ -512,6 +521,7 @@ const numeroSecuencia = String(
       compartirVariante: Boolean(info.progreso?.compartirVariante),
       visiblesDefecto: leccionesDefecto.map((leccion) => leccion.slug),
       totalDefecto,
+      unidadClase: etiqueta,
     }}
   >
     // Config activa: query > localStorage > default. El ID de una lección
@@ -590,6 +600,13 @@ const numeroSecuencia = String(
       if (pctEl) pctEl.textContent = `${pct}% completado`
       if (doneEl) doneEl.textContent = String(count)
       if (barEl) barEl.style.width = `${pct}%`
+
+      const claseActual = Math.max(1, visibles.indexOf(leccionKey) + 1)
+      const moduloLabelEl = document.querySelector("[data-module-progress-label]")
+      if (moduloLabelEl)
+        moduloLabelEl.textContent = `${unidadClase} ${claseActual} de ${routeTotal()} · ${pct}%`
+      const moduloFillEl = document.querySelector("[data-module-progress-fill]")
+      if (moduloFillEl) moduloFillEl.style.width = `${pct}%`
 
       const fabDone = document.getElementById("fab-done")
       if (fabDone) fabDone.textContent = String(count)
@@ -1008,67 +1025,128 @@ const numeroSecuencia = String(
     margin-left: auto;
   }
 
-  .lesson-nav {
+  .module-close {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.8rem;
+    gap: 1.1rem;
     margin-top: 1.25rem;
+    padding: 1.35rem 1.5rem;
   }
 
-  .lesson-nav__spacer {
-    display: block;
-  }
-
-  .lesson-nav__card {
-    display: flex;
-    flex-direction: column;
-    gap: 0.28rem;
-    padding: 0.65rem 0.8rem;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
-    background: transparent;
-    color: inherit;
-    text-decoration: none;
-    transition:
-      border-color var(--dur-ui) var(--ease-out),
-      background-color var(--dur-ui) var(--ease-out);
-  }
-
-  .lesson-nav__card--next {
-    border-color: color-mix(in srgb, var(--accent) 28%, var(--line));
-    text-align: right;
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .lesson-nav__card:hover {
-      border-color: var(--line-strong);
-      background: var(--bg-card);
-    }
-
-    .lesson-nav__card--next:hover {
-      border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
-    }
-  }
-
-  .lesson-nav__label {
-    display: block;
+  .module-close__kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0;
     font-family: var(--font-mono);
-    font-size: 0.6rem;
-    letter-spacing: 0.08em;
+    font-size: 0.64rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--ink-muted);
-  }
-
-  .lesson-nav__card--next .lesson-nav__label {
     color: var(--accent);
   }
 
-  .lesson-nav__title {
-    display: block;
+  .module-close__title {
+    margin: 0.35rem 0 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 2.2vw, 1.4rem);
+    font-weight: 600;
+    line-height: 1.15;
+  }
+
+  .module-close__progress {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .module-close__label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-muted);
+  }
+
+  .module-close__fill {
+    background: var(--accent);
+  }
+
+  :global([data-theme="light"]) .module-close__fill {
+    background: var(--signal);
+  }
+
+  .module-close__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .module-close__outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.46rem 0.8rem;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+    transition:
+      border-color var(--dur-ui) var(--ease-out),
+      background-color var(--dur-ui) var(--ease-out),
+      transform var(--dur-ui) var(--ease-out);
+  }
+
+  .module-close__next {
+    display: grid;
+    gap: 0.15rem;
+    text-align: right;
+    text-decoration: none;
+    transition: transform var(--dur-ui) var(--ease-out);
+  }
+
+  .module-close__next-label {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .module-close__next-title {
     color: var(--ink);
     font-size: 0.9rem;
     font-weight: 600;
     line-height: 1.35;
+  }
+
+  .module-close__outline:focus-visible,
+  .module-close__next:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .module-close__outline:active,
+  .module-close__next:active {
+    transform: translateY(1px);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .module-close__outline:hover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .module-close__next:hover .module-close__next-title {
+      color: var(--accent);
+    }
   }
 
   .temario-sheet {
@@ -1331,14 +1409,6 @@ const numeroSecuencia = String(
       display: none;
     }
 
-    .lesson-nav {
-      grid-template-columns: minmax(0, 1fr);
-    }
-
-    .lesson-nav__card--next {
-      text-align: left;
-    }
-
     .lesson-head__arrows {
       justify-content: flex-end;
     }
@@ -1346,6 +1416,28 @@ const numeroSecuencia = String(
     .lesson-head__top {
       grid-template-columns: minmax(0, 1fr) auto;
       align-items: start;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .module-close {
+      padding: 1.15rem;
+    }
+
+    .module-close__foot {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.8rem;
+    }
+
+    .module-close__next {
+      grid-row: 1;
+      text-align: left;
+    }
+
+    .module-close__outline {
+      grid-row: 2;
+      width: 100%;
     }
   }
 
