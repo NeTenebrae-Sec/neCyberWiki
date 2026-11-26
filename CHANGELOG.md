@@ -9,6 +9,10 @@ y el proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 
 - Reestructura el hero de la portada en dos columnas con un panel de datos derivados (cursos, lecciones y categorías), CTA «Explorar cursos» hacia `#cursos`, enlaces a GitHub y YouTube, y una señal de scroll («Sigue bajando») con animación breve.
+- Diferencia la portada de curso de la lección con una etiqueta de contexto reutilizable (`CURSO` / `LECCIÓN`) y una barra de estado «CURSO GRATIS» con progreso real de `localStorage`, con los conteos de lecciones y módulos bajo el título (PR #105).
+- Completa las migas `Cursos / Categoría / Curso / Módulo / Lección` con `aria-current="page"` y coloca el `<h1>` de la lección antes del reproductor (PR #105).
+- Sustituye la navegación inferior por una tarjeta de contexto del módulo con progreso guardado, «Volver al temario» en la primera lección y «Fin del curso» en la última (PR #105).
+- Quita la versión del badge de staging en el README para no tener que actualizarlo en cada integración en `dev` (PR #105).
 
 ## [1.1.3] - 2026-11-24
 
