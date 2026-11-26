@@ -1348,4 +1348,17 @@ const numeroSecuencia = String(
       align-items: start;
     }
   }
+
+  @media (max-width: 340px) {
+    .player-bar__crumb {
+      flex-wrap: wrap;
+      row-gap: 0.15rem;
+    }
+
+    .player-bar__crumb a,
+    .player-bar__module {
+      flex-shrink: 0;
+      max-width: none;
+    }
+  }
 </style>

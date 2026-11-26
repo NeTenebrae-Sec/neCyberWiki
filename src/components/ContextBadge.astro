@@ -41,15 +41,11 @@ const esCurso = props.type === "curso"
   )}
   {esCurso ? "CURSO" : "LECCIÓN"}
   {props.type === "leccion" && (
-    <>
-      <span class="lesson-head__class" data-lesson-sequence-number>
-        {props.numeroSecuencia}
-      </span>
-      <span aria-hidden="true">·</span>
-      <span>
-        de <span data-lesson-total>{props.totalDefecto}</span>
-      </span>
-    </>
+    <span class="context-badge__count">
+      <span data-lesson-sequence-number>{props.numeroSecuencia}</span>
+      <span aria-hidden="true">/</span>
+      <span data-lesson-total>{props.totalDefecto}</span>
+    </span>
   )}
 </span>
 
@@ -57,13 +53,13 @@ const esCurso = props.type === "curso"
   .context-badge {
     display: inline-flex;
     align-items: center;
-    gap: 0.45rem;
-    padding: 0.25rem 0.65rem;
+    gap: 0.35rem;
+    padding: 0.2rem 0.5rem;
     border-radius: var(--radius-sm);
     font-family: var(--font-mono);
-    font-size: 0.68rem;
+    font-size: 0.64rem;
     font-weight: 700;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.08em;
     line-height: 1.2;
     text-transform: uppercase;
     font-variant-numeric: tabular-nums;
@@ -86,7 +82,11 @@ const esCurso = props.type === "curso"
     color: var(--signal);
   }
 
-  .lesson-head__class {
+  .context-badge__count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    letter-spacing: 0.02em;
     color: var(--accent);
   }
 </style>
