@@ -176,7 +176,9 @@ const fecha = (date: Date) =>
         </aside>
       </div>
 
-      <div class="home-hero__scroll-cue" aria-hidden="true">
+      <div class="home-hero__scroll-cue">
+        <span class="home-hero__scroll-label">Sigue bajando</span>
+        <span class="home-hero__scroll-rule" aria-hidden="true"></span>
         <svg
           width="18"
           height="18"
@@ -186,6 +188,7 @@ const fecha = (date: Date) =>
           stroke-width="1.5"
           stroke-linecap="round"
           stroke-linejoin="round"
+          aria-hidden="true"
           focusable="false"
         >
           <path d="M10 4v11" />
@@ -610,32 +613,77 @@ const fecha = (date: Date) =>
 
   .home-hero__scroll-cue {
     display: flex;
+    align-items: center;
     justify-content: center;
+    gap: 0.7rem;
     margin-block-start: clamp(2.25rem, 4.5vw, 3.25rem);
+    color: var(--ink-muted);
     pointer-events: none;
     user-select: none;
   }
 
+  .home-hero__scroll-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .home-hero__scroll-rule {
+    width: 1.5rem;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.4;
+  }
+
   .home-hero__scroll-cue svg {
-    color: var(--ink-muted);
-    opacity: 0.55;
+    opacity: 0.6;
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    .home-hero__scroll-cue svg {
-      animation: hero-scroll-float 2.4s var(--ease-in-out) infinite;
+    .home-hero__scroll-cue {
+      animation: hero-cue-in 420ms var(--ease-out) 400ms both;
     }
 
-    @keyframes hero-scroll-float {
+    .home-hero__scroll-cue svg {
+      animation: hero-cue-nudge 1.2s var(--ease-in-out) 900ms 2 both;
+    }
+
+    .home-hero__scroll-rule {
+      animation: hero-cue-rule 500ms var(--ease-out) 650ms both;
+    }
+
+    @keyframes hero-cue-in {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes hero-cue-nudge {
       0%,
       100% {
-        opacity: 0.45;
         transform: translateY(0);
       }
 
       50% {
-        opacity: 0.85;
         transform: translateY(5px);
+      }
+    }
+
+    @keyframes hero-cue-rule {
+      from {
+        transform: scaleX(0);
+      }
+
+      to {
+        transform: scaleX(1);
       }
     }
 
@@ -660,12 +708,6 @@ const fecha = (date: Date) =>
         filter: blur(0);
         transform: translateY(0);
       }
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .home-hero__scroll-cue svg {
-      opacity: 0.6;
     }
   }
 
