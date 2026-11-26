@@ -265,11 +265,20 @@ const numeroSecuencia = String(
           <div class="progress-track module-close__track" aria-hidden="true">
             <div class="progress-fill module-close__fill" data-module-progress-fill></div>
           </div>
+          <a class="module-close__outline module-close__outline--sub" href={`${url}#temario`}>
+            VER TEMARIO COMPLETO
+          </a>
         </div>
 
-        <div class="module-close__foot">
-          <a class="module-close__outline" href={`${url}#temario`}>
-            VER TEMARIO COMPLETO
+        <div class="module-close__foot module-close__foot--split">
+          <a
+            href={prev ? leccionUrl(info, prev, base) : undefined}
+            class="module-close__prev-card"
+            data-route-prev
+            aria-label="Clase anterior"
+            hidden={!prev}
+          >
+            <span class="module-close__prev-label">← Clase anterior</span>
           </a>
           <a
             href={next ? leccionUrl(info, next, base) : undefined}
@@ -279,14 +288,21 @@ const numeroSecuencia = String(
             aria-label="Siguiente clase"
             hidden={!next}
           >
-            <span class="module-close__next-label">Siguiente clase →</span>
-            <span class="module-close__next-title" data-module-next-title>
-              {next?.title ?? ""}
+            <span class="module-close__next-body">
+              <span class="module-close__next-label">Siguiente clase</span>
+              <span class="module-close__next-title" data-module-next-title>
+                {next?.title ?? ""}
+              </span>
+            </span>
+            <span class="module-close__next-arrow" aria-hidden="true">
+              →
             </span>
           </a>
           <a href={url} class="module-close__next" data-route-back hidden={Boolean(next)}>
-            <span class="module-close__next-label">Fin del curso</span>
-            <span class="module-close__next-title">Volver al temario y repasar →</span>
+            <span class="module-close__next-body">
+              <span class="module-close__next-label">Fin del curso</span>
+              <span class="module-close__next-title">Volver al temario y repasar →</span>
+            </span>
           </a>
         </div>
       </nav>
@@ -474,7 +490,7 @@ const numeroSecuencia = String(
       el.hidden = false
       el.setAttribute("href", `${base}${target.slug}/`)
       el.setAttribute("title", `${tipo === "prev" ? "Anterior" : "Siguiente"}: ${target.title}`)
-      el.setAttribute("aria-label", tipo === "prev" ? "Lección anterior" : "Siguiente clase")
+      el.setAttribute("aria-label", tipo === "prev" ? "Clase anterior" : "Siguiente clase")
       const titleEl = el.querySelector("[data-module-next-title]")
       if (titleEl) titleEl.textContent = target.title
     }
@@ -1073,79 +1089,125 @@ const numeroSecuencia = String(
     background: var(--signal);
   }
 
-  .module-close__foot {
-    display: flex;
-    flex-wrap: wrap;
+  .module-close__outline--sub {
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 0.8rem;
-    padding-top: 1rem;
+    justify-self: start;
+    min-height: 44px;
+    padding: 0.25rem 0;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-color: var(--line);
+    transition:
+      color var(--dur-ui) var(--ease-out),
+      text-decoration-color var(--dur-ui) var(--ease-out);
+  }
+
+  .module-close__foot--split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+    gap: 0.85rem;
+    padding-top: 0.35rem;
     border-top: 1px solid var(--line);
   }
 
-  .module-close__outline {
-    display: inline-flex;
+  .module-close__prev-card {
+    display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 0.46rem 0.8rem;
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius-sm);
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ink);
+    gap: 0.75rem;
+    min-height: 64px;
+    padding: 0.85rem 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
     text-decoration: none;
     transition:
       border-color var(--dur-ui) var(--ease-out),
+      background-color var(--dur-ui) var(--ease-out);
+  }
+
+  .module-close__prev-label {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+
+  .module-close__next {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.9rem;
+    min-height: 64px;
+    padding: 0.85rem 1.15rem;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    text-decoration: none;
+    transition:
       background-color var(--dur-ui) var(--ease-out),
       transform var(--dur-ui) var(--ease-out);
   }
 
-  .module-close__next {
+  .module-close__next-body {
     display: grid;
     gap: 0.15rem;
-    text-align: right;
-    text-decoration: none;
-    transition: transform var(--dur-ui) var(--ease-out);
   }
 
   .module-close__next-label {
     font-family: var(--font-mono);
-    font-size: 0.62rem;
+    font-size: 0.66rem;
     font-weight: 600;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--accent);
   }
 
   .module-close__next-title {
     color: var(--ink);
-    font-size: 0.9rem;
+    font-size: 0.96rem;
     font-weight: 600;
-    line-height: 1.35;
+    line-height: 1.2;
   }
 
-  .module-close__outline:focus-visible,
-  .module-close__next:focus-visible {
+  .module-close__next-arrow {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .module-close a:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 3px;
   }
 
-  .module-close__outline:active,
-  .module-close__next:active {
+  .module-close a:active {
     transform: translateY(1px);
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .module-close__outline:hover {
-      border-color: var(--accent);
-      background: var(--accent-soft);
+    .module-close__outline--sub:hover {
+      color: var(--accent);
+      text-decoration-color: var(--accent);
     }
 
-    .module-close__next:hover .module-close__next-title {
-      color: var(--accent);
+    .module-close__prev-card:hover {
+      border-color: var(--line-strong);
+      background: var(--bg);
+    }
+
+    .module-close__next:hover {
+      background: color-mix(in srgb, var(--accent) 16%, transparent);
     }
   }
 
@@ -1424,20 +1486,12 @@ const numeroSecuencia = String(
       padding: 1.15rem;
     }
 
-    .module-close__foot {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      gap: 0.8rem;
+    .module-close__foot--split {
+      grid-template-columns: 1fr;
     }
 
     .module-close__next {
-      grid-row: 1;
-      text-align: left;
-    }
-
-    .module-close__outline {
-      grid-row: 2;
-      width: 100%;
+      order: -1;
     }
   }
 
