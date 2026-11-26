@@ -47,6 +47,9 @@ specs/
 # Test screenshots
 review_test_01/
 
+# Local design references
+stitch_necyberwiki.zip
+
 # All docs are AI/agent-related (local setup, not project content)
 docs/
 
