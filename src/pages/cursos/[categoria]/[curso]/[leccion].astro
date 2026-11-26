@@ -265,7 +265,12 @@ const numeroSecuencia = String(
           <div class="progress-track module-close__track" aria-hidden="true">
             <div class="progress-fill module-close__fill" data-module-progress-fill></div>
           </div>
-          <a class="module-close__outline module-close__outline--sub" href={`${url}#temario`}>
+          <a
+            class="module-close__outline module-close__outline--sub"
+            href={`${url}#temario`}
+            data-temario-link
+            hidden={!prev}
+          >
             VER TEMARIO COMPLETO
           </a>
         </div>
@@ -279,6 +284,15 @@ const numeroSecuencia = String(
             hidden={!prev}
           >
             <span class="module-close__prev-label">← Clase anterior</span>
+          </a>
+          <a
+            href={`${url}#temario`}
+            class="module-close__prev-card"
+            data-route-start
+            aria-label="Volver al temario"
+            hidden={Boolean(prev)}
+          >
+            <span class="module-close__prev-label">← Volver al temario</span>
           </a>
           <a
             href={next ? leccionUrl(info, next, base) : undefined}
@@ -523,6 +537,10 @@ const numeroSecuencia = String(
         aplicarEnlace(el, prev, "prev")
       for (const el of document.querySelectorAll<HTMLElement>("[data-route-next]"))
         aplicarEnlace(el, next, "next")
+      for (const el of document.querySelectorAll<HTMLElement>("[data-route-start]"))
+        el.hidden = Boolean(prev)
+      for (const el of document.querySelectorAll<HTMLElement>("[data-temario-link]"))
+        el.hidden = !prev
       for (const el of document.querySelectorAll<HTMLElement>("[data-route-back]"))
         el.hidden = Boolean(next)
     })
