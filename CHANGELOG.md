@@ -4,6 +4,12 @@ Todos los cambios notables de este proyecto se documentan en este archivo.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 y el proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4] - 2026-11-25
+
+### Changed
+
+- Reestructura el hero de la portada en dos columnas con un panel de datos derivados (cursos, lecciones y categorías), CTA «Explorar cursos» hacia `#cursos`, enlaces a GitHub y YouTube, y una señal de scroll («Sigue bajando») con animación breve.
+
 ## [1.1.3] - 2026-11-24
 
 ### Added
