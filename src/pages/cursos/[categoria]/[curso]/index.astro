@@ -114,9 +114,6 @@ const fichaDefecto = fichaDeRuta(CONFIG_POR_DEFECTO)
                   INTRODUCCIÓN:{" "}
                   <span class="video-hud__caption-highlight">Como funciona la neCyberWiki</span>
                 </span>
-                <a href="#temario" class="video-hud__bottom-link">
-                  [ VER GUÍA ESCRITA ↓ ]
-                </a>
               </div>
             </div>
           )}
@@ -898,7 +895,6 @@ const fichaDefecto = fichaDeRuta(CONFIG_POR_DEFECTO)
   .video-hud__bottom {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     padding: 0.45rem 0.85rem;
     border-top: 1px solid var(--line);
     background: var(--bg-deep);
@@ -909,18 +905,6 @@ const fichaDefecto = fichaDeRuta(CONFIG_POR_DEFECTO)
 
   .video-hud__caption-highlight {
     color: var(--ink-dim);
-  }
-
-  .video-hud__bottom-link {
-    color: var(--accent);
-    font-weight: 600;
-    text-decoration: none;
-    transition: color 0.15s ease;
-  }
-
-  .video-hud__bottom-link:hover {
-    color: var(--ink);
-    text-decoration: underline;
   }
 
   /* Ficha HUD */
