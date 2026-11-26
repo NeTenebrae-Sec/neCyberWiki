@@ -79,13 +79,12 @@ const fichaDefecto = fichaDeRuta(CONFIG_POR_DEFECTO)
 
       <div class="course-hero__grid">
         <div class="course-hero__main">
-          <CourseFormatBar>
-            <span class="meta-highlight" data-course-total data-unidad={unidad}>
-              {totalDefecto} {unidad}
-            </span>
-            <span aria-hidden="true">·</span>
-            <span class="meta-highlight">{modulosDefecto} módulos</span>
-          </CourseFormatBar>
+          <CourseFormatBar
+            slug={info.slug}
+            total={totalDefecto}
+            modulos={modulosDefecto}
+            unidad={unidad}
+          />
           <h1 class="course-hero__title">{info.titulo}</h1>
 
           {mostrarVideoHero && (
@@ -520,6 +519,24 @@ const fichaDefecto = fichaDeRuta(CONFIG_POR_DEFECTO)
         bar?.setAttribute("aria-valuemax", String(total))
       }
 
+      const barRoot = document.querySelector(`[data-bar-progress-course="${state.slug}"]`)
+      if (barRoot) {
+        const barVisibles = state.visibles
+        const barTotal = Number(
+          barRoot.getAttribute("data-bar-progress-total") || barVisibles.length,
+        )
+        const barUnidad = barRoot.getAttribute("data-bar-unidad") || "lecciones"
+        const barDone = Math.min(barVisibles.filter(isDone).length, barTotal)
+        const barPct = barTotal > 0 ? Math.round((barDone / barTotal) * 100) : 0
+        const barLabel = barRoot.querySelector("[data-bar-progress-label]")
+        if (barLabel) barLabel.textContent = `${barDone} / ${barTotal} ${barUnidad}`
+        const barFill = barRoot.querySelector<HTMLElement>("[data-bar-progress-fill]")
+        if (barFill) barFill.style.width = `${barPct}%`
+        const barTrack = barRoot.querySelector('[role="progressbar"]')
+        barTrack?.setAttribute("aria-valuenow", String(barDone))
+        barTrack?.setAttribute("aria-valuemax", String(barTotal))
+      }
+
       const cta = document.getElementById("cta-continue")
       if (!cta) return
 
@@ -576,6 +593,21 @@ const fichaDefecto = fichaDeRuta(CONFIG_POR_DEFECTO)
           `${n} / ${total} ${unidad} (${pct}%)`
         root.querySelector("[data-progress-fill]").style.width = `${pct}%`
         root.querySelector('[role="progressbar"]')?.setAttribute("aria-valuenow", String(n))
+      }
+
+      const barRoot = document.querySelector(`[data-bar-progress-course="${slug}"]`)
+      if (barRoot) {
+        const barTotal = Number(barRoot.getAttribute("data-bar-progress-total") || total)
+        const barUnidad = barRoot.getAttribute("data-bar-unidad") || "lecciones"
+        const barDone = Math.min(n, barTotal)
+        const barPct = barTotal > 0 ? Math.round((barDone / barTotal) * 100) : 0
+        const barLabel = barRoot.querySelector("[data-bar-progress-label]")
+        if (barLabel) barLabel.textContent = `${barDone} / ${barTotal} ${barUnidad}`
+        const barFill = barRoot.querySelector("[data-bar-progress-fill]")
+        if (barFill) barFill.style.width = `${barPct}%`
+        const barTrack = barRoot.querySelector('[role="progressbar"]')
+        barTrack?.setAttribute("aria-valuenow", String(barDone))
+        barTrack?.setAttribute("aria-valuemax", String(barTotal))
       }
 
       if (cta) {

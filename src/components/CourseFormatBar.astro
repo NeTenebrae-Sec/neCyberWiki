@@ -1,4 +1,21 @@
-<div class="course-format-bar" data-pagefind-ignore="all">
+---
+interface Props {
+  slug: string
+  total: number
+  modulos: number
+  unidad: string
+}
+
+const { slug, total, modulos, unidad } = Astro.props
+---
+
+<div
+  class="course-format-bar"
+  data-bar-progress-course={slug}
+  data-bar-progress-total={total}
+  data-bar-unidad={unidad}
+  data-pagefind-ignore="all"
+>
   <span class="course-format-bar__label">
     <svg
       width="15"
@@ -17,8 +34,36 @@
     </svg>
     // CURSO
   </span>
-  <div class="course-format-bar__meta">
-    <slot />
+
+  <span class="course-format-bar__sep" aria-hidden="true">
+    |
+  </span>
+
+  <div class="course-format-bar__progress">
+    <span data-bar-progress-label>
+      0 / {total} {unidad}
+    </span>
+    <span
+      class="progress-track course-format-bar__track"
+      role="progressbar"
+      aria-label="Progreso del curso"
+      aria-valuemin="0"
+      aria-valuemax={total}
+      aria-valuenow="0"
+    >
+      <span class="progress-fill course-format-bar__fill" data-bar-progress-fill></span>
+    </span>
+  </div>
+
+  <span class="course-format-bar__sep" aria-hidden="true">
+    |
+  </span>
+
+  <div class="course-format-bar__metrics">
+    <span class="chip">{modulos} MÓDULOS</span>
+    <span class="chip chip--signal">
+      {total} {unidad.toUpperCase()}
+    </span>
   </div>
 </div>
 
@@ -26,14 +71,14 @@
   .course-format-bar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     flex-wrap: wrap;
     gap: 0.5rem 0.75rem;
     padding: 0.6rem 0.95rem;
     border: 1px solid var(--line);
+    border-bottom: 0;
     border-left: 3px solid var(--accent);
-    border-radius: var(--radius-sm);
-    background: var(--accent-soft);
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    background: var(--bg-raised);
     font-family: var(--font-mono);
     color: var(--accent);
   }
@@ -53,15 +98,49 @@
     flex-shrink: 0;
   }
 
-  .course-format-bar__meta {
+  .course-format-bar__sep {
+    color: var(--line-strong);
+  }
+
+  .course-format-bar__progress {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    color: var(--ink-dim);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .course-format-bar__track {
+    width: 4rem;
+    flex-shrink: 0;
+  }
+
+  .course-format-bar__fill {
+    background: var(--accent);
+  }
+
+  .course-format-bar__metrics {
     display: inline-flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 0.35rem;
-    min-width: 0;
-    font-size: 0.68rem;
-    letter-spacing: 0.06em;
-    color: var(--ink-muted);
-    font-variant-numeric: tabular-nums;
+    gap: 0.4rem;
+  }
+
+  @media (max-width: 767.98px) {
+    .course-format-bar__sep {
+      display: none;
+    }
+
+    .course-format-bar__progress {
+      order: 1;
+    }
+
+    .course-format-bar__metrics {
+      order: 2;
+      width: 100%;
+    }
   }
 </style>
