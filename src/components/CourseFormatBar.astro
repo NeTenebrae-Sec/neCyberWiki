@@ -1,0 +1,67 @@
+<div class="course-format-bar" data-pagefind-ignore="all">
+  <span class="course-format-bar__label">
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="1.5" y="2.5" width="13" height="11" rx="1.5"></rect>
+      <path d="M4.5 6.5l2.25 1.75L4.5 10"></path>
+      <path d="M8.5 10h3"></path>
+    </svg>
+    // CURSO
+  </span>
+  <div class="course-format-bar__meta">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .course-format-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    padding: 0.6rem 0.95rem;
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius-sm);
+    background: var(--accent-soft);
+    font-family: var(--font-mono);
+    color: var(--accent);
+  }
+
+  .course-format-bar__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .course-format-bar__label svg {
+    flex-shrink: 0;
+  }
+
+  .course-format-bar__meta {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    min-width: 0;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    color: var(--ink-muted);
+    font-variant-numeric: tabular-nums;
+  }
+</style>

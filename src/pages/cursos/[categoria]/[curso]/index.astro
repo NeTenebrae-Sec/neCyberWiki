@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../../../../layouts/BaseLayout.astro"
-import ContextBadge from "../../../../components/ContextBadge.astro"
+import CourseFormatBar from "../../../../components/CourseFormatBar.astro"
 import CourseModuleList from "../../../../components/CourseModuleList.astro"
 import CourseConfig from "../../../../components/CourseConfig.astro"
 import VideoEmbed from "../../../../components/VideoEmbed.astro"
@@ -79,19 +79,14 @@ const fichaDefecto = fichaDeRuta(CONFIG_POR_DEFECTO)
 
       <div class="course-hero__grid">
         <div class="course-hero__main">
-          <ContextBadge type="curso" />
-          <h1 class="course-hero__title">{info.titulo}</h1>
-
-          <div class="course-hero__meta" data-pagefind-ignore="all">
+          <CourseFormatBar>
             <span class="meta-highlight" data-course-total data-unidad={unidad}>
               {totalDefecto} {unidad}
             </span>
-            <span class="meta-sep" aria-hidden="true">
-              ·
-            </span>
-
+            <span aria-hidden="true">·</span>
             <span class="meta-highlight">{modulosDefecto} módulos</span>
-          </div>
+          </CourseFormatBar>
+          <h1 class="course-hero__title">{info.titulo}</h1>
 
           {mostrarVideoHero && (
             <div class="course-hero__video-hud" data-pagefind-ignore="all">
@@ -1123,10 +1118,6 @@ const fichaDefecto = fichaDeRuta(CONFIG_POR_DEFECTO)
     line-height: 1.4;
   }
 
-  .meta-sep {
-    color: var(--line-strong);
-  }
-
   .meta-highlight {
     color: var(--accent);
   }
@@ -1153,18 +1144,6 @@ const fichaDefecto = fichaDeRuta(CONFIG_POR_DEFECTO)
     border: 1px dashed var(--line-strong);
     color: var(--ink-muted);
     font-size: 0.78rem;
-  }
-
-  .course-hero__meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem 1.4rem;
-    margin-top: 1.1rem;
-    font-family: var(--font-mono);
-    font-size: 0.64rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--ink-muted);
   }
 
   .mission-meter {
