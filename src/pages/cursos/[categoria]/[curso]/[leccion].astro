@@ -15,7 +15,6 @@ import {
   leccionesDeRuta,
 } from "../../../../lib/catalog"
 import { buscarRuta, CONFIG_POR_DEFECTO, numerosVisiblesPorRuta } from "../../../../lib/tracks"
-import { resumirConfig } from "../../../../lib/course-config.client"
 import { getCategoria } from "../../../../data/categorias"
 import { site } from "../../../../data/site"
 
@@ -141,30 +140,11 @@ const numeroSecuencia = String(
       <header class="lesson-head sheet" data-pagefind-ignore="all">
         <div class="lesson-head__top">
           <div class="lesson-head__info">
-            <ContextBadge type="leccion" />
-            <p class="lesson-head__course">
-              <span class="lesson-head__eyebrow">CURSO</span>
-              <a href={url} class="signal">
-                {info.titulo}
-              </a>
-            </p>
-            <p class="lesson-head__kicker">
-              <span class="lesson-head__class">
-                {etiqueta} <span data-lesson-sequence-number>{numeroSecuencia}</span>
-              </span>
-              <span aria-hidden="true">·</span>
-              <span>
-                de <span data-lesson-total>{totalDefecto}</span>
-              </span>
-              <span aria-hidden="true">·</span>
-              <span>
-                {entry.data.video ? entry.data.duracion || "Video + guía" : "Guía escrita"}
-              </span>
-              <span aria-hidden="true">·</span>
-              <span class="lesson-head__route" data-lesson-route>
-                {resumirConfig(CONFIG_POR_DEFECTO)}
-              </span>
-            </p>
+            <ContextBadge
+              type="leccion"
+              numeroSecuencia={numeroSecuencia}
+              totalDefecto={totalDefecto}
+            />
             <h1 class="lesson-head__title">{entry.data.title}</h1>
           </div>
 
@@ -214,7 +194,6 @@ const numeroSecuencia = String(
             </span>
             <span class="btn-label">Marcar lección como completada</span>
           </button>
-          <span class="meta">Se guarda automáticamente en tu navegador</span>
         </div>
       </header>
 
@@ -441,7 +420,7 @@ const numeroSecuencia = String(
   )}
 
   <script>
-    import { initCourseConfig, resumirConfig } from "../../../../lib/course-config.client"
+    import { initCourseConfig } from "../../../../lib/course-config.client"
     import type { CourseConfigState } from "../../../../lib/course-config.client"
     import type { CursoRuta } from "../../../../lib/tracks"
     import { numerosVisiblesPorRuta } from "../../../../lib/tracks"
@@ -498,8 +477,6 @@ const numeroSecuencia = String(
         window.location.replace("../")
         return
       }
-      const routeEl = document.querySelector<HTMLElement>("[data-lesson-route]")
-      if (routeEl) routeEl.textContent = resumirConfig(state.config)
       if (!catalogoEl) return
       const visibles = state.ruta ? state.ruta.lecciones : []
       const numerosVisibles = numerosVisiblesPorRuta(state.ruta)
@@ -933,43 +910,6 @@ const numeroSecuencia = String(
     min-width: 0;
   }
 
-  .lesson-head__course {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.4rem 0.55rem;
-    font-family: var(--font-mono);
-    font-size: 0.62rem;
-  }
-
-  .lesson-head__eyebrow {
-    color: var(--ink-muted);
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-
-  .lesson-head__kicker {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.4rem 0.55rem;
-    margin-top: 0.55rem;
-    font-family: var(--font-mono);
-    font-size: 0.66rem;
-    color: var(--ink-muted);
-  }
-
-  .lesson-head__class {
-    color: var(--accent);
-    font-size: 0.72rem;
-    font-weight: 700;
-  }
-
-  .lesson-head__route {
-    font-variant-numeric: tabular-nums;
-  }
-
   .lesson-head__title {
     margin-top: 0.35rem;
     max-width: 24ch;
@@ -998,7 +938,7 @@ const numeroSecuencia = String(
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 0.75rem;
     margin-top: 1.1rem;
     padding-top: 1rem;

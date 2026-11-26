@@ -1,10 +1,14 @@
 ---
-type Props = {
-  type: "curso" | "leccion"
-}
+type Props =
+  | { type: "curso" }
+  | {
+      type: "leccion"
+      numeroSecuencia: string
+      totalDefecto: number
+    }
 
-const { type } = Astro.props
-const esCurso = type === "curso"
+const props = Astro.props
+const esCurso = props.type === "curso"
 ---
 
 <span class:list={["context-badge", esCurso ? "context-badge--curso" : "context-badge--leccion"]}>
@@ -35,7 +39,18 @@ const esCurso = type === "curso"
       <path d="M6.5 8h4M6.5 10.5h3" />
     </svg>
   )}
-  <span>{esCurso ? "CURSO" : "LECCIÓN"}</span>
+  {esCurso ? "CURSO" : "LECCIÓN"}
+  {props.type === "leccion" && (
+    <>
+      <span class="lesson-head__class" data-lesson-sequence-number>
+        {props.numeroSecuencia}
+      </span>
+      <span aria-hidden="true">·</span>
+      <span>
+        de <span data-lesson-total>{props.totalDefecto}</span>
+      </span>
+    </>
+  )}
 </span>
 
 <style>
@@ -51,6 +66,8 @@ const esCurso = type === "curso"
     letter-spacing: 0.12em;
     line-height: 1.2;
     text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
   }
 
   .context-badge svg {
@@ -67,5 +84,9 @@ const esCurso = type === "curso"
     border: 1px dashed var(--signal);
     background: var(--signal-soft);
     color: var(--signal);
+  }
+
+  .lesson-head__class {
+    color: var(--accent);
   }
 </style>
