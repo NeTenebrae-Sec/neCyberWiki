@@ -2,11 +2,10 @@
 interface Props {
   slug: string
   total: number
-  modulos: number
   unidad: string
 }
 
-const { slug, total, modulos, unidad } = Astro.props
+const { slug, total, unidad } = Astro.props
 ---
 
 <div
@@ -35,10 +34,6 @@ const { slug, total, modulos, unidad } = Astro.props
     CURSO GRATIS
   </span>
 
-  <span class="course-format-bar__sep" aria-hidden="true">
-    |
-  </span>
-
   <div class="course-format-bar__progress">
     <span data-bar-progress-label>
       0 / {total} {unidad}
@@ -54,25 +49,15 @@ const { slug, total, modulos, unidad } = Astro.props
       <span class="progress-fill course-format-bar__fill" data-bar-progress-fill></span>
     </span>
   </div>
-
-  <span class="course-format-bar__sep" aria-hidden="true">
-    |
-  </span>
-
-  <div class="course-format-bar__metrics">
-    <span class="chip">{modulos} MÓDULOS</span>
-    <span class="chip chip--signal">
-      {total} {unidad.toUpperCase()}
-    </span>
-  </div>
 </div>
 
 <style>
   .course-format-bar {
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem 0.75rem;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 0.75rem;
     padding: 0.6rem 0.95rem;
     border: 1px solid var(--line);
     border-bottom: 0;
@@ -98,14 +83,11 @@ const { slug, total, modulos, unidad } = Astro.props
     flex-shrink: 0;
   }
 
-  .course-format-bar__sep {
-    color: var(--line-strong);
-  }
-
   .course-format-bar__progress {
     display: inline-flex;
     align-items: center;
     gap: 0.55rem;
+    margin-left: auto;
     font-size: 0.68rem;
     letter-spacing: 0.06em;
     color: var(--ink-dim);
@@ -122,27 +104,14 @@ const { slug, total, modulos, unidad } = Astro.props
     background: var(--accent);
   }
 
-  .course-format-bar__metrics {
-    display: inline-flex;
-    align-items: center;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    margin-left: auto;
-  }
-
   @media (max-width: 767.98px) {
-    .course-format-bar__sep {
-      display: none;
+    .course-format-bar {
+      gap: 0.5rem;
+      padding: 0.55rem 0.75rem;
     }
 
-    .course-format-bar__progress {
-      order: 1;
-    }
-
-    .course-format-bar__metrics {
-      order: 2;
-      width: 100%;
+    .course-format-bar__track {
+      width: 3.5rem;
     }
   }
 </style>
