@@ -8,7 +8,7 @@ y el proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
-- Reestructura el hero de la portada en dos columnas y destaca el CTA «Explorar cursos» hacia `#cursos`, con métricas y animación de entrada.
+- Reestructura el hero de la portada en dos columnas con un panel de datos derivados (cursos, lecciones y categorías), CTA «Explorar cursos» hacia `#cursos`, enlaces a GitHub y YouTube, y flecha de scroll decorativa.
 
 ## [1.1.3] - 2026-11-24
 
