@@ -1,0 +1,71 @@
+---
+type Props = {
+  type: "curso" | "leccion"
+}
+
+const { type } = Astro.props
+const esCurso = type === "curso"
+---
+
+<span class:list={["context-badge", esCurso ? "context-badge--curso" : "context-badge--leccion"]}>
+  {esCurso ? (
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      aria-hidden="true"
+    >
+      <path d="M2.5 3.5h4.5a2 2 0 0 1 2 2v7.5a1.5 1.5 0 0 0-1.5-1.5H2.5V3.5z" />
+      <path d="M13.5 3.5H9a2 2 0 0 0-2 2v7.5a1.5 1.5 0 0 1 1.5-1.5h5V3.5z" />
+    </svg>
+  ) : (
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      aria-hidden="true"
+    >
+      <path d="M4 2.5h6l3 3v8H4v-11z" />
+      <path d="M6.5 8h4M6.5 10.5h3" />
+    </svg>
+  )}
+  <span>{esCurso ? "CURSO" : "LECCIÓN"}</span>
+</span>
+
+<style>
+  .context-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .context-badge svg {
+    flex-shrink: 0;
+  }
+
+  .context-badge--curso {
+    border: 1px solid var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .context-badge--leccion {
+    border: 1px dashed var(--signal);
+    background: var(--signal-soft);
+    color: var(--signal);
+  }
+</style>

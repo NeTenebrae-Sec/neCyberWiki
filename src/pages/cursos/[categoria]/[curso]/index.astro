@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../../../layouts/BaseLayout.astro"
+import ContextBadge from "../../../../components/ContextBadge.astro"
 import CourseModuleList from "../../../../components/CourseModuleList.astro"
 import CourseConfig from "../../../../components/CourseConfig.astro"
 import VideoEmbed from "../../../../components/VideoEmbed.astro"
@@ -78,6 +79,7 @@ const fichaDefecto = fichaDeRuta(CONFIG_POR_DEFECTO)
 
       <div class="course-hero__grid">
         <div class="course-hero__main">
+          <ContextBadge type="curso" />
           <h1 class="course-hero__title">{info.titulo}</h1>
 
           <div class="course-hero__meta" data-pagefind-ignore="all">

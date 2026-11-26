@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from "astro:content"
 import BaseLayout from "../../../../layouts/BaseLayout.astro"
+import ContextBadge from "../../../../components/ContextBadge.astro"
 import CourseModuleList from "../../../../components/CourseModuleList.astro"
 import CourseConfig from "../../../../components/CourseConfig.astro"
 import TableOfContents from "../../../../components/TableOfContents.astro"
@@ -128,6 +129,7 @@ const numeroSecuencia = String(
       <header class="lesson-head sheet" data-pagefind-ignore="all">
         <div class="lesson-head__top">
           <div class="lesson-head__info">
+            <ContextBadge type="leccion" />
             <p class="lesson-head__course">
               <span class="lesson-head__eyebrow">CURSO</span>
               <a href={url} class="signal">
