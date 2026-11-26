@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from "astro:content"
 import BaseLayout from "../../../../layouts/BaseLayout.astro"
+import ContextBadge from "../../../../components/ContextBadge.astro"
 import CourseModuleList from "../../../../components/CourseModuleList.astro"
 import CourseConfig from "../../../../components/CourseConfig.astro"
 import TableOfContents from "../../../../components/TableOfContents.astro"
@@ -14,7 +15,6 @@ import {
   leccionesDeRuta,
 } from "../../../../lib/catalog"
 import { buscarRuta, CONFIG_POR_DEFECTO, numerosVisiblesPorRuta } from "../../../../lib/tracks"
-import { resumirConfig } from "../../../../lib/course-config.client"
 import { getCategoria } from "../../../../data/categorias"
 import { site } from "../../../../data/site"
 
@@ -74,6 +74,11 @@ const currentModule = info.modulos.find((modulo) =>
 const currentSub = currentModule?.submodulos?.find((sub) =>
   sub.lecciones.some((item) => item.slug === leccionKey),
 )
+const numeroModulo = String(currentModule ? info.modulos.indexOf(currentModule) + 1 : 1).padStart(
+  2,
+  "0",
+)
+const tituloModulo = currentModule?.titulo || entry.data.modulo_titulo || entry.data.modulo
 
 const { Content, headings } = await render(entry)
 const tocItems = headings.filter((heading) => heading.depth === 2 || heading.depth === 3)
@@ -101,11 +106,23 @@ const numeroSecuencia = String(
       <nav class="breadcrumb player-bar__crumb" aria-label="Miga de pan">
         <a href={`${base}cursos/`}>Cursos</a>
         <span aria-hidden="true">/</span>
-        <a href={`${base}cursos/${info.categoria}/`}>{categoria?.titulo || info.categoria}</a>
-        <span aria-hidden="true">/</span>
-        <a href={url} class="player-bar__course" aria-current="page">
+        <a class="player-bar__category" href={`${base}cursos/${info.categoria}/`}>
+          {categoria?.titulo || info.categoria}
+        </a>
+        <span class="player-bar__sep--category" aria-hidden="true">
+          /
+        </span>
+        <a href={url} class="player-bar__course">
           {info.titulo}
         </a>
+        <span aria-hidden="true">/</span>
+        <span class="player-bar__module">
+          {entry.data.modulo_titulo || currentModule?.titulo || `Módulo ${entry.data.modulo}`}
+        </span>
+        <span aria-hidden="true">/</span>
+        <span class="player-bar__current" aria-current="page">
+          {entry.data.title}
+        </span>
       </nav>
 
       <div class="player-bar__tools">
@@ -128,29 +145,11 @@ const numeroSecuencia = String(
       <header class="lesson-head sheet" data-pagefind-ignore="all">
         <div class="lesson-head__top">
           <div class="lesson-head__info">
-            <p class="lesson-head__course">
-              <span class="lesson-head__eyebrow">CURSO</span>
-              <a href={url} class="signal">
-                {info.titulo}
-              </a>
-            </p>
-            <p class="lesson-head__kicker">
-              <span class="lesson-head__class">
-                {etiqueta} <span data-lesson-sequence-number>{numeroSecuencia}</span>
-              </span>
-              <span aria-hidden="true">·</span>
-              <span>
-                de <span data-lesson-total>{totalDefecto}</span>
-              </span>
-              <span aria-hidden="true">·</span>
-              <span>
-                {entry.data.video ? entry.data.duracion || "Video + guía" : "Guía escrita"}
-              </span>
-              <span aria-hidden="true">·</span>
-              <span class="lesson-head__route" data-lesson-route>
-                {resumirConfig(CONFIG_POR_DEFECTO)}
-              </span>
-            </p>
+            <ContextBadge
+              type="leccion"
+              numeroSecuencia={numeroSecuencia}
+              totalDefecto={totalDefecto}
+            />
             <h1 class="lesson-head__title">{entry.data.title}</h1>
           </div>
 
@@ -200,7 +199,6 @@ const numeroSecuencia = String(
             </span>
             <span class="btn-label">Marcar lección como completada</span>
           </button>
-          <span class="meta">Se guarda automáticamente en tu navegador</span>
         </div>
       </header>
 
@@ -247,44 +245,80 @@ const numeroSecuencia = String(
         </div>
       </section>
 
-      <nav class="lesson-nav" aria-label="Navegación entre lecciones" data-pagefind-ignore="all">
-        <div
-          class="lesson-nav__spacer"
-          data-route-prev-spacer
-          hidden={Boolean(prev)}
-          aria-hidden="true"
-        ></div>
-        <a
-          href={prev ? leccionUrl(info, prev, base) : undefined}
-          class="lesson-nav__card"
-          data-route-prev
-          aria-label="Lección anterior"
-          hidden={!prev}
-        >
-          <span class="lesson-nav__label">← {etiqueta} anterior</span>
-          <span class="lesson-nav__title">{prev?.title ?? ""}</span>
-        </a>
+      <nav
+        class="module-close sheet--raised"
+        aria-label="Navegación del módulo y siguiente clase"
+        data-pagefind-ignore="all"
+      >
+        <div>
+          <p class="module-close__kicker">
+            <span class="status-dot status-dot--cyan" aria-hidden="true"></span>
+            MÓDULO {numeroModulo} · {tituloModulo.toUpperCase()}
+          </p>
+          <h2 class="module-close__title">{info.titulo}</h2>
+        </div>
 
-        <a
-          href={next ? leccionUrl(info, next, base) : undefined}
-          class="lesson-nav__card lesson-nav__card--next"
-          data-route-next
-          data-mark-next
-          aria-label="Lección siguiente"
-          hidden={!next}
-        >
-          <span class="lesson-nav__label">Siguiente {etiqueta.toLowerCase()} →</span>
-          <span class="lesson-nav__title">{next?.title ?? ""}</span>
-        </a>
-        <a
-          href={url}
-          class="lesson-nav__card lesson-nav__card--next"
-          data-route-back
-          hidden={Boolean(next)}
-        >
-          <span class="lesson-nav__label signal">Fin del curso</span>
-          <span class="lesson-nav__title">Volver al temario y repasar →</span>
-        </a>
+        <div class="module-close__progress">
+          <span class="module-close__label" data-module-progress-label>
+            {etiqueta} {numeroSecuencia} de {totalDefecto} · 0%
+          </span>
+          <div class="progress-track module-close__track" aria-hidden="true">
+            <div class="progress-fill module-close__fill" data-module-progress-fill></div>
+          </div>
+          <a
+            class="module-close__outline module-close__outline--sub"
+            href={`${url}#temario`}
+            data-temario-link
+            hidden={!prev}
+          >
+            VER TEMARIO COMPLETO
+          </a>
+        </div>
+
+        <div class="module-close__foot module-close__foot--split">
+          <a
+            href={prev ? leccionUrl(info, prev, base) : undefined}
+            class="module-close__prev-card"
+            data-route-prev
+            aria-label="Clase anterior"
+            hidden={!prev}
+          >
+            <span class="module-close__prev-label">← Clase anterior</span>
+          </a>
+          <a
+            href={`${url}#temario`}
+            class="module-close__prev-card"
+            data-route-start
+            aria-label="Volver al temario"
+            hidden={Boolean(prev)}
+          >
+            <span class="module-close__prev-label">← Volver al temario</span>
+          </a>
+          <a
+            href={next ? leccionUrl(info, next, base) : undefined}
+            class="module-close__next"
+            data-route-next
+            data-mark-next
+            aria-label="Siguiente clase"
+            hidden={!next}
+          >
+            <span class="module-close__next-body">
+              <span class="module-close__next-label">Siguiente clase</span>
+              <span class="module-close__next-title" data-module-next-title>
+                {next?.title ?? ""}
+              </span>
+            </span>
+            <span class="module-close__next-arrow" aria-hidden="true">
+              →
+            </span>
+          </a>
+          <a href={url} class="module-close__next" data-route-back hidden={Boolean(next)}>
+            <span class="module-close__next-body">
+              <span class="module-close__next-label">Fin del curso</span>
+              <span class="module-close__next-title">Volver al temario y repasar →</span>
+            </span>
+          </a>
+        </div>
       </nav>
     </article>
 
@@ -427,7 +461,7 @@ const numeroSecuencia = String(
   )}
 
   <script>
-    import { initCourseConfig, resumirConfig } from "../../../../lib/course-config.client"
+    import { initCourseConfig } from "../../../../lib/course-config.client"
     import type { CourseConfigState } from "../../../../lib/course-config.client"
     import type { CursoRuta } from "../../../../lib/tracks"
     import { numerosVisiblesPorRuta } from "../../../../lib/tracks"
@@ -470,8 +504,8 @@ const numeroSecuencia = String(
       el.hidden = false
       el.setAttribute("href", `${base}${target.slug}/`)
       el.setAttribute("title", `${tipo === "prev" ? "Anterior" : "Siguiente"}: ${target.title}`)
-      el.setAttribute("aria-label", tipo === "prev" ? "Lección anterior" : "Lección siguiente")
-      const titleEl = el.querySelector(".lesson-nav__title")
+      el.setAttribute("aria-label", tipo === "prev" ? "Clase anterior" : "Siguiente clase")
+      const titleEl = el.querySelector("[data-module-next-title]")
       if (titleEl) titleEl.textContent = target.title
     }
 
@@ -484,8 +518,6 @@ const numeroSecuencia = String(
         window.location.replace("../")
         return
       }
-      const routeEl = document.querySelector<HTMLElement>("[data-lesson-route]")
-      if (routeEl) routeEl.textContent = resumirConfig(state.config)
       if (!catalogoEl) return
       const visibles = state.ruta ? state.ruta.lecciones : []
       const numerosVisibles = numerosVisiblesPorRuta(state.ruta)
@@ -505,8 +537,10 @@ const numeroSecuencia = String(
         aplicarEnlace(el, prev, "prev")
       for (const el of document.querySelectorAll<HTMLElement>("[data-route-next]"))
         aplicarEnlace(el, next, "next")
-      const spacer = document.querySelector<HTMLElement>("[data-route-prev-spacer]")
-      if (spacer) spacer.hidden = Boolean(prev)
+      for (const el of document.querySelectorAll<HTMLElement>("[data-route-start]"))
+        el.hidden = Boolean(prev)
+      for (const el of document.querySelectorAll<HTMLElement>("[data-temario-link]"))
+        el.hidden = !prev
       for (const el of document.querySelectorAll<HTMLElement>("[data-route-back]"))
         el.hidden = Boolean(next)
     })
@@ -521,6 +555,7 @@ const numeroSecuencia = String(
       compartirVariante: Boolean(info.progreso?.compartirVariante),
       visiblesDefecto: leccionesDefecto.map((leccion) => leccion.slug),
       totalDefecto,
+      unidadClase: etiqueta,
     }}
   >
     // Config activa: query > localStorage > default. El ID de una lección
@@ -599,6 +634,13 @@ const numeroSecuencia = String(
       if (pctEl) pctEl.textContent = `${pct}% completado`
       if (doneEl) doneEl.textContent = String(count)
       if (barEl) barEl.style.width = `${pct}%`
+
+      const claseActual = Math.max(1, visibles.indexOf(leccionKey) + 1)
+      const moduloLabelEl = document.querySelector("[data-module-progress-label]")
+      if (moduloLabelEl)
+        moduloLabelEl.textContent = `${unidadClase} ${claseActual} de ${routeTotal()} · ${pct}%`
+      const moduloFillEl = document.querySelector("[data-module-progress-fill]")
+      if (moduloFillEl) moduloFillEl.style.width = `${pct}%`
 
       const fabDone = document.getElementById("fab-done")
       if (fabDone) fabDone.textContent = String(count)
@@ -808,11 +850,25 @@ const numeroSecuencia = String(
     flex-shrink: 0;
   }
 
-  .player-bar__course {
-    max-width: 26ch;
+  .player-bar__crumb a,
+  .player-bar__module {
+    min-width: 0;
+    flex-shrink: 1;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .player-bar__course {
+    max-width: 26ch;
+  }
+
+  .player-bar__module {
+    max-width: 18ch;
+  }
+
+  .player-bar__current {
+    flex-shrink: 0;
   }
 
   .player-bar__tools {
@@ -894,10 +950,6 @@ const numeroSecuencia = String(
     padding: clamp(1.1rem, 2.4vw, 1.6rem);
   }
 
-  .player-frame + .lesson-head {
-    margin-top: 1.25rem;
-  }
-
   .lesson-head__top {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -907,43 +959,6 @@ const numeroSecuencia = String(
 
   .lesson-head__info {
     min-width: 0;
-  }
-
-  .lesson-head__course {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.4rem 0.55rem;
-    font-family: var(--font-mono);
-    font-size: 0.62rem;
-  }
-
-  .lesson-head__eyebrow {
-    color: var(--ink-muted);
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-
-  .lesson-head__kicker {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.4rem 0.55rem;
-    margin-top: 0.55rem;
-    font-family: var(--font-mono);
-    font-size: 0.66rem;
-    color: var(--ink-muted);
-  }
-
-  .lesson-head__class {
-    color: var(--accent);
-    font-size: 0.72rem;
-    font-weight: 700;
-  }
-
-  .lesson-head__route {
-    font-variant-numeric: tabular-nums;
   }
 
   .lesson-head__title {
@@ -974,7 +989,7 @@ const numeroSecuencia = String(
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 0.75rem;
     margin-top: 1.1rem;
     padding-top: 1rem;
@@ -1044,67 +1059,174 @@ const numeroSecuencia = String(
     margin-left: auto;
   }
 
-  .lesson-nav {
+  .module-close {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.8rem;
+    gap: 1.1rem;
     margin-top: 1.25rem;
+    padding: 1.35rem 1.5rem;
   }
 
-  .lesson-nav__spacer {
-    display: block;
+  .module-close__kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
   }
 
-  .lesson-nav__card {
+  .module-close__title {
+    margin: 0.35rem 0 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 2.2vw, 1.4rem);
+    font-weight: 600;
+    line-height: 1.15;
+  }
+
+  .module-close__progress {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .module-close__label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-muted);
+  }
+
+  .module-close__fill {
+    background: var(--accent);
+  }
+
+  :global([data-theme="light"]) .module-close__fill {
+    background: var(--signal);
+  }
+
+  .module-close__outline--sub {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    min-height: 44px;
+    padding: 0.25rem 0;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-color: var(--line);
+    transition:
+      color var(--dur-ui) var(--ease-out),
+      text-decoration-color var(--dur-ui) var(--ease-out);
+  }
+
+  .module-close__foot--split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+    gap: 0.85rem;
+    padding-top: 0.35rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .module-close__prev-card {
     display: flex;
-    flex-direction: column;
-    gap: 0.28rem;
-    padding: 0.65rem 0.8rem;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 64px;
+    padding: 0.85rem 1rem;
+    background: var(--bg-card);
     border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
-    background: transparent;
-    color: inherit;
+    border-radius: var(--radius);
     text-decoration: none;
     transition:
       border-color var(--dur-ui) var(--ease-out),
       background-color var(--dur-ui) var(--ease-out);
   }
 
-  .lesson-nav__card--next {
-    border-color: color-mix(in srgb, var(--accent) 28%, var(--line));
-    text-align: right;
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .lesson-nav__card:hover {
-      border-color: var(--line-strong);
-      background: var(--bg-card);
-    }
-
-    .lesson-nav__card--next:hover {
-      border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
-    }
-  }
-
-  .lesson-nav__label {
-    display: block;
+  .module-close__prev-label {
     font-family: var(--font-mono);
-    font-size: 0.6rem;
+    font-size: 0.66rem;
+    font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--ink-muted);
+    color: var(--ink-dim);
   }
 
-  .lesson-nav__card--next .lesson-nav__label {
+  .module-close__next {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.9rem;
+    min-height: 64px;
+    padding: 0.85rem 1.15rem;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    text-decoration: none;
+    transition:
+      background-color var(--dur-ui) var(--ease-out),
+      transform var(--dur-ui) var(--ease-out);
+  }
+
+  .module-close__next-body {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .module-close__next-label {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
     color: var(--accent);
   }
 
-  .lesson-nav__title {
-    display: block;
+  .module-close__next-title {
     color: var(--ink);
-    font-size: 0.9rem;
+    font-size: 0.96rem;
     font-weight: 600;
-    line-height: 1.35;
+    line-height: 1.2;
+  }
+
+  .module-close__next-arrow {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .module-close a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .module-close a:active {
+    transform: translateY(1px);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .module-close__outline--sub:hover {
+      color: var(--accent);
+      text-decoration-color: var(--accent);
+    }
+
+    .module-close__prev-card:hover {
+      border-color: var(--line-strong);
+      background: var(--bg);
+    }
+
+    .module-close__next:hover {
+      background: color-mix(in srgb, var(--accent) 16%, transparent);
+    }
   }
 
   .temario-sheet {
@@ -1332,12 +1454,25 @@ const numeroSecuencia = String(
   }
 
   @media (max-width: 640px) {
-    .player-bar__module {
+    .player-bar__crumb {
+      gap: 0.3rem;
+    }
+
+    .player-bar__category,
+    .player-bar__sep--category {
       display: none;
     }
 
-    .player-bar__crumb {
-      mask-image: linear-gradient(to right, #000 82%, transparent 100%);
+    .player-bar__crumb > a:first-child {
+      flex-shrink: 0;
+    }
+
+    .player-bar__course {
+      max-width: 14ch;
+    }
+
+    .player-bar__module {
+      max-width: 12ch;
     }
 
     .player-bar__track {
@@ -1354,14 +1489,6 @@ const numeroSecuencia = String(
       display: none;
     }
 
-    .lesson-nav {
-      grid-template-columns: minmax(0, 1fr);
-    }
-
-    .lesson-nav__card--next {
-      text-align: left;
-    }
-
     .lesson-head__arrows {
       justify-content: flex-end;
     }
@@ -1369,6 +1496,33 @@ const numeroSecuencia = String(
     .lesson-head__top {
       grid-template-columns: minmax(0, 1fr) auto;
       align-items: start;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .module-close {
+      padding: 1.15rem;
+    }
+
+    .module-close__foot--split {
+      grid-template-columns: 1fr;
+    }
+
+    .module-close__next {
+      order: -1;
+    }
+  }
+
+  @media (max-width: 340px) {
+    .player-bar__crumb {
+      flex-wrap: wrap;
+      row-gap: 0.15rem;
+    }
+
+    .player-bar__crumb a,
+    .player-bar__module {
+      flex-shrink: 0;
+      max-width: none;
     }
   }
 </style>

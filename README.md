@@ -1,9 +1,9 @@
 # neCyberWiki
 
-![Astro](https://img.shields.io/badge/Astro-BC52EE?style=for-the-badge&logo=astro&logoColor=white)
-![Estado: Activo](https://img.shields.io/badge/ESTADO-ACTIVO-00C853?style=for-the-badge&labelColor=30363D)
-![Idioma: Español](https://img.shields.io/badge/IDIOMA-ESPA%C3%91OL-00B8D9?style=for-the-badge&labelColor=30363D)
-![Privacidad: Sin registros](https://img.shields.io/badge/PRIVACIDAD-SIN_REGISTROS-8E44AD?style=for-the-badge&labelColor=30363D)
+![Astro](https://badgen.net/badge/Astro/v4/BC52EE?icon=awesome&labelColor=30363D)
+![Estado: Activo](https://badgen.net/badge/ESTADO/ACTIVO/00C853?labelColor=30363D)
+![Idioma: Español](https://badgen.net/badge/IDIOMA/ESPAÑOL/00B8D9?labelColor=30363D)
+![Privacidad: Sin registros](https://badgen.net/badge/PRIVACIDAD/SIN%20REGISTROS/8E44AD?labelColor=30363D)
 
 ## TL;DR
 
@@ -13,7 +13,7 @@ Una bitácora de aprendizaje técnico en español sobre sistemas, redes, program
 
 ### ¡Visita la web!
 
-[![🌐 Producción v1.1.3](https://img.shields.io/badge/%F0%9F%8C%90-Producci%C3%B3n%20v1.1.3-00C853?style=for-the-badge&labelColor=30363D)](https://netenebrae-sec.github.io/neCyberWiki/) [![🧪 Staging v1.1.4 (dev)](https://img.shields.io/badge/🧪-Staging%20v1.1.4%20(dev)-FFB300?style=for-the-badge&labelColor=30363D)](https://netenebrae-sec.github.io/neCyberWiki/dev/)
+[![Producción v1.1.3](https://badgen.net/badge/PRODUCCIÓN/v1.1.3/00C853?icon=github&labelColor=30363D)](https://netenebrae-sec.github.io/neCyberWiki/) [![Staging dev](https://badgen.net/badge/STAGING/DEV/FFB300?icon=terminal&labelColor=30363D)](https://netenebrae-sec.github.io/neCyberWiki/dev/)
 
 ## Qué encontrarás
 
@@ -30,7 +30,7 @@ La neCyberWiki es está construyendo desde esas notas personales, con una idea c
 
 Buscamos un lugar donde cualquiera pueda encontrar una ruta para empezar, profundizar en lo que más le interesa y no sentirse solo en el proceso. **La web está mantenida al 100% con donaciones y no requiere registros**.
 
-[![Apoya el proyecto en Ko-fi](https://img.shields.io/badge/APOYA-KO--FI-FF5E5B?style=for-the-badge&labelColor=30363D&logo=ko-fi&logoColor=white)](https://ko-fi.com/netenebrae)
+[![Apoya el proyecto en Ko-fi](https://badgen.net/badge/APOYA/KO-FI/FF5E5B?icon=kofi&labelColor=30363D)](https://ko-fi.com/netenebrae)
 
 
 ## Documentación y enlaces

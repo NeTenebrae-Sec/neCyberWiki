@@ -1,0 +1,92 @@
+---
+type Props =
+  | { type: "curso" }
+  | {
+      type: "leccion"
+      numeroSecuencia: string
+      totalDefecto: number
+    }
+
+const props = Astro.props
+const esCurso = props.type === "curso"
+---
+
+<span class:list={["context-badge", esCurso ? "context-badge--curso" : "context-badge--leccion"]}>
+  {esCurso ? (
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      aria-hidden="true"
+    >
+      <path d="M2.5 3.5h4.5a2 2 0 0 1 2 2v7.5a1.5 1.5 0 0 0-1.5-1.5H2.5V3.5z" />
+      <path d="M13.5 3.5H9a2 2 0 0 0-2 2v7.5a1.5 1.5 0 0 1 1.5-1.5h5V3.5z" />
+    </svg>
+  ) : (
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      aria-hidden="true"
+    >
+      <path d="M4 2.5h6l3 3v8H4v-11z" />
+      <path d="M6.5 8h4M6.5 10.5h3" />
+    </svg>
+  )}
+  {esCurso ? "CURSO" : "LECCIÓN"}
+  {props.type === "leccion" && (
+    <span class="context-badge__count">
+      <span data-lesson-sequence-number>{props.numeroSecuencia}</span>
+      <span aria-hidden="true">/</span>
+      <span data-lesson-total>{props.totalDefecto}</span>
+    </span>
+  )}
+</span>
+
+<style>
+  .context-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .context-badge svg {
+    flex-shrink: 0;
+  }
+
+  .context-badge--curso {
+    border: 1px solid var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .context-badge--leccion {
+    border: 1px dashed var(--signal);
+    background: var(--signal-soft);
+    color: var(--signal);
+  }
+
+  .context-badge__count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    letter-spacing: 0.02em;
+    color: var(--accent);
+  }
+</style>

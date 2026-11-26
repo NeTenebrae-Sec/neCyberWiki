@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../../../layouts/BaseLayout.astro"
+import CourseFormatBar from "../../../../components/CourseFormatBar.astro"
 import CourseModuleList from "../../../../components/CourseModuleList.astro"
 import CourseConfig from "../../../../components/CourseConfig.astro"
 import VideoEmbed from "../../../../components/VideoEmbed.astro"
@@ -78,16 +79,14 @@ const fichaDefecto = fichaDeRuta(CONFIG_POR_DEFECTO)
 
       <div class="course-hero__grid">
         <div class="course-hero__main">
+          <CourseFormatBar slug={info.slug} total={totalDefecto} unidad={unidad} />
           <h1 class="course-hero__title">{info.titulo}</h1>
 
           <div class="course-hero__meta" data-pagefind-ignore="all">
-            <span class="meta-highlight" data-course-total data-unidad={unidad}>
+            <span class="meta-signal" data-course-total data-unidad={unidad}>
               {totalDefecto} {unidad}
             </span>
-            <span class="meta-sep" aria-hidden="true">
-              ·
-            </span>
-
+            <span aria-hidden="true">·</span>
             <span class="meta-highlight">{modulosDefecto} módulos</span>
           </div>
 
@@ -115,9 +114,6 @@ const fichaDefecto = fichaDeRuta(CONFIG_POR_DEFECTO)
                   INTRODUCCIÓN:{" "}
                   <span class="video-hud__caption-highlight">Como funciona la neCyberWiki</span>
                 </span>
-                <a href="#temario" class="video-hud__bottom-link">
-                  [ VER GUÍA ESCRITA ↓ ]
-                </a>
               </div>
             </div>
           )}
@@ -523,6 +519,24 @@ const fichaDefecto = fichaDeRuta(CONFIG_POR_DEFECTO)
         bar?.setAttribute("aria-valuemax", String(total))
       }
 
+      const barRoot = document.querySelector(`[data-bar-progress-course="${state.slug}"]`)
+      if (barRoot) {
+        const barVisibles = state.visibles
+        const barTotal = Number(
+          barRoot.getAttribute("data-bar-progress-total") || barVisibles.length,
+        )
+        const barUnidad = barRoot.getAttribute("data-bar-unidad") || "lecciones"
+        const barDone = Math.min(barVisibles.filter(isDone).length, barTotal)
+        const barPct = barTotal > 0 ? Math.round((barDone / barTotal) * 100) : 0
+        const barLabel = barRoot.querySelector("[data-bar-progress-label]")
+        if (barLabel) barLabel.textContent = `${barDone} / ${barTotal} ${barUnidad}`
+        const barFill = barRoot.querySelector<HTMLElement>("[data-bar-progress-fill]")
+        if (barFill) barFill.style.width = `${barPct}%`
+        const barTrack = barRoot.querySelector('[role="progressbar"]')
+        barTrack?.setAttribute("aria-valuenow", String(barDone))
+        barTrack?.setAttribute("aria-valuemax", String(barTotal))
+      }
+
       const cta = document.getElementById("cta-continue")
       if (!cta) return
 
@@ -579,6 +593,21 @@ const fichaDefecto = fichaDeRuta(CONFIG_POR_DEFECTO)
           `${n} / ${total} ${unidad} (${pct}%)`
         root.querySelector("[data-progress-fill]").style.width = `${pct}%`
         root.querySelector('[role="progressbar"]')?.setAttribute("aria-valuenow", String(n))
+      }
+
+      const barRoot = document.querySelector(`[data-bar-progress-course="${slug}"]`)
+      if (barRoot) {
+        const barTotal = Number(barRoot.getAttribute("data-bar-progress-total") || total)
+        const barUnidad = barRoot.getAttribute("data-bar-unidad") || "lecciones"
+        const barDone = Math.min(n, barTotal)
+        const barPct = barTotal > 0 ? Math.round((barDone / barTotal) * 100) : 0
+        const barLabel = barRoot.querySelector("[data-bar-progress-label]")
+        if (barLabel) barLabel.textContent = `${barDone} / ${barTotal} ${barUnidad}`
+        const barFill = barRoot.querySelector("[data-bar-progress-fill]")
+        if (barFill) barFill.style.width = `${barPct}%`
+        const barTrack = barRoot.querySelector('[role="progressbar"]')
+        barTrack?.setAttribute("aria-valuenow", String(barDone))
+        barTrack?.setAttribute("aria-valuemax", String(barTotal))
       }
 
       if (cta) {
@@ -866,7 +895,6 @@ const fichaDefecto = fichaDeRuta(CONFIG_POR_DEFECTO)
   .video-hud__bottom {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     padding: 0.45rem 0.85rem;
     border-top: 1px solid var(--line);
     background: var(--bg-deep);
@@ -877,18 +905,6 @@ const fichaDefecto = fichaDeRuta(CONFIG_POR_DEFECTO)
 
   .video-hud__caption-highlight {
     color: var(--ink-dim);
-  }
-
-  .video-hud__bottom-link {
-    color: var(--accent);
-    font-weight: 600;
-    text-decoration: none;
-    transition: color 0.15s ease;
-  }
-
-  .video-hud__bottom-link:hover {
-    color: var(--ink);
-    text-decoration: underline;
   }
 
   /* Ficha HUD */
@@ -1121,12 +1137,24 @@ const fichaDefecto = fichaDeRuta(CONFIG_POR_DEFECTO)
     line-height: 1.4;
   }
 
-  .meta-sep {
-    color: var(--line-strong);
-  }
-
   .meta-highlight {
     color: var(--accent);
+  }
+
+  .meta-signal {
+    color: var(--signal);
+  }
+
+  .course-hero__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.4rem;
+    margin-top: 1.1rem;
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
   }
 
   .course-hero__cta-note {
@@ -1151,18 +1179,6 @@ const fichaDefecto = fichaDeRuta(CONFIG_POR_DEFECTO)
     border: 1px dashed var(--line-strong);
     color: var(--ink-muted);
     font-size: 0.78rem;
-  }
-
-  .course-hero__meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem 1.4rem;
-    margin-top: 1.1rem;
-    font-family: var(--font-mono);
-    font-size: 0.64rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--ink-muted);
   }
 
   .mission-meter {

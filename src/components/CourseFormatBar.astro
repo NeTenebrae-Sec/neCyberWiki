@@ -1,0 +1,118 @@
+---
+interface Props {
+  slug: string
+  total: number
+  unidad: string
+}
+
+const { slug, total, unidad } = Astro.props
+---
+
+<div
+  class="course-format-bar"
+  data-bar-progress-course={slug}
+  data-bar-progress-total={total}
+  data-bar-unidad={unidad}
+  data-pagefind-ignore="all"
+>
+  <span class="course-format-bar__label">
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="1.5" y="2.5" width="13" height="11" rx="1.5"></rect>
+      <path d="M4.5 6.5l2.25 1.75L4.5 10"></path>
+      <path d="M8.5 10h3"></path>
+    </svg>
+    CURSO GRATIS
+  </span>
+
+  <div class="course-format-bar__progress">
+    <span data-bar-progress-label>
+      0 / {total} {unidad}
+    </span>
+    <span
+      class="progress-track course-format-bar__track"
+      role="progressbar"
+      aria-label="Progreso del curso"
+      aria-valuemin="0"
+      aria-valuemax={total}
+      aria-valuenow="0"
+    >
+      <span class="progress-fill course-format-bar__fill" data-bar-progress-fill></span>
+    </span>
+  </div>
+</div>
+
+<style>
+  .course-format-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    padding: 0.6rem 0.95rem;
+    border: 1px solid var(--line);
+    border-bottom: 0;
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    background: var(--bg-raised);
+    font-family: var(--font-mono);
+    color: var(--accent);
+  }
+
+  .course-format-bar__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .course-format-bar__label svg {
+    flex-shrink: 0;
+  }
+
+  .course-format-bar__progress {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-left: auto;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    color: var(--ink-dim);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .course-format-bar__track {
+    width: 4rem;
+    flex-shrink: 0;
+  }
+
+  .course-format-bar__fill {
+    background: var(--accent);
+  }
+
+  @media (max-width: 767.98px) {
+    .course-format-bar {
+      gap: 0.5rem;
+      padding: 0.55rem 0.75rem;
+    }
+
+    .course-format-bar__track {
+      width: 3.5rem;
+    }
+  }
+</style>
