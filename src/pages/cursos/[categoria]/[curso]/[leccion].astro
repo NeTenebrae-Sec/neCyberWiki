@@ -102,11 +102,23 @@ const numeroSecuencia = String(
       <nav class="breadcrumb player-bar__crumb" aria-label="Miga de pan">
         <a href={`${base}cursos/`}>Cursos</a>
         <span aria-hidden="true">/</span>
-        <a href={`${base}cursos/${info.categoria}/`}>{categoria?.titulo || info.categoria}</a>
-        <span aria-hidden="true">/</span>
-        <a href={url} class="player-bar__course" aria-current="page">
+        <a class="player-bar__category" href={`${base}cursos/${info.categoria}/`}>
+          {categoria?.titulo || info.categoria}
+        </a>
+        <span class="player-bar__sep--category" aria-hidden="true">
+          /
+        </span>
+        <a href={url} class="player-bar__course">
           {info.titulo}
         </a>
+        <span aria-hidden="true">/</span>
+        <span class="player-bar__module">
+          {entry.data.modulo_titulo || currentModule?.titulo || `Módulo ${entry.data.modulo}`}
+        </span>
+        <span aria-hidden="true">/</span>
+        <span class="player-bar__current" aria-current="page">
+          {entry.data.title}
+        </span>
       </nav>
 
       <div class="player-bar__tools">
@@ -810,11 +822,25 @@ const numeroSecuencia = String(
     flex-shrink: 0;
   }
 
-  .player-bar__course {
-    max-width: 26ch;
+  .player-bar__crumb a,
+  .player-bar__module {
+    min-width: 0;
+    flex-shrink: 1;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .player-bar__course {
+    max-width: 26ch;
+  }
+
+  .player-bar__module {
+    max-width: 18ch;
+  }
+
+  .player-bar__current {
+    flex-shrink: 0;
   }
 
   .player-bar__tools {
@@ -1334,12 +1360,25 @@ const numeroSecuencia = String(
   }
 
   @media (max-width: 640px) {
-    .player-bar__module {
+    .player-bar__crumb {
+      gap: 0.3rem;
+    }
+
+    .player-bar__category,
+    .player-bar__sep--category {
       display: none;
     }
 
-    .player-bar__crumb {
-      mask-image: linear-gradient(to right, #000 82%, transparent 100%);
+    .player-bar__crumb > a:first-child {
+      flex-shrink: 0;
+    }
+
+    .player-bar__course {
+      max-width: 14ch;
+    }
+
+    .player-bar__module {
+      max-width: 12ch;
     }
 
     .player-bar__track {
