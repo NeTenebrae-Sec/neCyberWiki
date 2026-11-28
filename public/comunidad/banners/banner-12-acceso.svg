@@ -29,20 +29,9 @@
   <rect x="1180" y="0" width="320" height="500" fill="#cf8b7f"/>
   <rect x="1180" y="0" width="320" height="500" fill="url(#hatch)"/>
   <line x1="1202" y1="30" x2="1202" y2="470" stroke="#070a08" stroke-opacity=".22" stroke-width="1" stroke-dasharray="3 7"/>
-  <text x="1340" y="76" text-anchor="middle" font-size="12" letter-spacing="6" fill="#070a08" opacity=".55">NCW</text>
-  <text x="1340" y="322" text-anchor="middle" font-size="190" font-weight="800" fill="#070a08">12</text>
-  <rect x="1262" y="392" width="4" height="36" fill="#070a08" opacity=".62"/><rect x="1269" y="392" width="2" height="36" fill="#070a08" opacity=".62"/><rect x="1274" y="392" width="5" height="36" fill="#070a08" opacity=".62"/><rect x="1282" y="392" width="4" height="36" fill="#070a08" opacity=".62"/><rect x="1290" y="392" width="5" height="36" fill="#070a08" opacity=".62"/><rect x="1299" y="392" width="4" height="36" fill="#070a08" opacity=".62"/><rect x="1306" y="392" width="2" height="36" fill="#070a08" opacity=".62"/><rect x="1311" y="392" width="3" height="36" fill="#070a08" opacity=".62"/><rect x="1318" y="392" width="5" height="36" fill="#070a08" opacity=".62"/><rect x="1327" y="392" width="2" height="36" fill="#070a08" opacity=".62"/><rect x="1331" y="392" width="2" height="36" fill="#070a08" opacity=".62"/><rect x="1335" y="392" width="2" height="36" fill="#070a08" opacity=".62"/><rect x="1340" y="392" width="4" height="36" fill="#070a08" opacity=".62"/><rect x="1348" y="392" width="3" height="36" fill="#070a08" opacity=".62"/><rect x="1354" y="392" width="4" height="36" fill="#070a08" opacity=".62"/><rect x="1362" y="392" width="2" height="36" fill="#070a08" opacity=".62"/><rect x="1366" y="392" width="2" height="36" fill="#070a08" opacity=".62"/><rect x="1371" y="392" width="5" height="36" fill="#070a08" opacity=".62"/><rect x="1380" y="392" width="4" height="36" fill="#070a08" opacity=".62"/><rect x="1387" y="392" width="4" height="36" fill="#070a08" opacity=".62"/><rect x="1395" y="392" width="5" height="36" fill="#070a08" opacity=".62"/><rect x="1403" y="392" width="3" height="36" fill="#070a08" opacity=".62"/><rect x="1409" y="392" width="3" height="36" fill="#070a08" opacity=".62"/>
-  <text transform="translate(1478 250) rotate(90)" text-anchor="middle" font-size="12" letter-spacing="4" fill="#070a08" opacity=".72">SOPORTE</text>
+  <text x="1345" y="330" text-anchor="middle" font-size="200" font-weight="800" fill="#070a08">12</text>
 </g>
 <g font-family="'JetBrains Mono','DejaVu Sans Mono',monospace">
-  <rect x="40" y="48" width="8" height="18" fill="#cf8b7f"/>
-  <text x="64" y="64" font-size="13" letter-spacing="4" fill="#cf8b7f">NEOCYBERWIKI / COMUNIDAD</text>
-  <text x="1116" y="64" text-anchor="end" font-size="11" letter-spacing="3" fill="#7f8778">CANAL DE TEXTO</text>
-  <text x="64" y="254" font-size="116" font-weight="800" letter-spacing="1" fill="#e9e4d4">ACCESO</text>
-  <rect x="64" y="280" width="56" height="2" fill="#cf8b7f" opacity=".85"/>
-  <text x="64" y="316" font-size="22" letter-spacing="2" fill="#b3b5a4">ROLES Y KO-FI</text>
-  <rect x="64" y="370" width="120" height="34" rx="17" fill="#cf8b7f" fill-opacity=".07" stroke="#cf8b7f" stroke-opacity=".38"/><text x="79" y="392" font-size="13" letter-spacing="1.2" fill="#cfd0c2">$3 MIEMBRO</text><rect x="196" y="370" width="129" height="34" rx="17" fill="#cf8b7f" fill-opacity=".07" stroke="#cf8b7f" stroke-opacity=".38"/><text x="211" y="392" font-size="13" letter-spacing="1.2" fill="#cfd0c2">$10 PREMIUM</text>
-  <text x="64" y="482" font-size="11" letter-spacing="2" fill="#7f8778">netenebrae-sec.github.io/neCyberWiki</text>
-  <text x="1116" y="482" text-anchor="end" font-size="11" letter-spacing="2" fill="#cf8b7f">#acceso</text>
+  <text x="64" y="341.0" font-size="260" font-weight="800" fill="#e9e4d4">ACCESO</text>
 </g>
 </svg>
