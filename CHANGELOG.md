@@ -14,6 +14,7 @@ y el proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Rediseño de los banners con la identidad del sitio: Fraunces para el nombre del canal, IBM Plex Mono para el sello, paleta Noche y la marca de la polilla.
 - Todos los nombres de canal en una sola línea, con los espacios entre palabras abiertos para que se lean en Discord.
+- Modo alerta en `#no-escribir-aquí`: sello `¡PELIGRO!` con triángulo dibujado, título y barra en rojo en lugar del número de canal.
 
 ## [1.1.3] - 2026-11-24
 
