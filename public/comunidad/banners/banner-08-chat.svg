@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 500" width="1500" height="500" role="img" aria-label="neCyberWiki comunidad - chat">
+<title>neCyberWiki // #chat — CHAT</title>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#070a08"/>
+    <stop offset="1" stop-color="#0b100c"/>
+  </linearGradient>
+  <radialGradient id="glow" cx=".9" cy=".05" r=".78">
+    <stop offset="0" stop-color="#8fd3c7" stop-opacity=".13"/>
+    <stop offset="1" stop-color="#8fd3c7" stop-opacity="0"/>
+  </radialGradient>
+  <pattern id="dots" width="30" height="30" patternUnits="userSpaceOnUse">
+    <circle cx="3" cy="3" r="1.1" fill="#e9e4d4" opacity=".06"/>
+  </pattern>
+  <pattern id="hatch" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <line x1="0" y1="0" x2="0" y2="14" stroke="#070a08" stroke-width="1" opacity=".05"/>
+  </pattern>
+  <mask id="stub">
+    <rect x="1180" y="0" width="320" height="500" fill="#fff"/>
+    <circle cx="1180" cy="0" r="22" fill="#000"/>
+    <circle cx="1180" cy="500" r="22" fill="#000"/>
+  </mask>
+</defs>
+<rect width="1500" height="500" fill="url(#bg)"/>
+<rect width="1180" height="500" fill="url(#dots)"/>
+<rect width="1180" height="500" fill="url(#glow)"/>
+<path d="M0 0V9 M50 0V5 M100 0V9 M150 0V5 M200 0V9 M250 0V5 M300 0V9 M350 0V5 M400 0V9 M450 0V5 M500 0V9 M550 0V5 M600 0V9 M650 0V5 M700 0V9 M750 0V5 M800 0V9 M850 0V5 M900 0V9 M950 0V5 M1000 0V9 M1050 0V5 M1100 0V9 M1150 0V5" stroke="#e9e4d4" stroke-opacity=".08" stroke-width="1"/>
+<g mask="url(#stub)">
+  <rect x="1180" y="0" width="320" height="500" fill="#8fd3c7"/>
+  <rect x="1180" y="0" width="320" height="500" fill="url(#hatch)"/>
+  <line x1="1202" y1="30" x2="1202" y2="470" stroke="#070a08" stroke-opacity=".22" stroke-width="1" stroke-dasharray="3 7"/>
+  <text x="1340" y="76" text-anchor="middle" font-size="12" letter-spacing="6" fill="#070a08" opacity=".55">NCW</text>
+  <text x="1340" y="322" text-anchor="middle" font-size="190" font-weight="800" fill="#070a08">08</text>
+  <rect x="1262" y="392" width="2" height="36" fill="#070a08" opacity=".62"/><rect x="1267" y="392" width="4" height="36" fill="#070a08" opacity=".62"/><rect x="1275" y="392" width="2" height="36" fill="#070a08" opacity=".62"/><rect x="1281" y="392" width="5" height="36" fill="#070a08" opacity=".62"/><rect x="1288" y="392" width="2" height="36" fill="#070a08" opacity=".62"/><rect x="1292" y="392" width="4" height="36" fill="#070a08" opacity=".62"/><rect x="1300" y="392" width="3" height="36" fill="#070a08" opacity=".62"/><rect x="1307" y="392" width="3" height="36" fill="#070a08" opacity=".62"/><rect x="1312" y="392" width="5" height="36" fill="#070a08" opacity=".62"/><rect x="1321" y="392" width="4" height="36" fill="#070a08" opacity=".62"/><rect x="1327" y="392" width="3" height="36" fill="#070a08" opacity=".62"/><rect x="1334" y="392" width="2" height="36" fill="#070a08" opacity=".62"/><rect x="1338" y="392" width="3" height="36" fill="#070a08" opacity=".62"/><rect x="1345" y="392" width="5" height="36" fill="#070a08" opacity=".62"/><rect x="1353" y="392" width="4" height="36" fill="#070a08" opacity=".62"/><rect x="1361" y="392" width="3" height="36" fill="#070a08" opacity=".62"/><rect x="1368" y="392" width="4" height="36" fill="#070a08" opacity=".62"/><rect x="1376" y="392" width="4" height="36" fill="#070a08" opacity=".62"/><rect x="1382" y="392" width="5" height="36" fill="#070a08" opacity=".62"/><rect x="1391" y="392" width="4" height="36" fill="#070a08" opacity=".62"/><rect x="1399" y="392" width="5" height="36" fill="#070a08" opacity=".62"/><rect x="1407" y="392" width="5" height="36" fill="#070a08" opacity=".62"/>
+  <text transform="translate(1478 250) rotate(90)" text-anchor="middle" font-size="12" letter-spacing="4" fill="#070a08" opacity=".72">CONVERSACION</text>
+</g>
+<g font-family="'JetBrains Mono','DejaVu Sans Mono',monospace">
+  <rect x="40" y="48" width="8" height="18" fill="#8fd3c7"/>
+  <text x="64" y="64" font-size="13" letter-spacing="4" fill="#8fd3c7">NEOCYBERWIKI / COMUNIDAD</text>
+  <text x="1116" y="64" text-anchor="end" font-size="11" letter-spacing="3" fill="#7f8778">CANAL DE TEXTO</text>
+  <text x="64" y="254" font-size="116" font-weight="800" letter-spacing="1" fill="#e9e4d4">CHAT</text>
+  <rect x="64" y="280" width="56" height="2" fill="#8fd3c7" opacity=".85"/>
+  <text x="64" y="316" font-size="22" letter-spacing="2" fill="#b3b5a4">CONVERSACIÓN GENERAL</text>
+  <rect x="64" y="370" width="111" height="34" rx="17" fill="#8fd3c7" fill-opacity=".07" stroke="#8fd3c7" stroke-opacity=".38"/><text x="79" y="392" font-size="13" letter-spacing="1.2" fill="#cfd0c2">SIN FOTOS</text><rect x="187" y="370" width="129" height="34" rx="17" fill="#8fd3c7" fill-opacity=".07" stroke="#8fd3c7" stroke-opacity=".38"/><text x="202" y="392" font-size="13" letter-spacing="1.2" fill="#cfd0c2">SIN ENLACES</text>
+  <text x="64" y="482" font-size="11" letter-spacing="2" fill="#7f8778">netenebrae-sec.github.io/neCyberWiki</text>
+  <text x="1116" y="482" text-anchor="end" font-size="11" letter-spacing="2" fill="#8fd3c7">#chat</text>
+</g>
+</svg>

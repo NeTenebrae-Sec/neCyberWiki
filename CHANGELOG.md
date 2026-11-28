@@ -4,6 +4,12 @@ Todos los cambios notables de este proyecto se documentan en este archivo.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 y el proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4-2] - 2026-11-27
+
+### Added
+
+- Banners de los canales de Discord en `public/comunidad/banners/` (13 PNG y 13 SVG, 1500x500) para los embeds de la comunidad.
+
 ## [1.1.3] - 2026-11-24
 
 ### Added
