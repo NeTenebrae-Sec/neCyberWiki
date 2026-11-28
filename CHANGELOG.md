@@ -8,7 +8,11 @@ y el proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
-- Banners de los canales de Discord en `public/comunidad/banners/` (13 PNG y 13 SVG, 1500x500) para los embeds de la comunidad.
+- Banners de los canales de Discord en `public/comunidad/banners/` (13 PNG y 13 SVG en 1500x500, más una versión grande en `xl/` a 1920x640) para los embeds de la comunidad.
+
+### Changed
+
+- Rediseño de los banners con la identidad del sitio: Fraunces para el nombre del canal, IBM Plex Mono para el sello, paleta Noche y la marca de la polilla.
 
 ## [1.1.3] - 2026-11-24
 
